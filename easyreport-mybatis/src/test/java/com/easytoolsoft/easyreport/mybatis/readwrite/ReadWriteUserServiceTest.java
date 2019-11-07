@@ -1,5 +1,7 @@
 package com.easytoolsoft.easyreport.mybatis.readwrite;
 
+import org.junit.Test;
+
 import com.easytoolsoft.easyreport.mybatis.BaseTest;
 
 /**
@@ -9,4 +11,8 @@ import com.easytoolsoft.easyreport.mybatis.BaseTest;
  * @date 2017-03-25
  */
 public class ReadWriteUserServiceTest extends BaseTest {
+	@Test
+	public void just_pass_the_test() {
+		//
+	}
 }
