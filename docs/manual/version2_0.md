@@ -34,7 +34,7 @@ EasyReport(ver2.0) 用户操作手册
 
 ### 2.1 从源代码安装(From Source Code)
 首先确定安装好[jdk1.8][]与[maven3][]，并配置好maven仓库，然后按如下步骤操作：
-* step1:git clone https://github.com/xianrendzw/EasyReport.git
+* step1:git clone https://github.com/koqiui/EasyReport.git
 * step2:mvn -DskipTests package
 * step3:经过step2, 如果没有报错，mvn spring-boot:run -pl easyreport-web 启动程序，然后就可以通过浏览器localhost:8080查看
 
@@ -232,7 +232,7 @@ utcIntEndTime|UTC整型结束日期|20150204
 [MySQL5+]: http://dev.mysql.com/downloads/mysql/
 [velocity]: http://velocity.apache.org/engine/1.7/user-guide.html
 [aviator]: https://code.google.com/p/aviator/wiki/User_Guide_zh
-[aviator-doc]: https://raw.githubusercontent.com/xianrendzw/EasyReport/master/docs/assets/files/Aviator-2.3.0用户指南.pdf
+[aviator-doc]: https://raw.githubusercontent.com/koqiui/EasyReport/master/docs/assets/files/Aviator-2.3.0用户指南.pdf
 [org.apache.commons.lang3.StringUtils]: http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/StringUtils.html
 [pm25.in]: http://www.pm25.in
 [aqistudy]: http://aqistudy.sinaapp.com/historydata/index.php
@@ -240,43 +240,43 @@ utcIntEndTime|UTC整型结束日期|20150204
 [highcharts]: http://www.highcharts.com/
 [tablesorter]: http://mottie.github.io/tablesorter/docs/
 [DataTables]: http://www.datatables.net/
-[release]: https://github.com/xianrendzw/EasyReport/releases
-[ds-1]: https://raw.githubusercontent.com/xianrendzw/EasyReport/master/docs/assets/imgs/ds-1.png
-[config-1]: https://raw.githubusercontent.com/xianrendzw/EasyReport/master/docs/assets/imgs/config-1.png
-[rp-1]: https://raw.githubusercontent.com/xianrendzw/EasyReport/master/docs/assets/imgs/rp-1.png
-[rp-2]: https://raw.githubusercontent.com/xianrendzw/EasyReport/master/docs/assets/imgs/rp-2.png
-[rp-3]: https://raw.githubusercontent.com/xianrendzw/EasyReport/master/docs/assets/imgs/rp-3.png
-[rp-4]: https://raw.githubusercontent.com/xianrendzw/EasyReport/master/docs/assets/imgs/rp-4.png
-[rp-5]: https://raw.githubusercontent.com/xianrendzw/EasyReport/master/docs/assets/imgs/rp-5.png
-[rp-6]: https://raw.githubusercontent.com/xianrendzw/EasyReport/master/docs/assets/imgs/rp-6.png
-[rp-7]: https://raw.githubusercontent.com/xianrendzw/EasyReport/master/docs/assets/imgs/rp-7.png
-[rp-8]: https://raw.githubusercontent.com/xianrendzw/EasyReport/master/docs/assets/imgs/rp-8.png
-[rp-9]: https://raw.githubusercontent.com/xianrendzw/EasyReport/master/docs/assets/imgs/rp-9.png
-[rp-10]: https://raw.githubusercontent.com/xianrendzw/EasyReport/master/docs/assets/imgs/rp-10.png
-[rp-11]: https://raw.githubusercontent.com/xianrendzw/EasyReport/master/docs/assets/imgs/rp-11.png
-[rp-12]: https://raw.githubusercontent.com/xianrendzw/EasyReport/master/docs/assets/imgs/rp-12.png
-[rp-13]: https://raw.githubusercontent.com/xianrendzw/EasyReport/master/docs/assets/imgs/rp-13.png
-[rp-14]: https://raw.githubusercontent.com/xianrendzw/EasyReport/master/docs/assets/imgs/rp-14.png
-[dev-1]: https://raw.githubusercontent.com/xianrendzw/EasyReport/master/docs/assets/imgs/dev-1.png
-[ex-src-1]: https://raw.githubusercontent.com/xianrendzw/EasyReport/master/docs/assets/imgs/ex-src-1.png
-[ex-1]: https://raw.githubusercontent.com/xianrendzw/EasyReport/master/docs/assets/imgs/ex-1.png
-[ex-src-2]: https://raw.githubusercontent.com/xianrendzw/EasyReport/master/docs/assets/imgs/ex-src-2.png
-[ex-param-2]: https://raw.githubusercontent.com/xianrendzw/EasyReport/master/docs/assets/imgs/ex-param-2.png
-[ex-2-1]: https://raw.githubusercontent.com/xianrendzw/EasyReport/master/docs/assets/imgs/ex-2-1.png
-[ex-2-2]: https://raw.githubusercontent.com/xianrendzw/EasyReport/master/docs/assets/imgs/ex-2-2.png
-[ex-2-3]: https://raw.githubusercontent.com/xianrendzw/EasyReport/master/docs/assets/imgs/ex-2-3.png
-[ex-2-4]: https://raw.githubusercontent.com/xianrendzw/EasyReport/master/docs/assets/imgs/ex-2-4.png
-[ex-src-3]: https://raw.githubusercontent.com/xianrendzw/EasyReport/master/docs/assets/imgs/ex-src-3.png
-[ex-3-1]: https://raw.githubusercontent.com/xianrendzw/EasyReport/master/docs/assets/imgs/ex-3-1.png
-[ex-3-2]: https://raw.githubusercontent.com/xianrendzw/EasyReport/master/docs/assets/imgs/ex-3-2.png
-[ex-3-3]: https://raw.githubusercontent.com/xianrendzw/EasyReport/master/docs/assets/imgs/ex-3-3.png
-[ex-3-4]: https://raw.githubusercontent.com/xianrendzw/EasyReport/master/docs/assets/imgs/ex-3-4.png
-[ex-src-4]: https://raw.githubusercontent.com/xianrendzw/EasyReport/master/docs/assets/imgs/ex-src-4.png
-[ex-4-1]: https://raw.githubusercontent.com/xianrendzw/EasyReport/master/docs/assets/imgs/ex-4-1.png
-[ex-src-5]: https://raw.githubusercontent.com/xianrendzw/EasyReport/master/docs/assets/imgs/ex-src-5.png
-[ex-5]: https://raw.githubusercontent.com/xianrendzw/EasyReport/master/docs/assets/imgs/ex-5.png
-[ex-src-6]: https://raw.githubusercontent.com/xianrendzw/EasyReport/master/docs/assets/imgs/ex-src-6.png
-[ex-6]: https://raw.githubusercontent.com/xianrendzw/EasyReport/master/docs/assets/imgs/ex-6.png
-[ex-7-1]: https://raw.githubusercontent.com/xianrendzw/EasyReport/master/docs/assets/imgs/ex-7-1.png
-[ex-7-2]: https://raw.githubusercontent.com/xianrendzw/EasyReport/master/docs/assets/imgs/ex-7-2.png
-[mysql.zip]: https://github.com/xianrendzw/EasyReport/blob/master/docs/db/mysql.zip?raw=true
+[release]: https://github.com/koqiui/EasyReport/releases
+[ds-1]: https://raw.githubusercontent.com/koqiui/EasyReport/master/docs/assets/imgs/ds-1.png
+[config-1]: https://raw.githubusercontent.com/koqiui/EasyReport/master/docs/assets/imgs/config-1.png
+[rp-1]: https://raw.githubusercontent.com/koqiui/EasyReport/master/docs/assets/imgs/rp-1.png
+[rp-2]: https://raw.githubusercontent.com/koqiui/EasyReport/master/docs/assets/imgs/rp-2.png
+[rp-3]: https://raw.githubusercontent.com/koqiui/EasyReport/master/docs/assets/imgs/rp-3.png
+[rp-4]: https://raw.githubusercontent.com/koqiui/EasyReport/master/docs/assets/imgs/rp-4.png
+[rp-5]: https://raw.githubusercontent.com/koqiui/EasyReport/master/docs/assets/imgs/rp-5.png
+[rp-6]: https://raw.githubusercontent.com/koqiui/EasyReport/master/docs/assets/imgs/rp-6.png
+[rp-7]: https://raw.githubusercontent.com/koqiui/EasyReport/master/docs/assets/imgs/rp-7.png
+[rp-8]: https://raw.githubusercontent.com/koqiui/EasyReport/master/docs/assets/imgs/rp-8.png
+[rp-9]: https://raw.githubusercontent.com/koqiui/EasyReport/master/docs/assets/imgs/rp-9.png
+[rp-10]: https://raw.githubusercontent.com/koqiui/EasyReport/master/docs/assets/imgs/rp-10.png
+[rp-11]: https://raw.githubusercontent.com/koqiui/EasyReport/master/docs/assets/imgs/rp-11.png
+[rp-12]: https://raw.githubusercontent.com/koqiui/EasyReport/master/docs/assets/imgs/rp-12.png
+[rp-13]: https://raw.githubusercontent.com/koqiui/EasyReport/master/docs/assets/imgs/rp-13.png
+[rp-14]: https://raw.githubusercontent.com/koqiui/EasyReport/master/docs/assets/imgs/rp-14.png
+[dev-1]: https://raw.githubusercontent.com/koqiui/EasyReport/master/docs/assets/imgs/dev-1.png
+[ex-src-1]: https://raw.githubusercontent.com/koqiui/EasyReport/master/docs/assets/imgs/ex-src-1.png
+[ex-1]: https://raw.githubusercontent.com/koqiui/EasyReport/master/docs/assets/imgs/ex-1.png
+[ex-src-2]: https://raw.githubusercontent.com/koqiui/EasyReport/master/docs/assets/imgs/ex-src-2.png
+[ex-param-2]: https://raw.githubusercontent.com/koqiui/EasyReport/master/docs/assets/imgs/ex-param-2.png
+[ex-2-1]: https://raw.githubusercontent.com/koqiui/EasyReport/master/docs/assets/imgs/ex-2-1.png
+[ex-2-2]: https://raw.githubusercontent.com/koqiui/EasyReport/master/docs/assets/imgs/ex-2-2.png
+[ex-2-3]: https://raw.githubusercontent.com/koqiui/EasyReport/master/docs/assets/imgs/ex-2-3.png
+[ex-2-4]: https://raw.githubusercontent.com/koqiui/EasyReport/master/docs/assets/imgs/ex-2-4.png
+[ex-src-3]: https://raw.githubusercontent.com/koqiui/EasyReport/master/docs/assets/imgs/ex-src-3.png
+[ex-3-1]: https://raw.githubusercontent.com/koqiui/EasyReport/master/docs/assets/imgs/ex-3-1.png
+[ex-3-2]: https://raw.githubusercontent.com/koqiui/EasyReport/master/docs/assets/imgs/ex-3-2.png
+[ex-3-3]: https://raw.githubusercontent.com/koqiui/EasyReport/master/docs/assets/imgs/ex-3-3.png
+[ex-3-4]: https://raw.githubusercontent.com/koqiui/EasyReport/master/docs/assets/imgs/ex-3-4.png
+[ex-src-4]: https://raw.githubusercontent.com/koqiui/EasyReport/master/docs/assets/imgs/ex-src-4.png
+[ex-4-1]: https://raw.githubusercontent.com/koqiui/EasyReport/master/docs/assets/imgs/ex-4-1.png
+[ex-src-5]: https://raw.githubusercontent.com/koqiui/EasyReport/master/docs/assets/imgs/ex-src-5.png
+[ex-5]: https://raw.githubusercontent.com/koqiui/EasyReport/master/docs/assets/imgs/ex-5.png
+[ex-src-6]: https://raw.githubusercontent.com/koqiui/EasyReport/master/docs/assets/imgs/ex-src-6.png
+[ex-6]: https://raw.githubusercontent.com/koqiui/EasyReport/master/docs/assets/imgs/ex-6.png
+[ex-7-1]: https://raw.githubusercontent.com/koqiui/EasyReport/master/docs/assets/imgs/ex-7-1.png
+[ex-7-2]: https://raw.githubusercontent.com/koqiui/EasyReport/master/docs/assets/imgs/ex-7-2.png
+[mysql.zip]: https://github.com/koqiui/EasyReport/blob/master/docs/db/mysql.zip?raw=true
