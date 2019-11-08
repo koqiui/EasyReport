@@ -29,7 +29,7 @@ easytoolsoft:
                 password: '@easytoolsoft.easyreport.member.datasource.password@'
         meta:
             datasource:
-                driver-class-name: '@easytoolsoft.easyreport.member.datasource.driver-class-name@'
+                driver-class-name: '@easytoolsoft.easyreport.meta.datasource.driver-class-name@'
                 url: '@easytoolsoft.easyreport.meta.datasource.url@'
                 username: '@easytoolsoft.easyreport.meta.datasource.username@'
                 password: '@easytoolsoft.easyreport.meta.datasource.password@'
