@@ -31,3 +31,4 @@ target/
 .idea
 *.iml
 .DS_Store
+/easyreport-web/dev-logs
