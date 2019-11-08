@@ -1,7 +1,4 @@
 
-
-set mode MySQL;
-
 -- ALTER USER SA SET PASSWORD 'pw';
 
 -- ----------------------------
