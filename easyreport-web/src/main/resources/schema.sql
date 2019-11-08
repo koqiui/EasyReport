@@ -194,9 +194,9 @@ CREATE TABLE IF NOT EXISTS `ezrpt_meta_report_history` (
 -- ----------------------------
 
 -- ----------------------------
--- Table structure for ezrpt_schedule_task
+-- Table structure for ezrpt_meta_task
 -- ----------------------------
-CREATE TABLE IF NOT EXISTS `ezrpt_schedule_task` (
+CREATE TABLE IF NOT EXISTS `ezrpt_meta_task` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '报表任务ID',
   `report_ids` varchar(1024) NOT NULL COMMENT '报表ID列表',
   `cron_expr` varchar(100) NOT NULL COMMENT '报表任务调度crontab表达式',
@@ -248,21 +248,3 @@ CREATE TABLE IF NOT EXISTS `ezrpt_sys_event` (
   `gmt_created` timestamp NOT NULL DEFAULT '1980-01-01 01:01:01' COMMENT '日志发生的时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=221 DEFAULT CHARSET=utf8;
-
--- ----------------------------
--- Table structure for fact_air_cn
--- ----------------------------
-CREATE TABLE IF NOT EXISTS `fact_air_cn` (
-  `area` varchar(20) NOT NULL,
-  `dt` date NOT NULL,
-  `aqi` int(11) NOT NULL,
-  `aqi_range` varchar(20) NOT NULL,
-  `quality` varchar(10) NOT NULL,
-  `pm25` float NOT NULL,
-  `pm10` float NOT NULL,
-  `so2` float NOT NULL,
-  `co` float NOT NULL,
-  `no2` float NOT NULL,
-  `o3` float NOT NULL,
-  PRIMARY KEY (`area`,`dt`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;

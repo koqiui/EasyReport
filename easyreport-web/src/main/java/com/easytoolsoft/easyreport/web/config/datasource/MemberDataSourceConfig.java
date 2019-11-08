@@ -20,7 +20,6 @@ import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import com.alibaba.druid.pool.DruidDataSource;
-import com.easytoolsoft.easyreport.common.util.DbUtils;
 
 /**
  * 用户与权限业务数据源配置类
@@ -45,17 +44,17 @@ public class MemberDataSourceConfig extends AbstractDataSourceConfig {
 	public DataSource dataSource() {
 		DruidDataSource dsh = firstDataSourceProperties().initializeDataSourceBuilder().type(DruidDataSource.class).build();
 		dsh.setValidationQuery("select 1");
-		//
-		String driverClassName = dsh.getDriverClassName();
 		// 执行schema
 		Resource initSchema = new ClassPathResource("schema.sql");
 		DatabasePopulator databasePopulator = new ResourceDatabasePopulator(initSchema);
 		DatabasePopulatorUtils.execute(databasePopulator, dsh);
-		// 执行 data
-		if (DbUtils.isMergeableDbDriverClassName(driverClassName)) {
-			Resource initData = new ClassPathResource("data.sql");
+		// 执行 initdata
+		try {// 防止重复插入报错
+			Resource initData = new ClassPathResource("initdata.sql");
 			databasePopulator = new ResourceDatabasePopulator(initData);
 			DatabasePopulatorUtils.execute(databasePopulator, dsh);
+		} catch (Exception ex) {
+			System.out.println("初始数据以前已经插入了");
 		}
 		return dsh;
 	}

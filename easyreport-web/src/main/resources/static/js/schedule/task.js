@@ -13,7 +13,7 @@ var ScheduleTask = {
 
 var TaskCommon = {
     baseUrl: EasyReport.ctxPath + '/rest/schedule/task/',
-    baseReportUrl: EasyReport.ctxPath + '/rest/schedule/designer/',
+    baseReportUrl: EasyReport.ctxPath + '/rest/report/designer/',
     baseIconUrl: EasyReport.ctxPath + '/custom/easyui/themes/icons/'
 };
 
