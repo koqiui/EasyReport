@@ -8,7 +8,7 @@ EasyReport是一个简单易用的Web报表工具,它的主要功能是把SQL语
 同时它还支持报表Excel导出、图表显示及固定表头与左边列的功能。  
 欢迎加入QQ群交流：（365582678）
 
-* mvn -DskipTests package
+* mvn -DskipTests package -P[环境：dev|prod]
 * mvn spring-boot:run -pl easyreport-web 
 
 然后就可以通过浏览器localhost:8080查看
@@ -30,6 +30,7 @@ EasyReport是一个简单易用的Web报表工具,它的主要功能是把SQL语
 * 数据访问采用mybatis框架,方便二次开发
 * 报表展现支持自定义生成模板
 
+## [开发参考][]
 ## [入门手册][]
 ## [用户参考][]
 ## 捐助
@@ -37,6 +38,7 @@ EasyReport是一个简单易用的Web报表工具,它的主要功能是把SQL语
 
 ![支付宝][]
 
+[开发参考]: https://github.com/koqiui/EasyReport/blob/master/docs/EasyReport开发、部署、应用指南.pdf
 [入门手册]: https://github.com/koqiui/EasyReport/blob/master/docs/manual/user-guide.md
 [用户参考]: https://github.com/koqiui/EasyReport/blob/master/docs/manual/version2_0.md
 [支付宝]: https://raw.githubusercontent.com/koqiui/EasyReport/master/docs/assets/imgs/alipay-code.png
