@@ -30,6 +30,11 @@ public class Report implements Serializable {
      * 报表唯一ID,由接口调用方传入
      */
     private String uid;
+    
+    /**
+     * 用户自定义代码（必须全局唯一）
+     */
+    private String ucode;
     /**
      * 报表分类id
      */

@@ -39,6 +39,12 @@ public interface ReportService extends CrudService<Report, ReportExample, Intege
      * @return
      */
     Report getByUid(String uid);
+    
+    /**
+     * @param ucode
+     * @return
+     */
+    Report getByUcode(String ucode);
 
     /**
      * @param id

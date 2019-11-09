@@ -87,7 +87,7 @@ var DesignerMVC = {
     Model: {
         MetaColumnOptions: [{
             name: "optional",
-            text: "可选",
+            text: "可选的",
             type: 1
         }, {
             name: "percent",
@@ -120,16 +120,16 @@ var DesignerMVC = {
              type: 2
              }*/],
         MetaColumnTypes: [{
-            text: "上侧索引",
+            text: "布局列",
             value: 1
         }, {
-            text: "左侧索引",
+            text: "维度列",
             value: 2
         }, {
-            text: "数值",
+            text: "统计列",
             value: 3
         }, {
-            text: "自定义数值",
+            text: "计算列",
             value: 4
         }],
         MetaColumnSortTypes: [{

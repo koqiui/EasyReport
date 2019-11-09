@@ -5,6 +5,7 @@
     <resultMap id="ReportMap" type="com.easytoolsoft.easyreport.meta.domain.Report">
         <id column="id" property="id" jdbcType="INTEGER"/>
         <result column="uid" property="uid" jdbcType="VARCHAR"/>
+        <result column="ucode" property="ucode" jdbcType="VARCHAR"/>
         <result column="category_id" property="categoryId" jdbcType="INTEGER"/>
         <result column="ds_id" property="dsId" jdbcType="INTEGER"/>
         <result column="name" property="name" jdbcType="VARCHAR"/>
@@ -51,7 +52,7 @@
     </sql>
     <sql id="Table_Name">ezrpt_meta_report</sql>
     <sql id="Base_Column_List_Without_Id">
-        uid , category_id , ds_id , name , sql_text , meta_columns , query_params , options , status , sequence ,
+        uid , ucode , category_id , ds_id , name , sql_text , meta_columns , query_params , options , status , sequence ,
         comment , create_user , gmt_created , gmt_modified
     </sql>
     <sql id="Base_Column_List">
@@ -60,6 +61,7 @@
     </sql>
     <sql id="Insert_Columns">
         <if test="record.uid != null">uid,</if>
+        <if test="record.ucode != null">ucode,</if>
         <if test="record.categoryId != null">category_id,</if>
         <if test="record.dsId != null">ds_id,</if>
         <if test="record.name != null">name,</if>
@@ -76,6 +78,7 @@
     </sql>
     <sql id="Insert_Values">
         <if test="record.uid != null">#{record.uid,jdbcType=VARCHAR},</if>
+        <if test="record.ucode != null">#{record.ucode,jdbcType=VARCHAR},</if>
         <if test="record.categoryId != null">#{record.categoryId,jdbcType=INTEGER},</if>
         <if test="record.dsId != null">#{record.dsId,jdbcType=INTEGER},</if>
         <if test="record.name != null">#{record.name,jdbcType=VARCHAR},</if>
@@ -92,6 +95,7 @@
     </sql>
     <sql id="Batch_Insert_Values">
         #{record.uid,jdbcType=VARCHAR},
+        #{record.ucode,jdbcType=VARCHAR},
         #{record.categoryId,jdbcType=INTEGER},
         #{record.dsId,jdbcType=INTEGER},
         #{record.name,jdbcType=VARCHAR},
@@ -112,6 +116,7 @@
     </sql>
     <sql id="Update_Set_From_Bean">
         <if test="record.uid != null">uid = #{record.uid,jdbcType=VARCHAR} ,</if>
+        <if test="record.ucode != null">ucode = #{record.ucode,jdbcType=VARCHAR} ,</if>
         <if test="record.categoryId != null">category_id = #{record.categoryId,jdbcType=INTEGER} ,</if>
         <if test="record.dsId != null">ds_id = #{record.dsId,jdbcType=INTEGER} ,</if>
         <if test="record.name != null">name = #{record.name,jdbcType=VARCHAR} ,</if>
@@ -166,7 +171,7 @@
             </trim>
         </foreach>
         ON DUPLICATE KEY UPDATE
-        uid = VALUES(uid) , category_id = VALUES(category_id) , ds_id = VALUES(ds_id) , name = VALUES(name) , sql_text =
+        uid = VALUES(uid) , ucode = VALUES(ucode) , category_id = VALUES(category_id) , ds_id = VALUES(ds_id) , name = VALUES(name) , sql_text =
         VALUES(sql_text) , meta_columns = VALUES(meta_columns) , query_params = VALUES(query_params) , options =
         VALUES(options) , status = VALUES(status) , sequence = VALUES(sequence) , comment = VALUES(comment) ,
         create_user = VALUES(create_user) , gmt_created = VALUES(gmt_created) , gmt_modified = VALUES(gmt_modified)

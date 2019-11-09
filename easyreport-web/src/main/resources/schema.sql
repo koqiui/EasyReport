@@ -148,6 +148,7 @@ CREATE TABLE IF NOT EXISTS `ezrpt_meta_datasource` (
 CREATE TABLE IF NOT EXISTS `ezrpt_meta_report` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '报表ID',
   `uid` varchar(128) DEFAULT NULL COMMENT '报表唯一ID,由接口调用方传入',
+  `ucode` varchar(128) DEFAULT NULL COMMENT '用户自定义代码（必须全局唯一）',
   `category_id` int(11) NOT NULL COMMENT '报表分类id',
   `ds_id` int(11) NOT NULL COMMENT '数据源ID',
   `name` varchar(50) NOT NULL COMMENT '报表名称',
