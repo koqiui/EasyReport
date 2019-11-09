@@ -8,7 +8,7 @@ EasyReport是一个简单易用的Web报表工具,它的主要功能是把SQL语
 同时它还支持报表Excel导出、图表显示及固定表头与左边列的功能。  
 欢迎加入QQ群交流：（365582678）
 
-* mvn -DskipTests package -P[环境：dev|prod]
+* mvn -DskipTests package -P${env} (${env}变量说明:dev表示开发环境,prod表示生产环境)
 * mvn spring-boot:run -pl easyreport-web 
 
 然后就可以通过浏览器localhost:8080查看

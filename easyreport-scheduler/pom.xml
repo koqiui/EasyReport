@@ -115,7 +115,7 @@
         <profile>
             <id>dev</id>
             <properties>
-                <props>src/main/filters/dev.properties</props>
+                <props>src/main/env/dev.properties</props>
             </properties>
             <activation>
                 <activeByDefault>true</activeByDefault>
@@ -124,13 +124,13 @@
         <profile>
             <id>test</id>
             <properties>
-                <props>src/main/filters/test.properties</props>
+                <props>src/main/env/test.properties</props>
             </properties>
         </profile>
         <profile>
             <id>prod</id>
             <properties>
-                <props>src/main/filters/prod.properties</props>
+                <props>src/main/env/prod.properties</props>
             </properties>
         </profile>
     </profiles>
