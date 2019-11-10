@@ -213,8 +213,8 @@
                                        value="100" data-options="validType:'digit'" style="width:150px"/></td>
                             <td>是否必选:</td>
                             <td><input class="easyui-checkbox" type="checkbox" id="report-query-param-required" name="required"/></td>
-                            <td>是否自动提示:</td>
-                            <td><input class="easyui-checkbox" type="checkbox" id="report-query-param-autoComplete" name="autoComplete"/></td>
+                            <td>是否隐藏:</td>
+                            <td><input class="easyui-checkbox" type="checkbox" id="report-query-param-hidden" name="hidden"/></td>
                         </tr>
                         <tr>
                             <td>表单控件:</td>
@@ -227,12 +227,14 @@
                                 <option value="date">日期</option>
                             </select></td>
                             <td>内容来源类型</td>
-                            <td colspan="5"><select class="easyui-combobox" id="report-query-param-dataSource"
+                            <td colspan="3"><select class="easyui-combobox" id="report-query-param-dataSource"
                                                     name="dataSource" data-options="required:true" style="width:150px">
                                 <option value="sql">SQL语句</option>
                                 <option value="text">文本字符串</option>
                                 <option value="none">无内容</option>
                             </select></td>
+                            <td>是否自动提示:</td>
+                            <td><input class="easyui-checkbox" type="checkbox" id="report-query-param-autoComplete" name="autoComplete"/></td>
                         </tr>
                         <tr>
                             <td>内容:</td>

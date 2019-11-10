@@ -140,14 +140,21 @@ public abstract class AbstractQueryer {
 	}
 
 	public List<Map<String, Object>> getResultSetRows() {
+		return this.getResultSetRows(null);
+	}
+
+	public List<Map<String, Object>> getResultSetRows(String sqlText) {
 		Connection conn = null;
 		Statement stmt = null;
 		ResultSet rs = null;
 		try {
-			this.logger.debug(this.parameter.getSqlText());
+			if (sqlText == null) {
+				sqlText = this.parameter.getSqlText();
+			}
+			this.logger.debug(sqlText);
 			conn = this.getJdbcConnection();
 			stmt = conn.createStatement();
-			rs = stmt.executeQuery(this.parameter.getSqlText());
+			rs = stmt.executeQuery(sqlText);
 			// 获取列名称
 			final ResultSetMetaData rsMataData = rs.getMetaData();
 			final int colCount = rsMataData.getColumnCount();
@@ -168,7 +175,7 @@ public abstract class AbstractQueryer {
 			}
 			return retRows;
 		} catch (final Exception ex) {
-			this.logger.error(String.format("SqlText:%s，Msg:%s", this.parameter.getSqlText(), ex));
+			this.logger.error(String.format("SqlText:%s，Msg:%s", sqlText, ex));
 			throw new SQLQueryException(ex);
 		} finally {
 			JdbcUtils.releaseJdbcResource(conn, stmt, rs);

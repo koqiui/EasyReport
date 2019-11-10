@@ -12,6 +12,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
@@ -62,9 +63,8 @@ public class ReportController {
 		return modelAndView;
 	}
 
-	@ResponseBody
+	@ResponseBody // add by koqiui
 	@RequestMapping(value = "/by/ucode")
-	// @RequiresPermissions("report.designer:preview")
 	public ResponseResult<?> getMetaDataByUcode(final String ucode) {
 		ResponseResult<?> result = null;
 		try {
@@ -106,19 +106,34 @@ public class ReportController {
 		return modelAndView;
 	}
 
-	@ResponseBody
+	@ResponseBody // add by koqiui
 	@RequestMapping(value = "/getResultSetRows.json")
-	// @RequiresPermissions("report.designer:preview")
 	public ResponseResult<?> getResultSet(final String uid, final HttpServletRequest request) {
 		ResponseResult<?> result;
 		try {
-			result = ResponseResult.success(ReportUtils.getResultSetRows(uid, request.getParameterMap()));
+			result = ResponseResult.success(ReportUtils.getReportResultSetRows(uid, request.getParameterMap()));
 		} catch (QueryParamsException | NotFoundLayoutColumnException | SQLQueryException | TemplatePraseException ex) {
 			log.error("报表结果出错", ex);
-			result = ResponseResult.failure(10007, "报表生成失败", ex.getMessage());
+			result = ResponseResult.failure(10007, "报表结果出错", ex.getMessage());
 		} catch (final Exception ex) {
 			log.error("报表系统出错", ex);
-			result = ResponseResult.failure(10008, "报表系统出错", ex.getMessage());
+			result = ResponseResult.failure(10008, "报表结果出错", ex.getMessage());
+		}
+		return result;
+	}
+
+	@ResponseBody // add by koqiui
+	@PostMapping(value = "/getSqlBasedParamOptionList.json")
+	public ResponseResult<?> getSqlBasedParamOptionList(final String uid, final @RequestBody String sqlText) {
+		ResponseResult<?> result;
+		try {
+			result = ResponseResult.success(ReportUtils.getReportSqlBasedParamOptionList(uid, sqlText));
+		} catch (QueryParamsException | NotFoundLayoutColumnException | SQLQueryException | TemplatePraseException ex) {
+			log.error("报表参数结果出错", ex);
+			result = ResponseResult.failure(10007, "报表参数结果出错", ex.getMessage());
+		} catch (final Exception ex) {
+			log.error("报表参数结果出错", ex);
+			result = ResponseResult.failure(10008, "报表参数结果出错", ex.getMessage());
 		}
 		return result;
 	}

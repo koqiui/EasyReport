@@ -570,6 +570,10 @@ var DesignerMVC = {
                     title: '是否必选',
                     width: 80
                 }, {
+                    field: 'hidden',
+                    title: '是否隐藏',
+                    width: 80
+                }, {
                     field: 'autoComplete',
                     title: '是否自动提示',
                     width: 80
@@ -589,10 +593,28 @@ var DesignerMVC = {
                     }
                 }]],
                 onDblClickRow: function (index, row) {
+                	var someWasNull = false;
+                	if(row.hidden == null){
+                		someWasNull = true;
+                		row.hidden = false;
+                	}
+                	if(row.content == null){
+                		someWasNull = true;
+                		row.content = '';
+                	}
+                	//
                     $('#report-query-param-form').form('load', row);
                     $("#report-query-param-required").prop("checked", row.required);
+                    $("#report-query-param-hidden").prop("checked", row.hidden);
                     $("#report-query-param-autoComplete").prop("checked", row.autoComplete);
                     $("#report-query-param-gridIndex").val(index);
+                    //
+                    if(someWasNull){//反馈初始化变更
+                    	$('#report-query-param-grid').datagrid('updateRow', {
+                            index: index,
+                            row: row
+                        });
+                    }
                 }
             });
 
@@ -1130,6 +1152,7 @@ var DesignerMVC = {
                 }
 
                 row.required = $("#report-query-param-required").prop("checked");
+                row.hidden = $("#report-query-param-hidden").prop("checked");
                 row.autoComplete = $("#report-query-param-autoComplete").prop("checked");
 
                 if (act == "add") {

@@ -46,7 +46,7 @@ public interface Queryer {
 	List<ReportMetaDataColumn> getMetaDataColumns();
 
 	/**
-	 * 返回原生结果行集
+	 * 返回查询统计主体的原生结果行集
 	 * 
 	 * @author koqiui
 	 * @date 2019年11月10日 下午6:48:51
@@ -54,4 +54,16 @@ public interface Queryer {
 	 * @return
 	 */
 	public List<Map<String, Object>> getResultSetRows();
+
+	/**
+	 * 返回指定的sql语句的原生结果行集
+	 * 
+	 * @author koqiui
+	 * @date 2019年11月10日 下午10:18:48
+	 * 
+	 * @param sqlText
+	 *            指定的sql语句
+	 * @return
+	 */
+	public List<Map<String, Object>> getResultSetRows(String sqlText);
 }

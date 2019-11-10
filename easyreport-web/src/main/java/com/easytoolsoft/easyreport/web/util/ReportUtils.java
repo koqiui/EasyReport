@@ -1,6 +1,7 @@
 package com.easytoolsoft.easyreport.web.util;
 
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,12 +75,47 @@ public class ReportUtils {
 		return tableReportService.getReportParameter(report, parameters);
 	}
 
-	public static List<Map<String, Object>> getResultSetRows(final String uid, final Map<?, ?> parameters) {
+	/**
+	 * 返回报表（原生）结果数据集
+	 * 
+	 * @author koqiui
+	 * @date 2019年11月10日 下午10:36:12
+	 * 
+	 * @param uid
+	 * @param parameters
+	 * @return
+	 */
+	public static List<Map<String, Object>> getReportResultSetRows(final String uid, final Map<?, ?> parameters) {
 		Report report = reportService.getByUid(uid);
 		ReportDataSource dataSource = reportService.getReportDataSource(report.getDsId());
 		ReportParameter parameter = tableReportService.getReportParameter(report, parameters);
 		Queryer queryer = QueryerFactory.create(dataSource, parameter);
 		return queryer.getResultSetRows();
+	}
+
+	/**
+	 * 返回指定报表基于sql的参数选项列表
+	 * 
+	 * @author koqiui
+	 * @date 2019年11月10日 下午10:38:10
+	 * 
+	 * @param uid
+	 * @param sqlText
+	 * @return
+	 */
+	public static List<Map<String, Object>> getReportSqlBasedParamOptionList(final String uid, String sqlText) {
+		if (sqlText == null) {
+			return new ArrayList<>(0);
+		}
+		String tmpSql = sqlText.toLowerCase().replace('\n', ' ').replace('\r', ' ');
+		// sql语句必须同时包含select from where
+		if (tmpSql.indexOf("select ") == -1 || tmpSql.indexOf("from ") == -1 || tmpSql.indexOf("where ") == -1) {
+			return new ArrayList<>(0);
+		}
+		Report report = reportService.getByUid(uid);
+		ReportDataSource dataSource = reportService.getReportDataSource(report.getDsId());
+		Queryer queryer = QueryerFactory.create(dataSource, null);
+		return queryer.getResultSetRows(sqlText);
 	}
 
 	public static void renderByFormMap(final String uid, final ModelAndView modelAndView, final HttpServletRequest request) {
