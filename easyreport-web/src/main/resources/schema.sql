@@ -164,7 +164,8 @@ CREATE TABLE IF NOT EXISTS `ezrpt_meta_report` (
   `gmt_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '记录修改时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_category_id_name` (`category_id`,`name`),
-  UNIQUE KEY `uk_uid` (`uid`)
+  UNIQUE KEY `uk_uid` (`uid`),
+  INDEX `idx_ucode`(`ucode`)
 ) ENGINE=InnoDB AUTO_INCREMENT=721 DEFAULT CHARSET=utf8;
 
 -- ----------------------------

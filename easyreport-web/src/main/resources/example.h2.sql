@@ -24,49 +24,6 @@ CREATE TABLE IF NOT EXISTS `fact_air_cn` (
 MERGE INTO `ezrpt_meta_category` VALUES ('711', '0', '中国空气(MySQL)', '711', '0', '0', '100', '', '2015-01-29 17:54:49', '2016-09-22 23:06:48');
 MERGE INTO `ezrpt_meta_category` VALUES ('716', '0', '中国天气(MySQL)', '716', '0', '0', '100', '', '2015-02-10 15:20:31', '2016-09-22 23:06:50');
 
--- ----------------------------
--- Records of ezrpt_meta_conf
--- ----------------------------
-MERGE INTO `ezrpt_meta_conf` VALUES ('1', '33', '常见统计列', 'statColumn', 'statColumn', '0', '统计列', '2015-02-10 10:23:56', '2015-02-10 10:23:56');
-MERGE INTO `ezrpt_meta_conf` VALUES ('5', '1', 'AQI指数', 'aqi', '空气指数', '100', '空气指数', '2015-02-10 11:01:45', '2015-02-10 11:01:45');
-MERGE INTO `ezrpt_meta_conf` VALUES ('6', '1', 'AQI指数范围', 'aqi_range', 'AQI指数范围', '100', 'AQI指数范围', '2015-02-10 11:02:34', '2015-02-10 11:02:34');
-MERGE INTO `ezrpt_meta_conf` VALUES ('7', '1', '空气等级', 'quality', '空气等级', '100', '空气等级', '2015-02-10 11:03:41', '2015-02-10 11:03:41');
-MERGE INTO `ezrpt_meta_conf` VALUES ('15', '33', '常见日期列', 'dateColumn', 'dateColumn', '100', '', '2015-02-10 10:23:56', '2015-02-10 10:23:56');
-MERGE INTO `ezrpt_meta_conf` VALUES ('16', '15', 'dt日期', 'dt', '日期', '100', '', '2015-02-10 11:17:18', '2015-02-10 11:17:18');
-MERGE INTO `ezrpt_meta_conf` VALUES ('17', '15', 'date日期', 'date', '日期', '100', '日期列', '2015-02-10 11:17:22', '2015-02-10 11:17:22');
-MERGE INTO `ezrpt_meta_conf` VALUES ('18', '1', 'PM2.5细颗粒物', 'pm25', 'PM2.5细颗粒物', '100', 'PM2.5细颗粒物', '2015-02-10 11:04:31', '2015-02-10 11:04:31');
-MERGE INTO `ezrpt_meta_conf` VALUES ('19', '1', 'PM10可吸入颗粒物', 'pm10', 'PM10可吸入颗粒物', '100', 'PM10可吸入颗粒物', '2015-02-10 11:05:05', '2015-02-10 11:05:05');
-MERGE INTO `ezrpt_meta_conf` VALUES ('32', '33', '常见维度列', 'dimColumn', 'dimColumn', '0', '常见统计列', '2015-02-10 10:23:56', '2015-02-10 10:23:56');
-MERGE INTO `ezrpt_meta_conf` VALUES ('33', '0', '报表常用元数据列', 'reportCommonMetaColum', 'reportCommonMetaColum', '0', '报表常用元数据列', '2015-02-10 10:23:56', '2015-02-10 10:23:56');
-MERGE INTO `ezrpt_meta_conf` VALUES ('36', '1', '二氧化硫', 'so2', '二氧化硫(So2)', '100', '二氧化硫', '2015-02-10 11:05:57', '2015-02-10 11:05:57');
-MERGE INTO `ezrpt_meta_conf` VALUES ('37', '32', '城市', 'area', '城市', '100', '', '2015-02-10 11:10:47', '2015-02-10 11:10:47');
-MERGE INTO `ezrpt_meta_conf` VALUES ('38', '32', '地区', 'region', '地区', '100', '华北，华南', '2015-02-10 11:11:06', '2015-02-10 11:11:06');
-MERGE INTO `ezrpt_meta_conf` VALUES ('39', '32', '省(直辖市)', 'province', '省(直辖市)', '100', '', '2015-02-10 11:11:41', '2015-02-10 11:11:41');
-MERGE INTO `ezrpt_meta_conf` VALUES ('40', '32', '城市', 'city', '城市', '100', '北京，上海', '2015-02-10 11:12:01', '2015-02-10 11:12:01');
-MERGE INTO `ezrpt_meta_conf` VALUES ('41', '32', '城区', 'district', '城区', '100', '海淀区、朝阳区', '2015-02-10 11:12:43', '2015-02-10 11:12:43');
-MERGE INTO `ezrpt_meta_conf` VALUES ('42', '32', '标题', 'title', '标题', '100', '', '2015-02-10 11:13:30', '2015-02-10 11:13:30');
-MERGE INTO `ezrpt_meta_conf` VALUES ('48', '32', '标识', 'id', '标识', '100', '', '2015-02-10 11:13:44', '2015-02-10 11:13:44');
-MERGE INTO `ezrpt_meta_conf` VALUES ('49', '32', '文本', 'text', '文本', '100', '', '2015-02-10 11:14:22', '2015-02-10 11:14:22');
-MERGE INTO `ezrpt_meta_conf` VALUES ('50', '32', '首字母', 'capital', '首字母', '100', '首字母', '2015-02-10 11:15:27', '2015-02-10 11:15:27');
-MERGE INTO `ezrpt_meta_conf` VALUES ('52', '33', '常见可选列', 'optionalColumn', 'optionalColumn', '0', '', '2015-02-10 10:23:56', '2015-02-10 10:23:56');
-MERGE INTO `ezrpt_meta_conf` VALUES ('53', '52', '二氧化氮', 'no2', '二氧化氮(No2)', '100', '', '2015-02-10 11:20:21', '2015-02-10 11:20:21');
-MERGE INTO `ezrpt_meta_conf` VALUES ('54', '52', '臭氧', 'o3', '臭氧(O3)', '100', '', '2015-02-10 11:20:55', '2015-02-10 11:20:55');
-MERGE INTO `ezrpt_meta_conf` VALUES ('55', '32', '代号', 'code', '代号', '100', '', '2015-02-10 11:15:09', '2015-02-10 11:15:09');
-MERGE INTO `ezrpt_meta_conf` VALUES ('56', '1', '一氧化碳', 'co', '一氧化碳(Co)', '100', '一氧化碳', '2015-02-10 11:06:26', '2015-02-10 11:06:26');
-MERGE INTO `ezrpt_meta_conf` VALUES ('57', '1', '二氧化氮', 'no2', '二氧化氮(No2)', '100', '二氧化氮', '2015-02-10 11:06:48', '2015-02-10 11:06:48');
-MERGE INTO `ezrpt_meta_conf` VALUES ('58', '1', '臭氧', 'o3', '臭氧(O3)', '100', '臭氧', '2015-02-10 11:07:21', '2015-02-10 11:07:21');
-MERGE INTO `ezrpt_meta_conf` VALUES ('59', '15', '天', 'day', '天', '100', '', '2015-02-10 11:17:10', '2015-02-10 11:17:10');
-MERGE INTO `ezrpt_meta_conf` VALUES ('60', '15', '小时', 'hour', '小时', '100', '', '2015-02-10 11:17:38', '2015-02-10 11:17:38');
-MERGE INTO `ezrpt_meta_conf` VALUES ('61', '15', '月度', 'month', '月度', '100', '', '2015-02-10 11:17:57', '2015-02-10 11:17:57');
-MERGE INTO `ezrpt_meta_conf` VALUES ('69', '0', '数据源类型', 'dbType', 'dbType', '10', '数据源类型', '2016-09-20 13:57:36', '2016-09-20 13:57:36');
-MERGE INTO `ezrpt_meta_conf` VALUES ('70', '69', 'MySQL', 'mysql', '{	"driverClass":"com.mysql.jdbc.Driver",	"queryerClass":"com.easytoolsoft.easyreport.engine.query.MySqlQueryer",	"jdbcUrl":"jdbc:mysql://${host}:${port}/${database}?characterEncoding=${encoding}"}', '10', '', '2016-09-20 14:06:02', '2016-09-20 14:06:02');
-MERGE INTO `ezrpt_meta_conf` VALUES ('71', '69', 'SQLServer', 'sqlserver', '{	"driverClass":"com.microsoft.sqlserver.jdbc.SQLServerDriver",	"queryerClass":"com.easytoolsoft.easyreport.engine.query.SqlServerQueryer",	"jdbcUrl":"jdbc:sqlserver://${host};databaseName=${database}"}', '10', '', '2016-09-20 14:08:09', '2016-09-20 14:08:09');
-MERGE INTO `ezrpt_meta_conf` VALUES ('72', '0', '数据源连接池类型', 'dbPoolType', 'dbPoolType', '10', '', '2016-09-20 14:09:21', '2016-09-20 14:09:21');
-MERGE INTO `ezrpt_meta_conf` VALUES ('73', '72', 'C3P0', 'c3p0', '{	"poolClass":"com.easytoolsoft.easyreport.engine.dbpool.C3p0DataSourcePool",	"options":{		"initialPoolSize":3,		"minPoolSize":1,		"maxPoolSize":10,		"maxStatements":50,		"maxIdleTime":1000,		"acquireIncrement":3,		"acquireRetryAttempts":30,		"idleConnectionTestPeriod":60,		"breakAfterAcquireFailure":false,		"testConnectionOnCheckout":false	}}', '10', '', '2016-09-20 14:10:46', '2016-09-20 14:10:46');
-MERGE INTO `ezrpt_meta_conf` VALUES ('74', '72', 'DBCP2', 'dbcp2', '{	"poolClass":"com.easytoolsoft.easyreport.engine.dbpool.DBCP2DataSourcePool",	"options":{		"initialSize":3,		"maxIdle":20,		"minIdle":1,		"logAbandoned":true,		"removeAbandoned":true,		"removeAbandonedTimeout":180,		"maxWait":1000	}}', '10', '', '2016-09-20 14:11:03', '2016-09-20 14:11:03');
-MERGE INTO `ezrpt_meta_conf` VALUES ('75', '72', 'Druid', 'druid', '{	"poolClass":"com.easytoolsoft.easyreport.engine.dbpool.DruidDataSourcePool",	"options":{		"initialSize": 3,		"maxActive": 20,		"minIdle": 1,		"maxWait": 60000,		"timeBetweenEvictionRunsMillis": 60000,		"minEvictableIdleTimeMillis": 300000,		"testWhileIdle": true,		"testOnBorrow": false,		"testOnReturn": false,		"maxOpenPreparedStatements": 20,		"removeAbandoned": true,		"removeAbandonedTimeout": 1800,		"logAbandoned": true	}}', '10', '', '2016-09-20 14:11:18', '2016-09-20 14:11:18');
-MERGE INTO `ezrpt_meta_conf` VALUES ('76', '72', '无连接池', 'noDbPool', '{	"poolClass":"com.easytoolsoft.easyreport.engine.dbpool.NoDataSourcePool",	"options":{}}', '10', '', '2016-09-20 14:14:32', '2016-09-20 14:14:32');
-MERGE INTO `ezrpt_meta_conf` VALUES ('77', '69', 'H2', 'h2', '{	"driverClass":"org.h2.Driver","queryerClass":"com.easytoolsoft.easyreport.engine.query.H2Queryer","jdbcUrl":"jdbc:h2:file:./h2db"}', '10', '', '2016-09-20 14:06:02','2016-09-20 14:06:02');
 
 -- ----------------------------
 -- Records of ezrpt_meta_datasource
@@ -74,11 +31,12 @@ MERGE INTO `ezrpt_meta_conf` VALUES ('77', '69', 'H2', 'h2', '{	"driverClass":"o
 MERGE INTO `ezrpt_meta_datasource` VALUES ('49', '8b2d3b62-0c08-4d62-a666-8bb97fc9c222', '中国天气(SQLServer)', 'com.microsoft.sqlserver.jdbc.SQLServerDriver', 'jdbc:sqlserver://localhost;databaseName=ChinaWeatherAir', 'sa', 'ddd', 'com.easytoolsoft.easyreport.engine.query.SqlServerQueryer', 'com.easytoolsoft.easyreport.engine.dbpool.DBCP2DataSourcePool', '{"initialSize":3,"maxIdle":20,"minIdle":1,"logAbandoned":true,"removeAbandoned":true,"removeAbandonedTimeout":180,"maxWait":1000}', '', '2015-01-27 14:32:32', '2015-01-27 14:32:32');
 MERGE INTO `ezrpt_meta_datasource` VALUES ('50', '6423b076-ce78-47fc-8c25-c005be2b85af', '中国天气(MySQL)', 'com.mysql.jdbc.Driver', 'jdbc:mysql://localhost:3306/china_weather_air?characterEncoding=UTF-8', 'root', 'ddd', 'com.easytoolsoft.easyreport.engine.query.MySqlQueryer', 'com.easytoolsoft.easyreport.engine.dbpool.DruidDataSourcePool', '{"initialSize":3,"maxActive":20,"minIdle":1,"maxWait":60000,"timeBetweenEvictionRunsMillis":60000,"minEvictableIdleTimeMillis":300000,"testWhileIdle":true,"testOnBorrow":false,"testOnReturn":false,"maxOpenPreparedStatements":20,"removeAbandoned":true,"removeAbandonedTimeout":1800,"logAbandoned":true}', '', '2015-01-29 17:54:32', '2015-01-29 17:54:32');
 MERGE INTO `ezrpt_meta_datasource` VALUES ('51', '03755f08-9846-465a-a322-03ac5506c66c', 'local-h2', 'org.h2.Driver', 'jdbc:h2:file:./h2db', 'sa', '', 'com.easytoolsoft.easyreport.engine.query.H2Queryer', 'com.easytoolsoft.easyreport.engine.dbpool.DruidDataSourcePool', '{"initialSize":3,"maxActive":20,"minIdle":1,"maxWait":60000,"timeBetweenEvictionRunsMillis":60000,"minEvictableIdleTimeMillis":300000,"testWhileIdle":true,"testOnBorrow":false,"testOnReturn":false,"maxOpenPreparedStatements":20,"removeAbandoned":true,"removeAbandonedTimeout":1800,"logAbandoned":true}', '', '2015-01-29 17:54:32', '2015-01-29 17:54:32');
+
+
 -- ----------------------------
 -- Records of ezrpt_meta_report
 -- ----------------------------
 MERGE INTO `ezrpt_meta_report` VALUES ('714', 'bc7be838-31ae-41fe-ae63-4ae8efe5c457', '711', '51', '2014年三亚每天空气指数', 'select * from fact_air_cn where area="三亚市" and year(dt)="2014"', '[{"ordinal":0,"name":"dt","text":"日期","dataType":"DATE","expression":"","format":"","comment":"","width":10,"decimals":"0","type":"1","sortType":"0","extensions":false,"hidden":false,"percent":false,"footings":false,"displayInMail":false,"optional":false},{"ordinal":0,"name":"aqi","text":"空气指数","dataType":"INT","expression":"","width":11,"decimals":"0","type":"3","sortType":"0","extensions":false,"hidden":false,"percent":false,"footings":false,"displayInMail":false,"optional":false},{"ordinal":0,"name":"aqi_range","text":"AQI指数范围","dataType":"VARCHAR","expression":"","width":20,"decimals":"0","type":"3","sortType":"0","extensions":false,"hidden":false,"percent":false,"footings":false,"displayInMail":false,"optional":false},{"ordinal":0,"name":"quality","text":"空气等级","dataType":"VARCHAR","expression":"","width":10,"decimals":"0","type":"3","sortType":"0","extensions":false,"hidden":false,"percent":false,"footings":false,"displayInMail":false,"optional":false},{"ordinal":0,"name":"pm25","text":"PM2.5细颗粒物","dataType":"FLOAT","expression":"","width":12,"decimals":"0","type":"3","sortType":"0","extensions":false,"hidden":false,"percent":false,"footings":false,"displayInMail":false,"optional":false},{"ordinal":0,"name":"pm10","text":"PM10可吸入颗粒物","dataType":"FLOAT","expression":"","width":12,"decimals":"0","type":"3","sortType":"0","extensions":false,"hidden":false,"percent":false,"footings":false,"displayInMail":false,"optional":false},{"ordinal":0,"name":"so2","text":"二氧化硫(So2)","dataType":"FLOAT","expression":"","width":12,"decimals":"0","type":"3","sortType":"0","extensions":false,"hidden":false,"percent":false,"footings":false,"displayInMail":false,"optional":false},{"ordinal":0,"name":"co","text":"一氧化碳(Co)","dataType":"FLOAT","expression":"","width":12,"decimals":"0","type":"3","sortType":"0","extensions":false,"hidden":false,"percent":false,"footings":false,"displayInMail":false,"optional":false},{"ordinal":0,"name":"no2","text":"二氧化氮(No2)","dataType":"FLOAT","expression":"","width":12,"decimals":"0","type":"3","sortType":"0","extensions":false,"hidden":false,"percent":false,"footings":false,"displayInMail":false,"optional":false},{"ordinal":0,"name":"o3","text":"臭氧(O3)","dataType":"FLOAT","expression":"","width":12,"decimals":"0","type":"3","sortType":"0","extensions":false,"hidden":false,"percent":false,"footings":false,"displayInMail":false,"optional":false}]', '', '{"layout":2,"statColumnLayout":1,"dataRange":7}', '1', '100', '', 'admin', '2015-01-29 17:59:14', '2016-09-26 18:40:37');
-
 
 
 -- ----------------------------
