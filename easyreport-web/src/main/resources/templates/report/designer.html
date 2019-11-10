@@ -109,15 +109,13 @@
                                         style="width:150px">
                             </select>
                             </td>
-<!--
                             <td>布局列:</td>
                             <td><select class="easyui-combobox" id="report-layout" name="layout"
                                         data-options="required:true" style="width:100px">
-                                <option value="1">横向展示</option>
-                                <option value="2">纵向展示</option>
+                                <option value="1">横向布局</option>
+                                <option value="2">纵向布局</option>
                             </select>
                             </td>
--->
                             <td>数值列位置:</td>
                             <td colspan="3"><select class="easyui-combobox" id="report-statColumnLayout"
                                                     name="statColumnLayout"
@@ -145,15 +143,17 @@
                                        value="100"
                                        data-options="required:true,validType:'digit'" style="width:100px"/>
                             </td>
+                            <td>所属分类:</td>
+                            <td><label id="report-category-name"/></td>
                         </tr>
                         <tr>
-                        	 <td>所属分类:</td>
-                            <td><label id="report-category-name"/></td>
-                            
                             <td>自定义代码:</td>
-                            <td><input class="easyui-textbox" type="text" id="report-ucode" name="ucode"
-                                        style="width:600px"/>
+                            <td colspan="3"><input class="easyui-textbox" type="text" id="report-ucode" name="ucode"
+                                        style="width:80%"/>
                             </td>
+                            <td>备注说明:</td>
+                            <td colspan="3"><input class="easyui-textbox" type="text" id="report-comment" name="comment" value=""
+                            			style="width:80%"/></td>
                         </tr>
                         <tr>
                             <td>SQL语句:</td>
@@ -164,7 +164,6 @@
                                 <input type="hidden" id="report-categoryId" name="categoryId" value="0"/>
                                 <input type="hidden" id="report-sqlTextIsChange" name="isChange" value="0"/>
                                 <input type="hidden" id="report-queryParams" name="queryParams"/>
-                                <input type="hidden" id="report-comment" name="comment" value=""/>
                             </td>
                         </tr>
                         <tr>

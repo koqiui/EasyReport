@@ -933,7 +933,7 @@ var DesignerMVC = {
             DesignerMVC.Util.isRowSelected(function (row) {
                 var options = DesignerMVC.Util.getOptions();
                 options.iconCls = 'icon-designer';
-                options.data = row;
+                options.data = DesignerMVC.Util.copy(row);
                 options.title = '报表设计器--修改[' + options.data.name + ']报表';
                 DesignerMVC.Util.editOrCopy(options, 'edit');
             });
@@ -942,7 +942,7 @@ var DesignerMVC = {
             DesignerMVC.Util.isRowSelected(function (row) {
                 var options = DesignerMVC.Util.getOptions();
                 options.iconCls = 'icon-designer';
-                options.data = row;
+                options.data = DesignerMVC.Util.copy(row);
                 options.title = '报表设计器--复制[' + options.data.name + ']报表';
                 DesignerMVC.Util.editOrCopy(options, 'copy');
                 $('#modal-action').val("add");
@@ -1173,6 +1173,19 @@ var DesignerMVC = {
         }
     },
     Util: {
+    	copy: function(src){
+    		var ret = null;
+    		if(src != null){
+    			if($.isArray(src)){
+        			 ret = [];
+        		}
+    			else {
+    				ret = {};
+    			}
+    			$.extend(true, ret, src);
+    		}
+    		return ret;
+    	},
         getOptions: function () {
             return {
                 dlgId: '#report-designer-dlg',
@@ -1201,6 +1214,7 @@ var DesignerMVC = {
 
             var row = options.data;
             if (act === 'copy') {
+            	row.id = null;
                 row.name = '';
             }
             DesignerMVC.Util.fillReportBasicConfForm(row, $.toJSON(row.options));

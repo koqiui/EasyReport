@@ -16,7 +16,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.alibaba.fastjson.JSONObject;
-import com.easytoolsoft.easyreport.engine.data.LayoutType;
 import com.easytoolsoft.easyreport.engine.data.ReportDataSource;
 import com.easytoolsoft.easyreport.engine.data.ReportMetaDataColumn;
 import com.easytoolsoft.easyreport.engine.data.ReportMetaDataSet;
@@ -97,7 +96,6 @@ public class ReportUtils {
 	public static void renderByTemplate(final String uid, final ModelAndView modelAndView, final QueryParamFormView formView, final HttpServletRequest request) {
 		final Report report = reportService.getByUid(uid);
 		final ReportOptions options = reportService.parseOptions(report.getOptions());
-		options.setLayout(LayoutType.HORIZONTAL.getValue());
 		final List<ReportMetaDataColumn> metaDataColumns = reportService.parseMetaColumns(report.getMetaColumns());
 		final Map<String, Object> buildInParams = tableReportService.getBuildInParameters(request.getParameterMap(), options.getDataRange());
 		final List<HtmlFormElement> dateAndQueryElements = tableReportService.getDateAndQueryParamFormElements(report, buildInParams);
