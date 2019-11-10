@@ -1,24 +1,29 @@
 package com.easytoolsoft.easyreport.web.util;
 
-import com.easytoolsoft.easyreport.engine.data.LayoutType;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.ModelAndView;
 
+import com.alibaba.fastjson.JSONObject;
+import com.easytoolsoft.easyreport.engine.data.LayoutType;
 import com.easytoolsoft.easyreport.engine.data.ReportDataSource;
 import com.easytoolsoft.easyreport.engine.data.ReportMetaDataColumn;
 import com.easytoolsoft.easyreport.engine.data.ReportMetaDataSet;
 import com.easytoolsoft.easyreport.engine.data.ReportParameter;
 import com.easytoolsoft.easyreport.engine.data.ReportTable;
 import com.easytoolsoft.easyreport.engine.query.Queryer;
+import com.easytoolsoft.easyreport.engine.query.QueryerFactory;
 import com.easytoolsoft.easyreport.engine.util.DateUtils;
 import com.easytoolsoft.easyreport.meta.domain.Report;
 import com.easytoolsoft.easyreport.meta.domain.options.ReportOptions;
@@ -26,11 +31,6 @@ import com.easytoolsoft.easyreport.meta.form.QueryParamFormView;
 import com.easytoolsoft.easyreport.meta.form.control.HtmlFormElement;
 import com.easytoolsoft.easyreport.meta.service.ReportService;
 import com.easytoolsoft.easyreport.meta.service.TableReportService;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.web.servlet.ModelAndView;
 
 /**
  * @author Tom Deng
@@ -73,6 +73,14 @@ public class ReportUtils {
 
 	public static ReportParameter getReportParameter(final Report report, final Map<?, ?> parameters) {
 		return tableReportService.getReportParameter(report, parameters);
+	}
+
+	public static List<Map<String, Object>> getResultSetRows(final String uid, final Map<?, ?> parameters) {
+		Report report = reportService.getByUid(uid);
+		ReportDataSource dataSource = reportService.getReportDataSource(report.getDsId());
+		ReportParameter parameter = tableReportService.getReportParameter(report, parameters);
+		Queryer queryer = QueryerFactory.create(dataSource, parameter);
+		return queryer.getResultSetRows();
 	}
 
 	public static void renderByFormMap(final String uid, final ModelAndView modelAndView, final HttpServletRequest request) {

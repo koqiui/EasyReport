@@ -106,6 +106,23 @@ public class ReportController {
 		return modelAndView;
 	}
 
+	@ResponseBody
+	@RequestMapping(value = "/getResultSetRows.json")
+	// @RequiresPermissions("report.designer:preview")
+	public ResponseResult<?> getResultSet(final String uid, final HttpServletRequest request) {
+		ResponseResult<?> result;
+		try {
+			result = ResponseResult.success(ReportUtils.getResultSetRows(uid, request.getParameterMap()));
+		} catch (QueryParamsException | NotFoundLayoutColumnException | SQLQueryException | TemplatePraseException ex) {
+			log.error("报表结果出错", ex);
+			result = ResponseResult.failure(10007, "报表生成失败", ex.getMessage());
+		} catch (final Exception ex) {
+			log.error("报表系统出错", ex);
+			result = ResponseResult.failure(10008, "报表系统出错", ex.getMessage());
+		}
+		return result;
+	}
+
 	@OpLog(name = "获取报表DataSet JSON格式数据")
 	@ResponseBody
 	@RequestMapping(value = "/getDataSet.json")
