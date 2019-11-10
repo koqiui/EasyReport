@@ -4,10 +4,18 @@ $(function () {
 
 var MetaDataDs = {
     init: function () {
-        DsMVC.View.initControl();
-        DsMVC.View.bindEvent();
-        DsMVC.View.bindValidate();
-        DsMVC.View.initData();
+    	DsMVC.View.initData();//放到脚本最后面了
+    	var loader = $.messager.progress({
+            title: '请稍后...',
+            text: '加载数据中...'
+        });
+    	setTimeout(function(){
+    		 DsMVC.View.initControl();
+    	     DsMVC.View.bindEvent();
+    	     DsMVC.View.bindValidate();
+    	     //
+    	     $.messager.progress("close");
+    	}, 1000);
     }
 };
 
@@ -57,6 +65,9 @@ var DsMVC = {
         dbPoolTypes: {}
     },
     View: {
+    	initData: function () {
+            DsMVC.Util.loadConfigItems();
+        },
         initControl: function () {
             $('#ds-datagrid').datagrid({
                 method: 'get',
@@ -191,19 +202,33 @@ var DsMVC = {
 
             $('#dbType').combobox({
                 onChange: function (newValue, oldValue) {
-                    var item = DsMVC.Model.dbTypes[newValue].value;
-                    $('#jdbcUrl').textbox('setValue', item.jdbcUrl);
-                    $('#driverClass').val(item.driverClass);
-                    $('#queryerClass').val(item.queryerClass);
+                	if(newValue){
+                		 var item = DsMVC.Model.dbTypes[newValue].value;
+                         $('#jdbcUrl').textbox('setValue', item.jdbcUrl);
+                         $('#driverClass').val(item.driverClass);
+                         $('#queryerClass').val(item.queryerClass);
+                	}
+                	else {
+                		$('#jdbcUrl').textbox('setValue', "");
+                        $('#driverClass').val("");
+                        $('#queryerClass').val("");
+                	}
                 }
             });
 
             $('#dbPoolType').combobox({
                 onChange: function (newValue, oldValue) {
-                    var item = DsMVC.Model.dbPoolTypes[newValue].value;
-                    $('#poolClass').val(item.poolClass);
-                    var data = EasyUIUtils.toPropertygridRows(item.options);
-                    $('#ds-options-pg').propertygrid('loadData', data);
+                	if(newValue){
+                		var item = DsMVC.Model.dbPoolTypes[newValue].value;
+                        $('#poolClass').val(item.poolClass);
+                        var data = EasyUIUtils.toPropertygridRows(item.options);
+                        $('#ds-options-pg').propertygrid('loadData', data);
+                	}
+                	else {
+                        $('#poolClass').val("");
+                        var data = EasyUIUtils.toPropertygridRows([]);
+                        $('#ds-options-pg').propertygrid('loadData', data);
+                	}
                 }
             });
 
@@ -220,9 +245,6 @@ var DsMVC = {
             $('#btn-search').bind('click', DsMVC.Controller.find);
         },
         bindValidate: function () {
-        },
-        initData: function () {
-            DsMVC.Util.loadConfigItems();
         }
     },
     Controller: {
