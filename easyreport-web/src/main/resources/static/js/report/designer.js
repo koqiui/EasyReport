@@ -579,9 +579,9 @@ var DesignerMVC = {
                     width: 50,
                     formatter: function (value, row, index) {
                         var imgPath = DesignerCommon.baseIconUrl + 'remove.png';
-                        var tmpl = '<a href="#" title ="删除" ' +
+                        var tmpl = '<a href="#" title ="移除" ' +
                             'onclick="MetaDataDesigner.deleteQueryParam(\'${index}\')"><img src="${imgPath}" ' +
-                            'alt="删除"/"></a>';
+                            'alt="移除"/"></a>';
                         return juicer(tmpl, {
                             index: index,
                             imgPath: imgPath
@@ -1130,7 +1130,7 @@ var DesignerMVC = {
                 }
 
                 row.required = $("#report-query-param-required").prop("checked");
-                row.autoComplete = $("#report-query-param-required").prop("checked");
+                row.autoComplete = $("#report-query-param-autoComplete").prop("checked");
 
                 if (act == "add") {
                     $('#report-query-param-grid').datagrid('appendRow', row);
