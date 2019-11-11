@@ -10,19 +10,19 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.ValidationException;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.easytoolsoft.easyreport.common.pair.IdNamePair;
-import com.easytoolsoft.easyreport.engine.data.LayoutType;
 import com.easytoolsoft.easyreport.engine.data.ReportMetaDataColumn;
 import com.easytoolsoft.easyreport.engine.util.VelocityUtils;
 import com.easytoolsoft.easyreport.membership.domain.User;
@@ -40,6 +40,7 @@ import com.easytoolsoft.easyreport.support.annotation.OpLog;
 import com.easytoolsoft.easyreport.support.model.ResponseResult;
 import com.easytoolsoft.easyreport.web.controller.common.BaseController;
 import com.easytoolsoft.easyreport.web.model.DataGridPager;
+import com.easytoolsoft.easyreport.web.util.ReportUtils;
 
 /**
  * 报表设计器
@@ -97,6 +98,13 @@ public class DesignerController extends BaseController<ReportService, Report, Re
 		return list;
 	}
 
+	//by koqiui 2019-11-11 解析sql中的变量名
+	@PostMapping(value = "/parseSqlVarNames")
+	public ResponseResult parseVarNames(final @RequestBody String sqlText) {
+		List<String> varNames = ReportUtils.parseSqlVarNames(sqlText);
+		return ResponseResult.success(varNames);
+	}
+
 	@PostMapping(value = "/add")
 	@OpLog(name = "新增报表")
 	@RequiresPermissions("report.designer:add")
@@ -135,8 +143,12 @@ public class DesignerController extends BaseController<ReportService, Report, Re
 			if (dataRange == null) {
 				dataRange = 7;
 			}
-			sqlText = this.getSqlText(sqlText, dataRange, queryParams, request);
-			return ResponseResult.success(this.service.getMetaDataColumns(dsId, sqlText));
+			try {
+				sqlText = this.getSqlText(sqlText, dataRange, queryParams, request);
+				return ResponseResult.success(this.service.getMetaDataColumns(dsId, sqlText));
+			} catch (Exception ex) {
+				return ResponseResult.failure(ex.getMessage());
+			}
 		}
 		return ResponseResult.failure(10006, "没有选择数据源");
 	}
@@ -149,9 +161,13 @@ public class DesignerController extends BaseController<ReportService, Report, Re
 			if (dataRange == null) {
 				dataRange = 7;
 			}
-			sqlText = this.getSqlText(sqlText, dataRange, queryParams, request);
-			this.service.explainSqlText(dsId, sqlText);
-			return ResponseResult.success(sqlText);
+			try {
+				sqlText = this.getSqlText(sqlText, dataRange, queryParams, request);
+				this.service.explainSqlText(dsId, sqlText);
+				return ResponseResult.success(sqlText);
+			} catch (Exception ex) {
+				return ResponseResult.failure(ex.getMessage());
+			}
 		}
 		return ResponseResult.failure(10006, "没有选择数据源");
 	}
@@ -170,9 +186,14 @@ public class DesignerController extends BaseController<ReportService, Report, Re
 
 	private String getSqlText(final String sqlText, final Integer dataRange, final String queryParams, final HttpServletRequest request) {
 		final Map<String, Object> formParameters = this.tableReportService.getBuildInParameters(request.getParameterMap(), dataRange);
+		List<QueryParameterOptions> queryParameters = null;
 		if (StringUtils.isNotBlank(queryParams)) {
-			final List<QueryParameterOptions> queryParameters = JSON.parseArray(queryParams, QueryParameterOptions.class);
+			queryParameters = JSON.parseArray(queryParams, QueryParameterOptions.class);
 			queryParameters.stream().filter(parameter -> !formParameters.containsKey(parameter.getName())).forEach(parameter -> formParameters.put(parameter.getName(), parameter.getRealDefaultValue()));
+		}
+		List<String> lackSqlValueVarNames = ReportUtils.validateSqlParamValues(sqlText, queryParameters, formParameters);
+		if (lackSqlValueVarNames.size() > 0) {
+			throw new ValidationException("sql中如下参数的值缺少或无效：\r\n" + lackSqlValueVarNames.toString());
 		}
 		return VelocityUtils.parse(sqlText, formParameters);
 	}

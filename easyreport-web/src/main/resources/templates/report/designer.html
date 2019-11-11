@@ -99,29 +99,29 @@
                 <form id="report-basic-conf-form" name="report-basic-conf-form" method="post">
                     <table class="designer-table" style="width: 95%">
                         <tr>
-                            <td>名称:</td>
+                            <td>报表名称:</td>
                             <td><input class="easyui-textbox" type="text" id="report-name" name="name"
                                        data-options="required:true" style="width:200px"/>
                             </td>
-                            <td>数据源:</td>
+                            <td>数据源名:</td>
                             <td><select class="easyui-combobox" id="report-dsId" name="dsId"
                                         data-options="required:true,valueField:'id',textField:'name'"
                                         style="width:150px">
                             </select>
                             </td>
-                            <td>布局列:</td>
+                            <td>布局方式:</td>
                             <td><select class="easyui-combobox" id="report-layout" name="layout"
                                         data-options="required:true" style="width:100px">
                                 <option value="1">横向布局</option>
                                 <option value="2">纵向布局</option>
                             </select>
                             </td>
-                            <td>数值列位置:</td>
+                            <td>数值列在:</td>
                             <td colspan="3"><select class="easyui-combobox" id="report-statColumnLayout"
                                                     name="statColumnLayout"
                                         data-options="required:true" style="width:100px">
-                                <option value="1">数值列在上侧</option>
-                                <option value="2">数值列在左侧</option>
+                                <option value="1">上侧</option>
+                                <option value="2">左侧</option>
                             </select>
                             </td>
                         </tr>
@@ -130,7 +130,7 @@
                             <td><input class="easyui-textbox" type="text" id="report-dataRange" name="dataRange"
                                        value="7"
                                        data-options="required:true,validType:'digit'" style="width:200px"/></td>
-                            <td>状态:</td>
+                            <td>当前状态:</td>
                             <td><select class="easyui-combobox" id="report-status" name="status"
                                         data-options="required:true" style="width:150px">
                                 <option value="0">禁用</option>
@@ -168,6 +168,8 @@
                         </tr>
                         <tr>
                             <td colspan="8" style="text-align: center;">
+                            	<a id="btn-report-parse-sql-var-names" href="#" class="easyui-linkbutton"
+                                   >提取SQL中的参数变量</a>&nbsp;&nbsp;
                                 <a id="btn-report-exec-sql" href="#" class="easyui-linkbutton"
                                    iconCls="icon-ok">执行SQL</a>&nbsp;&nbsp;
                                 <a id="btn-report-preview-sql" href="#" class="easyui-linkbutton"
@@ -186,18 +188,18 @@
                 <form id="report-query-param-form" method="post">
                     <table class="designer-table">
                         <tr>
-                            <td>参数名:</td>
+                            <td>参数代码:</td>
                             <td><input class="easyui-textbox" type="text" id="report-query-param-name" name="name"
                                        data-options="required:true" style="width:150px"/></td>
-                            <td>标题:</td>
+                            <td>标签文字:</td>
                             <td><input class="easyui-textbox" type="text" id="report-query-param-text" name="text"
                                        data-options="required:true" style="width:150px"/></td>
-                            <td>默认值:</td>
+                            <td>  默认值:</td>
                             <td><input class="easyui-textbox" type="text" id="report-query-param-defaultValue"
                                        name="defaultValue" style="width:150px"/></td>
-                            <td>默认标题:</td>
-                            <td><input class="easyui-textbox" type="text" id="report-query-param-defaultText"
-                                       name="defaultText" style="width:150px"/></td>
+                            <td><label title="统计sql中用到的变量参数：必须(不想让用户手工改动的：隐藏)；\n 参数来源sql中用到的变量参数：隐藏 +非必须 （但要默认值）" for="report-query-param-required">是否必须:</label></td>
+                            <td><input title="统计sql中用到的变量参数：必须(不想让用户手工改动的：隐藏)；\n 参数来源sql中用到的变量参数：隐藏 +非必须 （但要默认值）" class="easyui-checkbox" type="checkbox" checked id="report-query-param-required" name="required"/></td>
+                            
                         </tr>
                         <tr>
                             <td>数据类型:</td>
@@ -209,35 +211,36 @@
                                 <option value="date">日期</option>
                             </select></td>
                             <td>数据长度:</td>
-                            <td><input class="easyui-textbox" type="text" id="report-query-param-width" name="width"
-                                       value="100" data-options="validType:'digit'" style="width:150px"/></td>
-                            <td>是否必选:</td>
-                            <td><input class="easyui-checkbox" type="checkbox" id="report-query-param-required" name="required"/></td>
-                            <td>是否隐藏:</td>
-                            <td><input class="easyui-checkbox" type="checkbox" id="report-query-param-hidden" name="hidden"/></td>
+                            <td><input class="easyui-textbox" type="text" id="report-query-param-width" name="width" value="100" data-options="validType:'digit'" style="width:150px"/></td>
+                            <td><label for="report-query-param-autoComplete">自动提示:</label></td>
+                            <td><input class="easyui-checkbox" type="checkbox" id="report-query-param-autoComplete" name="autoComplete"/></td>
+                            <td><label title="统计sql中用到的变量参数：必须(不想让用户手工改动的：隐藏)；\n 参数来源sql中用到的变量参数：隐藏 +非必须 （但要默认值）" for="report-query-param-hidden">是否隐藏:</label></td>
+                            <td><input title="统计sql中用到的变量参数：必须(不想让用户手工改动的：隐藏)；\n 参数来源sql中用到的变量参数：隐藏 +非必须 （但要默认值）" class="easyui-checkbox" type="checkbox" id="report-query-param-hidden" name="hidden"/></td>
                         </tr>
                         <tr>
                             <td>表单控件:</td>
                             <td><select class="easyui-combobox" id="report-query-param-formElement" name="formElement"
                                         data-options="required:true" style="width:150px">
+                                <option value="text" selected>文本</option>
+                                <option value="date">日期</option>
+                                <option value="checkbox">复选框</option>
                                 <option value="select">下拉单选</option>
                                 <option value="selectMul">下拉多选</option>
-                                <option value="checkbox">复选框</option>
-                                <option value="text">文本框</option>
-                                <option value="date">日期</option>
                             </select></td>
-                            <td>内容来源类型</td>
-                            <td colspan="3"><select class="easyui-combobox" id="report-query-param-dataSource"
+                            <td>数据来源:</td>
+                            <td><select title="需要来源内容支持" class="easyui-combobox" id="report-query-param-dataSource"
                                                     name="dataSource" data-options="required:true" style="width:150px">
+                                <option value="none">无</option>
+                                <option value="text">文本定义</option>
                                 <option value="sql">SQL语句</option>
-                                <option value="text">文本字符串</option>
-                                <option value="none">无内容</option>
                             </select></td>
-                            <td>是否自动提示:</td>
-                            <td><input class="easyui-checkbox" type="checkbox" id="report-query-param-autoComplete" name="autoComplete"/></td>
+                            <td >默认文本:</td>
+                            <td  colspan="3"><input class="easyui-textbox" type="text" id="report-query-param-defaultText"
+                                       name="defaultText" style="width:150px"/></td>
+                            
                         </tr>
                         <tr>
-                            <td>内容:</td>
+                            <td>来源内容:</td>
                             <td colspan="7">
                             <textarea id="report-query-param-content" name="content" style="width: 95%; height: 100px;"
                                       placeholder="(select col1 as name,col2 as text from table ...) or (name1,text1|name2,text2|...) or (name1|name2|...)"></textarea>
@@ -255,7 +258,7 @@
                 </form>
             </div>
             <div id="report-query-param-div" style="height:180px;">
-                <div id="report-query-param-grid" title="查询参数列表"></div>
+                <div id="report-query-param-grid" title="参数列表"></div>
             </div>
         </div>
     </div>

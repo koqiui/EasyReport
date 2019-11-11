@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.alibaba.fastjson.JSONObject;
+import com.easytoolsoft.easyreport.common.util.StrUtils;
 import com.easytoolsoft.easyreport.engine.data.ReportDataSource;
 import com.easytoolsoft.easyreport.engine.data.ReportMetaDataColumn;
 import com.easytoolsoft.easyreport.engine.data.ReportMetaDataSet;
@@ -26,6 +27,7 @@ import com.easytoolsoft.easyreport.engine.query.Queryer;
 import com.easytoolsoft.easyreport.engine.query.QueryerFactory;
 import com.easytoolsoft.easyreport.engine.util.DateUtils;
 import com.easytoolsoft.easyreport.meta.domain.Report;
+import com.easytoolsoft.easyreport.meta.domain.options.QueryParameterOptions;
 import com.easytoolsoft.easyreport.meta.domain.options.ReportOptions;
 import com.easytoolsoft.easyreport.meta.form.QueryParamFormView;
 import com.easytoolsoft.easyreport.meta.form.control.HtmlFormElement;
@@ -47,6 +49,72 @@ public class ReportUtils {
 		ReportUtils.tableReportService = tableReportService;
 	}
 
+	public static List<String> parseSqlVarNames(String sqlText) {
+		return StrUtils.extractVarNames(sqlText);
+	}
+
+	/**
+	 * 验证sql语句中的变量是否都提供了值
+	 * 
+	 * @author koqiui
+	 * @date 2019年11月11日 下午3:46:33
+	 * 
+	 * @param sqlText
+	 * @param qryParams
+	 * @param qryValueMap
+	 * @return 缺值的变量名称
+	 */
+	public static List<String> validateSqlParamValues(String sqlText, List<QueryParameterOptions> qryParams, Map<String, Object> qryValueMap) {
+		List<String> lckParamNames = new ArrayList<>();
+		//
+		List<String> sqlVarNames = parseSqlVarNames(sqlText);
+		boolean hasSqlVars = sqlVarNames != null && !sqlVarNames.isEmpty();
+		if (hasSqlVars) {
+			// name => object
+			Map<String, QueryParameterOptions> qryParamMap = new HashMap<>();
+			if (qryParams != null) {
+				for (QueryParameterOptions qryParam : qryParams) {
+					qryParamMap.put(qryParam.getName(), qryParam);
+				}
+			}
+			//
+			QueryParameterOptions qryParm = null;
+			String dataType = null; // (string|float|integer|date)
+			String varText = null;
+			String strVal = null;
+			for (String sqlVarName : sqlVarNames) {
+				qryParm = qryParamMap.get(sqlVarName);
+				varText = qryParm == null || StringUtils.isBlank(qryParm.getText()) ? sqlVarName : qryParm.getText();
+				Object objValue = qryValueMap.get(sqlVarName);
+				if (objValue == null) {
+					lckParamNames.add(varText);
+					continue;
+				}
+				dataType = qryParm == null ? "string" : qryParm.getDataType();
+				strVal = String.valueOf(objValue);
+				if (!"string".equals(dataType) && StringUtils.isBlank(strVal)) {
+					lckParamNames.add(varText);
+					continue;
+				}
+				if ("integer".equals(dataType)) {
+					try {
+						Long.valueOf(strVal);
+					} catch (NumberFormatException nfe) {
+						lckParamNames.add(varText);
+					}
+				} else if ("float".equals(dataType)) {
+					try {
+						Double.valueOf(strVal);
+					} catch (NumberFormatException nfe) {
+						lckParamNames.add(varText);
+					}
+				}
+			}
+		}
+		//
+		return lckParamNames;
+	}
+
 	public static Report getReportMetaDataByUid(final String uid) {
 		return reportService.getByUid(uid);
 	}
@@ -57,6 +125,7 @@ public class ReportUtils {
 
 	public static JSONObject getDefaultChartData() {
 		return new JSONObject(6) {
+			private static final long serialVersionUID = 1L;
 			{
 				put("dimColumnMap", null);
 				put("dimColumns", null);
