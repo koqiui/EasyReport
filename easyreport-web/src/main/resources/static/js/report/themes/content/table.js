@@ -3,7 +3,7 @@ var TableReport = {
         TableReportMVC.View.initControl();
         TableReportMVC.View.bindEvent();
         TableReportMVC.View.bindValidate();
-        TableReportMVC.View.initData();
+        //TableReportMVC.View.initData();//禁用立刻查询 by koqiui
     }
 };
 

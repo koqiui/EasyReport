@@ -5,11 +5,11 @@
                 <td id="table-report-title" colspan="2" style="font-size: 24px;" th:text="${name}"></td>
             </tr>
             <tr>
-                <td style="text-align: left;"><span th:utext="${formHtmlText}"></span>
-                    <input id="table-report-isMergeRow" type="checkbox" name="isMergeRow" checked="checked"/>合并左边相同维度行
-                    <a id="btn-generate" href="#" class="easyui-linkbutton" data-options="iconCls:'icon-ok'">生成</a>
+                <td style="text-align: left;padding-right:4px;"><span th:utext="${formHtmlText}"></span>
+                    <label style="float:right;clear:right;margin-top:4px;"><input id="table-report-isMergeRow" type="checkbox" name="isMergeRow" checked="checked"/>合并左边相同维度行</label>
                 </td>
-                <td style="text-align: right;">
+                <td style="text-align: right;width:140px;">
+                	<a id="btn-generate" href="#" style="float:left" class="easyui-linkbutton" data-options="iconCls:'icon-ok'">生成</a>
                     <img id="btn-export-excel" title="导出到Excel" style="cursor: pointer;padding-right: 5px;"
                          src="../../static/custom/easyui/themes/icons/excel_24.png"
                          th:src="@{/custom/easyui/themes/icons/excel_24.png}"/>
@@ -24,5 +24,4 @@
         </table>
     </form>
 </div>
-<div xmlns:th="http://www.thymeleaf.org" style="margin: 5px;" id="table-report-htmltext-div"t
-     th:text="${htmlTable}"></div>
+<div xmlns:th="http://www.thymeleaf.org" style="margin: 5px;" id="table-report-htmltext-div" th:text="${htmlTable}"></div>

@@ -82,6 +82,7 @@ public class ReportUtils {
 			String dataType = null; // (string|float|integer|date)
 			String varText = null;
 			String strVal = null;
+			boolean isMulSelect = false;
 			for (String sqlVarName : sqlVarNames) {
 				qryParm = qryParamMap.get(sqlVarName);
 				varText = qryParm == null || StringUtils.isBlank(qryParm.getText()) ? sqlVarName : qryParm.getText();
@@ -96,17 +97,42 @@ public class ReportUtils {
 					lckParamNames.add(varText);
 					continue;
 				}
-				if ("integer".equals(dataType)) {
-					try {
-						Long.valueOf(strVal);
-					} catch (NumberFormatException nfe) {
-						lckParamNames.add(varText);
+				//
+				isMulSelect = "selectMul".equalsIgnoreCase(qryParm.getFormElement());
+				if (isMulSelect) {
+					String[] values = strVal.split(",", -1);
+					String value = null;
+					for (int i = 0; i < values.length; i++) {
+						value = values[i].trim();// trim 增强容错性
+						if ("integer".equals(dataType)) {
+							try {
+								Long.valueOf(value);
+							} catch (NumberFormatException nfe) {
+								lckParamNames.add(varText);
+								break;
+							}
+						} else if ("float".equals(dataType)) {
+							try {
+								Double.valueOf(value);
+							} catch (NumberFormatException nfe) {
+								lckParamNames.add(varText);
+								break;
+							}
+						}
 					}
-				} else if ("float".equals(dataType)) {
-					try {
-						Double.valueOf(strVal);
-					} catch (NumberFormatException nfe) {
-						lckParamNames.add(varText);
+				} else {
+					if ("integer".equals(dataType)) {
+						try {
+							Long.valueOf(strVal);
+						} catch (NumberFormatException nfe) {
+							lckParamNames.add(varText);
+						}
+					} else if ("float".equals(dataType)) {
+						try {
+							Double.valueOf(strVal);
+						} catch (NumberFormatException nfe) {
+							lckParamNames.add(varText);
+						}
 					}
 				}
 			}

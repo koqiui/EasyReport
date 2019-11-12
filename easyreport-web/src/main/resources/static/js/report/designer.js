@@ -231,7 +231,7 @@ var DesignerMVC = {
                 }, {
                     field: 'createUser',
                     title: '创建者',
-                    width: 100,
+                    width: 50,
                     sortable: true
                 }, {
                     field: 'comment',
@@ -241,17 +241,17 @@ var DesignerMVC = {
                 }, {
                     field: 'gmtCreated',
                     title: '创建时间',
-                    width: 80,
+                    width: 90,
                     sortable: true
                 }, {
                     field: 'gmtModified',
                     title: '修改时间',
-                    width: 80,
+                    width: 90,
                     sortable: true
                 }, {
                     field: 'options',
                     title: '操作',
-                    width: 100,
+                    width: 110,
                     formatter: function (value, row, index) {
                         var icons = [{
                             "name": "info",
@@ -274,7 +274,8 @@ var DesignerMVC = {
                         }];
                         var buttons = [];
                         for (var i = 0; i < icons.length; i++) {
-                            var tmpl = '<a href="#" style="padding-left:4px;" title ="${title}" ' +
+                        	var padding = i==0 ? '' : ' style="padding-left:4px;" ';
+                            var tmpl = '<a href="#" title ="${title}"' + padding +
                                 'onclick="DesignerMVC.Controller.doOption(\'${index}\',\'${name}\')">' +
                                 '<img src="${imgSrc}" alt="${title}"/"></a>';
                             var data = {

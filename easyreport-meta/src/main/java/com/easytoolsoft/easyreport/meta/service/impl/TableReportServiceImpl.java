@@ -102,8 +102,6 @@ public class TableReportServiceImpl implements TableReportService {
 		final String sqlText = new ReportSqlTemplate(report.getSqlText(), formParams).execute();
 		final Set<String> enabledStatColumn = this.getEnabledStatColumns(formParams);
 		final ReportOptions options = this.reportService.parseOptions(report.getOptions());
-		// report layout: need not to be configured by user
-		// options.setLayout(LayoutType.HORIZONTAL.getValue());
 		final List<ReportMetaDataColumn> metaColumns = this.reportService.parseMetaColumns(report.getMetaColumns());
 		return new ReportParameter(report.getId().toString(), report.getName(), options.getLayout(), options.getStatColumnLayout(), metaColumns, enabledStatColumn, Boolean.valueOf(formParams.get("isRowSpan").toString()), sqlText);
 	}
@@ -202,6 +200,7 @@ public class TableReportServiceImpl implements TableReportService {
 		}
 	}
 
+	// 支持in（列表）
 	private String getQueryParamValue(final String dataType, final String[] values) {
 		if (values.length == 1) {
 			return values[0];
@@ -336,19 +335,51 @@ public class TableReportServiceImpl implements TableReportService {
 		for (QueryParameterOptions metaParam : metaParams) {
 			// 【隐藏+非必须】
 			if (BooleanUtils.isTrue(metaParam.isHidden() && BooleanUtils.isFalse(metaParam.isRequired()))) {
-				String strValue = metaParam.getDefaultValue();
-				Object objVallue = strValue;
-				String theType = metaParam.getDataType();
-				if (theType != null && !theType.equalsIgnoreCase("string")) {// integer, float, date
-					if (StringUtils.isBlank(strValue)) {
-						objVallue = null;
-					} else if ("integer".equalsIgnoreCase(theType)) {
-						objVallue = NumUtils.parseLong(strValue);
-					} else if ("float".equalsIgnoreCase(theType)) {
-						objVallue = NumUtils.parseDouble(strValue);
-					}
+				String strValue = metaParam.hasDefaultValue() ? metaParam.getDefaultValue() : null;
+				if (strValue == null) {
+					continue;
 				}
-				mergedParamMap.put(metaParam.getName(), objVallue);
+				String theType = metaParam.getDataType();
+				if (theType == null) {
+					theType = "string";
+				}
+				boolean isMulSelect = "selectMul".equalsIgnoreCase(metaParam.getFormElement());
+				if (isMulSelect) {// 多选可能是列表
+					String[] values = strValue.split(",", -1);
+					boolean isInvalidVal = false;
+					String value = null;
+					Object objValue = null;
+					for (int i = 0; i < values.length; i++) {
+						value = values[i].trim();// trim,增强容错性
+						objValue = value;
+						if (!theType.equalsIgnoreCase("string")) {// integer, float, date
+							if (StringUtils.isBlank(value)) {
+								objValue = null;
+							} else if ("integer".equalsIgnoreCase(theType)) {
+								objValue = NumUtils.parseLong(value);
+							} else if ("float".equalsIgnoreCase(theType)) {
+								objValue = NumUtils.parseDouble(value);
+							}
+						}
+						if (objValue == null) {
+							isInvalidVal = true;
+							break;
+						}
+					}
+					mergedParamMap.put(metaParam.getName(), isInvalidVal ? null : strValue);
+				} else {
+					Object objValue = strValue;
+					if (!theType.equalsIgnoreCase("string")) {// integer, float, date
+						if (StringUtils.isBlank(strValue)) {
+							objValue = null;
+						} else if ("integer".equalsIgnoreCase(theType)) {
+							objValue = NumUtils.parseLong(strValue);
+						} else if ("float".equalsIgnoreCase(theType)) {
+							objValue = NumUtils.parseDouble(strValue);
+						}
+					}
+					mergedParamMap.put(metaParam.getName(), objValue);
+				}
 			}
 		}
 		return mergedParamMap;
@@ -383,23 +414,60 @@ public class TableReportServiceImpl implements TableReportService {
 		return formElements;
 	}
 
+	// 加强对多选列表的支持
 	private HtmlComboBox getComboBoxFormElements(final QueryParameterOptions queryParam, final int dsId, final Map<String, Object> mergedParamMap) {
 		final List<ReportQueryParamItem> options = this.getOptions(queryParam, dsId, mergedParamMap);
 		final List<HtmlSelectOption> htmlSelectOptions = new ArrayList<>(options.size());
-
-		if (queryParam.hasDefaultValue()) {
-			htmlSelectOptions.add(new HtmlSelectOption(queryParam.getDefaultText(), queryParam.getDefaultValue(), true));
-		}
-		for (int i = 0; i < options.size(); i++) {
-			final ReportQueryParamItem option = options.get(i);
-			if (!option.getName().equals(queryParam.getDefaultValue())) {
-				htmlSelectOptions.add(new HtmlSelectOption(option.getText(), option.getName(), (!queryParam.hasDefaultValue() && i == 0)));
+		String defaultValue = queryParam.hasDefaultValue() ? queryParam.getDefaultValue() : null;
+		List<String> defaultValues = null;
+		boolean isMulSelect = "selectMul".equalsIgnoreCase(queryParam.getFormElement());
+		boolean isRequired = queryParam.isRequired();
+		boolean isHidden = queryParam.isHidden();
+		boolean hasSelected = false;
+		if (isMulSelect) {
+			if (defaultValue == null) {
+				defaultValues = new ArrayList<>(0);
+			} else {
+				String[] tmpValues = defaultValue.split(",", -1);
+				defaultValues = new ArrayList<>(tmpValues.length);
+				for (int i = 0; i < tmpValues.length; i++) {
+					defaultValues.add(tmpValues[i].trim());// trim 增强容错性
+				}
+			}
+			//
+			for (int i = 0; i < options.size(); i++) {
+				final ReportQueryParamItem option = options.get(i);
+				String optionName = option.getName();
+				boolean selected = !defaultValues.isEmpty() && defaultValues.contains(optionName);
+				hasSelected = hasSelected || selected;
+				htmlSelectOptions.add(new HtmlSelectOption(option.getText(), optionName, selected));
+			}
+		} else {
+			for (int i = 0; i < options.size(); i++) {
+				final ReportQueryParamItem option = options.get(i);
+				String optionName = option.getName();
+				boolean selected = false;
+				if (defaultValue != null && !hasSelected) {// 单选
+					selected = defaultValue.equals(optionName);
+					hasSelected = hasSelected || selected;
+				}
+				htmlSelectOptions.add(new HtmlSelectOption(option.getText(), optionName, selected));
 			}
 		}
-
+		if (isRequired && !hasSelected && htmlSelectOptions.size() > 0) {
+			// 必须的参数默认选中第一项
+			htmlSelectOptions.get(0).setSelected(true);
+		}
 		final HtmlComboBox htmlComboBox = new HtmlComboBox(queryParam.getName(), queryParam.getText(), htmlSelectOptions);
-		htmlComboBox.setMultipled("selectMul".equals(queryParam.getFormElement()));
+		htmlComboBox.setMultipled(isMulSelect);
 		htmlComboBox.setAutoComplete(queryParam.isAutoComplete());
+		if (isHidden && !isRequired) {// 提示隐藏参数
+			if (isMulSelect) {
+				htmlComboBox.setHintText(defaultValues == null ? "" : defaultValues.toString());
+			} else {
+				htmlComboBox.setHintText(defaultValue == null ? "" : defaultValue);
+			}
+		}
 		return htmlComboBox;
 	}
 

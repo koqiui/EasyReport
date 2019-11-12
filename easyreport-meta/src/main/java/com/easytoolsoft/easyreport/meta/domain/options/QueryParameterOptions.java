@@ -12,6 +12,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  */
 public class QueryParameterOptions implements Serializable {
 	private static final long serialVersionUID = 7975880105664108114L;
+	//
+	private static final String NO_DEFAULT_VALUE_FLAG = "noDefaultValue";
+	//
 	private String name;
 	private String text;
 	private String formElement;
@@ -112,7 +115,7 @@ public class QueryParameterOptions implements Serializable {
 	 * @return 报表查询参数对应的默认值
 	 */
 	public String getDefaultValue() {
-		return (this.defaultValue == null || this.defaultValue.trim().length() == 0) ? "noDefaultValue" : this.defaultValue.trim();
+		return (this.defaultValue == null || this.defaultValue.trim().length() == 0) ? NO_DEFAULT_VALUE_FLAG : this.defaultValue.trim();
 	}
 
 	/**
@@ -301,7 +304,7 @@ public class QueryParameterOptions implements Serializable {
 	 */
 	@JsonIgnore
 	public boolean hasDefaultValue() {
-		return !"noDefaultValue".equals(this.getDefaultValue());
+		return !NO_DEFAULT_VALUE_FLAG.equals(this.getDefaultValue());
 	}
 
 	/**

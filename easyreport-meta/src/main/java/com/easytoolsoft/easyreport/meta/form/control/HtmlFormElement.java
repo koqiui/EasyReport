@@ -16,6 +16,7 @@ public abstract class HtmlFormElement {
 	protected Boolean isHidden = false;
 	private String defaultText;
 	private String defaultValue;
+	private String hintText;//提示信息
 
 	protected HtmlFormElement(final String name, final String text) {
 		this.name = name;
@@ -200,5 +201,13 @@ public abstract class HtmlFormElement {
 	 */
 	public void setDefaultText(final String defaultText) {
 		this.defaultText = defaultText;
+	}
+
+	public String getHintText() {
+		return hintText;
+	}
+
+	public void setHintText(String hintText) {
+		this.hintText = hintText;
 	}
 }
