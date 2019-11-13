@@ -66,6 +66,21 @@ public class StrUtils {
 		return checkStr.startsWith("'") && checkStr.endsWith("'");
 	}
 
+	public static final String EmptyStr = "";
+
+	public static final String replaceAll(String srcStr, String toBeReplaced, Object replacement) {
+		if (srcStr == null || srcStr.length() == 0) {
+			return srcStr;
+		}
+		//
+		String replaceStr = replacement == null ? EmptyStr : String.valueOf(replacement);
+		//
+		CharSequence toBeReplacedX = toBeReplaced.subSequence(0, toBeReplaced.length());
+		CharSequence replacementX = replaceStr.substring(0, replaceStr.length());
+		//
+		return srcStr.replace(toBeReplacedX, replacementX);
+	}
+
 	/**
 	 * 处理字符串中 \, \n , \r, '转义
 	 * 
@@ -79,8 +94,11 @@ public class StrUtils {
 		if (srcStr == null) {
 			return null;
 		}
-		String retStr = srcStr.replaceAll("\\", "\\\\").replaceAll("\n", "\\n").replaceAll("\r", "\\r");
-		return retStr.replaceAll("'", "\\'");
+		String retStr = replaceAll(srcStr, "\\", "\\\\");
+		retStr = replaceAll(retStr, "\n", "\\n");
+		retStr = replaceAll(retStr, "\r", "\\r");
+		retStr = replaceAll(retStr, "'", "\\'");
+		return retStr;
 	}
 
 }

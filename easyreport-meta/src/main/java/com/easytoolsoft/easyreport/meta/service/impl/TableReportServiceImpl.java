@@ -403,7 +403,7 @@ public class TableReportServiceImpl implements TableReportService {
 			queryParam.setDefaultText(VelocityUtils.parse(queryParam.getDefaultText(), buildinParams));
 			queryParam.setDefaultValue(VelocityUtils.parse(queryParam.getDefaultValue(), buildinParams));
 			queryParam.setContent(VelocityUtils.parse(queryParam.getContent(), buildinParams));
-			final String formElement = queryParam.getFormElement().toLowerCase();
+			final String formElement = queryParam.getFormElement();
 			if ("select".equals(formElement) || "selectMul".equals(formElement)) {
 				Map<String, Object> mergedParamMap = this.getMergedParamValueMap(report, buildinParams);
 				//

@@ -98,7 +98,7 @@ public class ReportUtils {
 					continue;
 				}
 				//
-				isMulSelect = "selectMul".equalsIgnoreCase(qryParm.getFormElement());
+				isMulSelect = "selectMul".equals(qryParm.getFormElement());
 				if (isMulSelect) {
 					String[] values = strVal.split(",", -1);
 					String value = null;
