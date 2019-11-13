@@ -251,14 +251,22 @@ var EasyUIUtils = {
             $grid.datagrid('selectRow', moveIndex);
         }
     },
-    fillCombox: function (id, act, list, defaultValue) {
+    fillCombox: function (id, list, defaultValue, valPropName) {
         $(id).combobox('clear');
+        if(valPropName == null){//值对应的属性名称
+        	valPropName = 'value';
+        }
+        var defaultIndex = -1;//标记默认值的索引
         for (var i = 0; i < list.length; i++) {
             var item = list[i];
             item["selected"] = (i == 0);
+            //
+            if(defaultIndex == -1 && item[valPropName] == defaultValue){
+            	defaultIndex = i;
+            }
         }
         $(id).combobox('loadData', list);
-        if (act == "edit") {
+        if (defaultIndex != -1) {
             $(id).combobox('setValue', defaultValue);
         }
     },

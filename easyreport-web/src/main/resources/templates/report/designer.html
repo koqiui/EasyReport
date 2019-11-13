@@ -107,9 +107,10 @@
                             <td><select class="easyui-combobox" id="report-dsId" name="dsId"
                                         data-options="required:true,valueField:'id',textField:'name'"
                                         style="width:150px">
-                            </select>
+                            </select><a id="btn-refresh-report-ds-list" style="height:23px;" href="#" class="easyui-linkbutton icon-reload"
+                                    title="刷新加载数据源列表">&nbsp;&nbsp;</a>
                             </td>
-                            <td>布局方式:</td>
+                            <td>布局形式:</td>
                             <td><select class="easyui-combobox" id="report-layout" name="layout"
                                         data-options="required:true" style="width:100px">
                                 <option value="1">横向布局</option>
@@ -267,11 +268,11 @@
 <div id="report-detail-dlg" title="详细信息">
     <table class="designer-table detail">
         <tr>
-            <td>名称:</td>
+            <td>报表名称:</td>
             <td><label id="report-detail-name"/></td>
-            <td>ID:</td>
+            <td>报表ID:</td>
             <td><label id="report-detail-id"/></td>
-            <td>UID:</td>
+            <td>报表UID:</td>
             <td><label id="report-detail-uid"/></td>
         </tr>
         <tr>
@@ -279,13 +280,13 @@
             <td><label id="report-detail-categoryId"/></td>
             <td>分类名称:</td>
             <td><label id="report-detail-categoryName"/></td>
-            <td>状态:</td>
+            <td>当前状态:</td>
             <td><label id="report-detail-status"/></td>
         </tr>
         <tr>
             <td>数据源ID:</td>
             <td><label id="report-detail-dsId"/></td>
-            <td>数据源名称:</td>
+            <td>数据源名:</td>
             <td><label id="report-detail-dsName"/></td>
             <td>显示顺序:</td>
             <td><label id="report-detail-sequence"/></td>
@@ -293,7 +294,7 @@
         <tr>
             <td>布局形式:</td>
             <td><label id="report-detail-layout"/></td>
-            <td>统计列布局形式:</td>
+            <td>统计列布局:</td>
             <td><label id="report-detail-statColumnLayout"/></td>
             <td>显示几天数据:</td>
             <td><label id="report-detail-dataRange"/></td>
@@ -319,7 +320,13 @@
             <td colspan="5" class="code"><label id="report-detail-queryParams"/></td>
         </tr>
         <tr>
-            <td>说明:</td>
+            <td>自定义代码:</td>
+            <td colspan="5">
+                <label id="report-detail-ucode"/>
+            </td>
+        </tr>
+        <tr>
+            <td>备注说明:</td>
             <td colspan="5">
                 <label id="report-detail-comment"/>
             </td>

@@ -264,8 +264,8 @@ var DsMVC = {
             var options = DsMVC.Util.getOptions();
             options.title = '新增数据源';
             EasyUIUtils.openAddDlg(options);
-            DsMVC.Util.fillCombox("#dbType", "add", DsMVC.Model.dbTypes, "driverClass", "");
-            DsMVC.Util.fillCombox("#dbPoolType", "add", DsMVC.Model.dbPoolTypes, "poolClass", "");
+            DsMVC.Util.fillCombox("#dbType", DsMVC.Model.dbTypes, "driverClass", null);
+            DsMVC.Util.fillCombox("#dbPoolType", DsMVC.Model.dbPoolTypes, "poolClass", null);
         },
         edit: function () {
             var row = $('#ds-datagrid').datagrid('getSelected');
@@ -275,8 +275,8 @@ var DsMVC = {
                 options.data = row;
                 options.title = '修改[' + options.data.name + ']数据源';
                 EasyUIUtils.openEditDlg(options);
-                DsMVC.Util.fillCombox("#dbType", "edit", DsMVC.Model.dbTypes, "driverClass", row.driverClass);
-                DsMVC.Util.fillCombox("#dbPoolType", "edit", DsMVC.Model.dbPoolTypes, "poolClass", row.poolClass);
+                DsMVC.Util.fillCombox("#dbType", DsMVC.Model.dbTypes, "driverClass", row.driverClass);
+                DsMVC.Util.fillCombox("#dbPoolType", DsMVC.Model.dbPoolTypes, "poolClass", row.poolClass);
                 $('#jdbcUrl').textbox('setValue', row.jdbcUrl);
                 $('#options').val(row.options || "{}");
                 EasyReport.utils.debug(row.options);
@@ -376,23 +376,27 @@ var DsMVC = {
                 gridId: null,
             };
         },
-        fillCombox: function (id, act, map, fieldName, value) {
+        fillCombox: function (id, map, valPropName, value) {
             $(id).combobox('clear');
-            var data = [];
+            var listData = [];
             var i = 0;
+            var idxKey = null;
             for (var key in map) {
                 var item = map[key];
-                data.push({
+                listData.push({
                     "value": item.key,
                     "name": item.name,
                     "selected": i == 0
                 });
+                if(idxKey == null && item.value[valPropName] == value){
+                	idxKey = item.key;
+                }
+                //
                 i++;
             }
-            $(id).combobox('loadData', data);
-            if (act == "edit") {
-                var key = DsMVC.Util.findKey(map, fieldName, value);
-                $(id).combobox('setValues', key);
+            $(id).combobox('loadData', listData);
+            if (idxKey != null) {
+                $(id).combobox('setValue', idxKey);
             }
         },
         loadConfigItems: function () {
@@ -411,14 +415,6 @@ var DsMVC = {
                 srcMap[item.key] = item;
             }
             return srcMap;
-        },
-        findKey: function (map, fieldName, value) {
-            for (var key in map) {
-                if (value === map[key].value[fieldName]) {
-                    return key;
-                }
-            }
-            return "";
         }
     }
 };

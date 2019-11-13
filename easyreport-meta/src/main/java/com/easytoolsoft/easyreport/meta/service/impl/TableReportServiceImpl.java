@@ -200,13 +200,17 @@ public class TableReportServiceImpl implements TableReportService {
 		}
 	}
 
-	// 支持in（列表）
+	// 支持in（列表，和字符串转义）
 	private String getQueryParamValue(final String dataType, final String[] values) {
 		if (values.length == 1) {
 			return values[0];
 		}
 		if ("float".equals(dataType) || "integer".equals(dataType)) {
 			return StringUtils.join(values, ",");
+		}
+		// 处理\, \n , \r, '转义问题
+		for (int i = 0; i < values.length; i++) {
+			values[i] = StrUtils.toSqlStrValue(values[i]);
 		}
 		return StringUtils.join(values, "','");
 	}

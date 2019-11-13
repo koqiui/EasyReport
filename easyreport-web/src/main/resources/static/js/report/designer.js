@@ -901,6 +901,8 @@ var DesignerMVC = {
             $('#btn-report-query-param-edit').bind('click', function (e) {
                 DesignerMVC.Controller.addOrEditQueryParam('edit');
             });
+            //
+            $('#btn-refresh-report-ds-list').bind('click', DesignerMVC.Util.reloadDataSourceList);
         },
         bindValidate: function () {
         },
@@ -1543,16 +1545,24 @@ var DesignerMVC = {
         getQueryParams: function () {
             var rows = $("#report-query-param-grid").datagrid('getRows');
             return rows ? JSON.stringify(rows) : "";
+        },
+        //刷新/重新加载数据源列表
+        reloadDataSourceList : function(){
+        	var dsId = $('#report-dsId').combobox('getValue');
+        	DesignerMVC.Data.loadDataSourceList(dsId);
         }
     },
     Data: {
-        loadDataSourceList: function () {
+        loadDataSourceList: function (dsId) {
             $.getJSON(DesignerMVC.URLs.DataSource.listAll.url, function (result) {
                 if (result.code) {
-                    console.info(result.msg);
+                    console.error(result.msg);
                 }
-                DesignerMVC.Model.DataSourceList = result.data;
-                EasyUIUtils.fillCombox("#report-dsId", "add", result.data, "");
+                DesignerMVC.Model.DataSourceList = result.data || [];
+                if(typeof dsId == 'undefined'){
+                	dsId = null;
+                }
+                EasyUIUtils.fillCombox("#report-dsId", result.data, dsId, "id");
             });
         }
     }

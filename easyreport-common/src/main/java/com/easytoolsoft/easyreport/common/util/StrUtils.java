@@ -51,4 +51,36 @@ public class StrUtils {
 		return result;
 	}
 
+	/**
+	 * 判断给定的字符串是否已经被单引号 ' 引住了
+	 * 
+	 * @author koqiui
+	 * @date 2019年11月13日 下午7:17:03
+	 * 
+	 * @return
+	 */
+	public static boolean isSingleQuoted(String checkStr) {
+		if (checkStr == null) {
+			return false;
+		}
+		return checkStr.startsWith("'") && checkStr.endsWith("'");
+	}
+
+	/**
+	 * 处理字符串中 \, \n , \r, '转义
+	 * 
+	 * @author koqiui
+	 * @date 2019年11月13日 下午7:45:47
+	 * 
+	 * @param srcStr
+	 * @return
+	 */
+	public static String toSqlStrValue(String srcStr) {
+		if (srcStr == null) {
+			return null;
+		}
+		String retStr = srcStr.replaceAll("\\", "\\\\").replaceAll("\n", "\\n").replaceAll("\r", "\\r");
+		return retStr.replaceAll("'", "\\'");
+	}
+
 }
