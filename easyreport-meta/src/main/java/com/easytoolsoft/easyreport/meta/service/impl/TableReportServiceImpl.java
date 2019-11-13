@@ -203,16 +203,21 @@ public class TableReportServiceImpl implements TableReportService {
 	// 支持in（列表，和字符串转义）
 	private String getQueryParamValue(final String dataType, final String[] values) {
 		if (values.length == 1) {
-			return values[0];
+			if ("integer".equals(dataType) || "float".equals(dataType)) {
+				return values[0];
+			}
+			return StrUtils.toSqlStrValue(values[0]);
 		}
-		if ("float".equals(dataType) || "integer".equals(dataType)) {
+		// 多个参数值
+		if ("integer".equals(dataType) || "float".equals(dataType)) {
 			return StringUtils.join(values, ",");
 		}
 		// 处理\, \n , \r, '转义问题
+		List<String> valuesTmp = new ArrayList<>();
 		for (int i = 0; i < values.length; i++) {
-			values[i] = StrUtils.toSqlStrValue(values[i]);
+			valuesTmp.add(StrUtils.toSqlStrValue(values[i]));
 		}
-		return StringUtils.join(values, "','");
+		return StringUtils.join(valuesTmp, "','");
 	}
 
 	@Override
@@ -347,7 +352,7 @@ public class TableReportServiceImpl implements TableReportService {
 				if (theType == null) {
 					theType = "string";
 				}
-				boolean isMulSelect = "selectMul".equalsIgnoreCase(metaParam.getFormElement());
+				boolean isMulSelect = "selectMul".equals(metaParam.getFormElement());
 				if (isMulSelect) {// 多选可能是列表
 					String[] values = strValue.split(",", -1);
 					boolean isInvalidVal = false;
@@ -356,12 +361,12 @@ public class TableReportServiceImpl implements TableReportService {
 					for (int i = 0; i < values.length; i++) {
 						value = values[i].trim();// trim,增强容错性
 						objValue = value;
-						if (!theType.equalsIgnoreCase("string")) {// integer, float, date
+						if (!"string".equals(theType)) {// integer, float, date
 							if (StringUtils.isBlank(value)) {
 								objValue = null;
-							} else if ("integer".equalsIgnoreCase(theType)) {
+							} else if ("integer".equals(theType)) {
 								objValue = NumUtils.parseLong(value);
-							} else if ("float".equalsIgnoreCase(theType)) {
+							} else if ("float".equals(theType)) {
 								objValue = NumUtils.parseDouble(value);
 							}
 						}
@@ -373,12 +378,12 @@ public class TableReportServiceImpl implements TableReportService {
 					mergedParamMap.put(metaParam.getName(), isInvalidVal ? null : strValue);
 				} else {
 					Object objValue = strValue;
-					if (!theType.equalsIgnoreCase("string")) {// integer, float, date
+					if (!"string".equals(theType)) {// integer, float, date
 						if (StringUtils.isBlank(strValue)) {
 							objValue = null;
-						} else if ("integer".equalsIgnoreCase(theType)) {
+						} else if ("integer".equals(theType)) {
 							objValue = NumUtils.parseLong(strValue);
-						} else if ("float".equalsIgnoreCase(theType)) {
+						} else if ("float".equals(theType)) {
 							objValue = NumUtils.parseDouble(strValue);
 						}
 					}
@@ -399,7 +404,7 @@ public class TableReportServiceImpl implements TableReportService {
 			queryParam.setDefaultValue(VelocityUtils.parse(queryParam.getDefaultValue(), buildinParams));
 			queryParam.setContent(VelocityUtils.parse(queryParam.getContent(), buildinParams));
 			final String formElement = queryParam.getFormElement().toLowerCase();
-			if ("select".equals(formElement) || "selectMul".equalsIgnoreCase(formElement)) {
+			if ("select".equals(formElement) || "selectMul".equals(formElement)) {
 				Map<String, Object> mergedParamMap = this.getMergedParamValueMap(report, buildinParams);
 				//
 				htmlFormElement = this.getComboBoxFormElements(queryParam, report.getDsId(), mergedParamMap);
@@ -424,7 +429,7 @@ public class TableReportServiceImpl implements TableReportService {
 		final List<HtmlSelectOption> htmlSelectOptions = new ArrayList<>(options.size());
 		String defaultValue = queryParam.hasDefaultValue() ? queryParam.getDefaultValue() : null;
 		List<String> defaultValues = null;
-		boolean isMulSelect = "selectMul".equalsIgnoreCase(queryParam.getFormElement());
+		boolean isMulSelect = "selectMul".equals(queryParam.getFormElement());
 		boolean isRequired = queryParam.isRequired();
 		boolean isHidden = queryParam.isHidden();
 		boolean hasSelected = false;
