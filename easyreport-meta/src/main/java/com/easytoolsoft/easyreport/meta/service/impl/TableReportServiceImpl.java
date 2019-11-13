@@ -210,14 +210,14 @@ public class TableReportServiceImpl implements TableReportService {
 		}
 		// 多个参数值
 		if ("integer".equals(dataType) || "float".equals(dataType)) {
-			return StringUtils.join(values, ",");
+			return StringUtils.join(values, ", ");
 		}
 		// 处理\, \n , \r, '转义问题
 		List<String> valuesTmp = new ArrayList<>();
 		for (int i = 0; i < values.length; i++) {
 			valuesTmp.add(StrUtils.toSqlStrValue(values[i]));
 		}
-		return StringUtils.join(valuesTmp, "','");
+		return StringUtils.join(valuesTmp, "', '");
 	}
 
 	@Override
