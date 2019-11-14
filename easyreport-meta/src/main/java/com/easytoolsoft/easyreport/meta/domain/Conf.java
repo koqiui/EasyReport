@@ -20,7 +20,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Conf implements Serializable {
-    /**
+	private static final long serialVersionUID = 1L;
+	/**
      * 数据源ID
      */
     private Integer id;

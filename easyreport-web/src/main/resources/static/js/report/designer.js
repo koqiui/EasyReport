@@ -953,8 +953,7 @@ var DesignerMVC = {
                     sequence: 10,
                     options: {
                         layout: 2,
-                        statColumnLayout: 1,
-                        dataRange: 7
+                        statColumnLayout: 1
                     }
                 };
                 DesignerMVC.Util.fillReportBasicConfForm(row, row.options);
@@ -1108,7 +1107,6 @@ var DesignerMVC = {
             $.post(DesignerMVC.URLs.execSqlText.url, {
                 sqlText: DesignerMVC.View.SqlEditor.getValue(),
                 dsId: $('#report-dsId').combobox('getValue'),
-                dataRange: $('#report-dataRange').val(),
                 queryParams: DesignerMVC.Util.getQueryParams()
             }, function (result) {
                 $.messager.progress("close");
@@ -1131,7 +1129,6 @@ var DesignerMVC = {
             $.post(DesignerMVC.URLs.previewSqlText.url, {
                 dsId: $('#report-dsId').combobox('getValue'),
                 sqlText: DesignerMVC.View.SqlEditor.getValue(),
-                dataRange: $('#report-dataRange').val(),
                 queryParams: DesignerMVC.Util.getQueryParams()
             }, function (result) {
                 $.messager.progress("close");
@@ -1176,8 +1173,7 @@ var DesignerMVC = {
             data.sqlText = DesignerMVC.View.SqlEditor.getValue();
             data["options"] = JSON.stringify({
                 layout: data.layout,
-                statColumnLayout: data.statColumnLayout,
-                dataRange: data.dataRange
+                statColumnLayout: data.statColumnLayout
             });
             data["metaColumns"] = JSON.stringify(metaColumns);
 

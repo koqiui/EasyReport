@@ -146,8 +146,7 @@ public class ReportController {
 		ResponseResult<?> result;
 		try {
 			final Report po = this.reportService.getByUid(uid);
-			final ReportOptions options = this.reportService.parseOptions(po.getOptions());
-			final Map<String, Object> formParameters = this.tableReportService.getFormParameters(request.getParameterMap(), options.getDataRange());
+			final Map<String, Object> formParameters = this.tableReportService.getFormParameters(request.getParameterMap());
 			result = ResponseResult.success(this.tableReportService.getReportDataSet(po, formParameters));
 		} catch (QueryParamsException | NotFoundLayoutColumnException | SQLQueryException | TemplatePraseException ex) {
 			log.error("报表生成失败", ex);
@@ -187,8 +186,7 @@ public class ReportController {
 		if (StringUtils.isNotBlank(uid)) {
 			try {
 				final Report po = this.reportService.getByUid(uid);
-				final ReportOptions options = this.reportService.parseOptions(po.getOptions());
-				final Map<String, Object> formParameters = this.tableReportService.getFormParameters(request.getParameterMap(), options.getDataRange());
+				final Map<String, Object> formParameters = this.tableReportService.getFormParameters(request.getParameterMap());
 				final ReportDataSet reportDataSet = this.tableReportService.getReportDataSet(po, formParameters);
 				data.put("dimColumnMap", this.chartReportService.getDimColumnMap(reportDataSet));
 				data.put("dimColumns", this.chartReportService.getDimColumns(reportDataSet));

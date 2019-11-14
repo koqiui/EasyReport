@@ -28,7 +28,6 @@ import com.easytoolsoft.easyreport.engine.query.QueryerFactory;
 import com.easytoolsoft.easyreport.engine.util.DateUtils;
 import com.easytoolsoft.easyreport.meta.domain.Report;
 import com.easytoolsoft.easyreport.meta.domain.options.QueryParameterOptions;
-import com.easytoolsoft.easyreport.meta.domain.options.ReportOptions;
 import com.easytoolsoft.easyreport.meta.form.QueryParamFormView;
 import com.easytoolsoft.easyreport.meta.form.control.HtmlFormElement;
 import com.easytoolsoft.easyreport.meta.service.ReportService;
@@ -215,8 +214,7 @@ public class ReportUtils {
 
 	public static void renderByFormMap(final String uid, final ModelAndView modelAndView, final HttpServletRequest request) {
 		final Report report = reportService.getByUid(uid);
-		final ReportOptions options = reportService.parseOptions(report.getOptions());
-		final Map<String, Object> buildInParams = tableReportService.getBuildInParameters(request.getParameterMap(), options.getDataRange());
+		final Map<String, Object> buildInParams = tableReportService.getBuildInParameters(request.getParameterMap());
 		final Map<String, HtmlFormElement> formMap = tableReportService.getFormElementMap(report, buildInParams, 1);
 		modelAndView.addObject("formMap", formMap);
 		modelAndView.addObject("uid", uid);
@@ -226,9 +224,8 @@ public class ReportUtils {
 
 	public static void renderByTemplate(final String uid, final ModelAndView modelAndView, final QueryParamFormView formView, final HttpServletRequest request) {
 		final Report report = reportService.getByUid(uid);
-		final ReportOptions options = reportService.parseOptions(report.getOptions());
 		final List<ReportMetaDataColumn> metaDataColumns = reportService.parseMetaColumns(report.getMetaColumns());
-		final Map<String, Object> buildInParams = tableReportService.getBuildInParameters(request.getParameterMap(), options.getDataRange());
+		final Map<String, Object> buildInParams = tableReportService.getBuildInParameters(request.getParameterMap());
 		final List<HtmlFormElement> dateAndQueryElements = tableReportService.getDateAndQueryParamFormElements(report, buildInParams);
 		final HtmlFormElement statColumnFormElements = tableReportService.getStatColumnFormElements(metaDataColumns, 0);
 		final List<HtmlFormElement> nonStatColumnFormElements = tableReportService.getNonStatColumnFormElements(metaDataColumns);
@@ -278,8 +275,7 @@ public class ReportUtils {
 
 	public static ReportTable generate(final String uid, final Map<String, Object> attachParams, final Map<?, ?> parameters) {
 		final Report report = reportService.getByUid(uid);
-		final ReportOptions options = reportService.parseOptions(report.getOptions());
-		final Map<String, Object> formParams = tableReportService.getFormParameters(parameters, options.getDataRange());
+		final Map<String, Object> formParams = tableReportService.getFormParameters(parameters);
 		if (MapUtils.isNotEmpty(attachParams)) {
 			for (final Entry<String, Object> es : attachParams.entrySet()) {
 				formParams.put(es.getKey(), es.getValue());
@@ -297,8 +293,7 @@ public class ReportUtils {
 			fileName = new String(fileName.getBytes(), "ISO8859-1") + ".xls";
 			if ("large".equals(htmlText)) {
 				final Report report = reportService.getByUid(uid);
-				final ReportOptions options = reportService.parseOptions(report.getOptions());
-				final Map<String, Object> formParameters = tableReportService.getFormParameters(request.getParameterMap(), options.getDataRange());
+				final Map<String, Object> formParameters = tableReportService.getFormParameters(request.getParameterMap());
 				final ReportTable reportTable = tableReportService.getReportTable(report, formParameters);
 				htmlText = reportTable.getHtmlText();
 			}

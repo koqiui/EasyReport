@@ -19,16 +19,17 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class ReportOptions implements Serializable {
-    /**
-     * 报表默认展示多少天的数据
-     */
-    private Integer dataRange;
-    /**
-     * 布局形式.1横向;2纵向
-     */
-    private Integer layout;
-    /**
-     * 统计列布局形式.1横向;2纵向
-     */
-    private Integer statColumnLayout;
+	private static final long serialVersionUID = 1L;
+	/**
+	 * 报表默认展示多少天的数据
+	 */
+	private Integer dataRange;
+	/**
+	 * 布局形式.1横向;2纵向
+	 */
+	private Integer layout;
+	/**
+	 * 统计列布局形式.1横向;2纵向
+	 */
+	private Integer statColumnLayout;
 }

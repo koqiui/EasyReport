@@ -31,7 +31,6 @@ import com.easytoolsoft.easyreport.engine.data.ReportQueryParamItem;
 import com.easytoolsoft.easyreport.engine.data.ReportSqlTemplate;
 import com.easytoolsoft.easyreport.engine.data.ReportTable;
 import com.easytoolsoft.easyreport.engine.query.Queryer;
-import com.easytoolsoft.easyreport.engine.util.DateUtils;
 import com.easytoolsoft.easyreport.engine.util.VelocityUtils;
 import com.easytoolsoft.easyreport.meta.domain.Report;
 import com.easytoolsoft.easyreport.meta.domain.options.QueryParameterOptions;
@@ -59,8 +58,7 @@ public class TableReportServiceImpl implements TableReportService {
 
 	@Override
 	public ReportParameter getReportParameter(final Report report, final Map<?, ?> parameters) {
-		final ReportOptions options = this.reportService.parseOptions(report.getOptions());
-		final Map<String, Object> formParams = this.getFormParameters(parameters, options.getDataRange());
+		final Map<String, Object> formParams = this.getFormParameters(parameters);
 		return this.createReportParameter(report, formParams);
 	}
 
@@ -122,40 +120,21 @@ public class TableReportServiceImpl implements TableReportService {
 	}
 
 	@Override
-	public Map<String, Object> getBuildInParameters(final Map<?, ?> httpReqParamMap, final int dataRange) {
+	public Map<String, Object> getBuildInParameters(final Map<?, ?> httpReqParamMap) {
 		final Map<String, Object> formParams = new HashMap<>();
-		this.setBuildInParams(formParams, httpReqParamMap, dataRange);
+		this.setBuildInParams(formParams, httpReqParamMap);
 		return formParams;
 	}
 
 	@Override
 	public Map<String, Object> getFormParameters(final Map<?, ?> httpReqParamMap) {
-		return this.getFormParameters(httpReqParamMap, 7);
-	}
-
-	@Override
-	public Map<String, Object> getFormParameters(final Map<?, ?> httpReqParamMap, final int dataRange) {
 		final Map<String, Object> formParams = new HashMap<>();
-		this.setBuildInParams(formParams, httpReqParamMap, 7);
+		this.setBuildInParams(formParams, httpReqParamMap);
 		this.setQueryParams(formParams, httpReqParamMap);
 		return formParams;
 	}
 
-	private void setBuildInParams(final Map<String, Object> formParams, final Map<?, ?> httpReqParamMap, int dataRange) {
-		dataRange = (dataRange - 1) < 0 ? 0 : dataRange - 1;
-		// 判断是否设置报表开始时间与结束时期
-		if (httpReqParamMap.containsKey("startTime")) {
-			final String[] values = (String[]) httpReqParamMap.get("startTime");
-			formParams.put("startTime", values[0]);
-		} else {
-			formParams.put("startTime", DateUtils.add(-dataRange, "yyyy-MM-dd"));
-		}
-		if (httpReqParamMap.containsKey("endTime")) {
-			final String[] values = (String[]) httpReqParamMap.get("endTime");
-			formParams.put("endTime", values[0]);
-		} else {
-			formParams.put("endTime", DateUtils.getNow("yyyy-MM-dd"));
-		}
+	private void setBuildInParams(final Map<String, Object> formParams, final Map<?, ?> httpReqParamMap) {
 		// 判断是否设置报表统计列
 		if (httpReqParamMap.containsKey("statColumns")) {
 			final String[] values = (String[]) httpReqParamMap.get("statColumns");
@@ -170,15 +149,6 @@ public class TableReportServiceImpl implements TableReportService {
 		} else {
 			formParams.put("isRowSpan", "true");
 		}
-
-		final String startTime = formParams.get("startTime").toString();
-		final String endTime = formParams.get("endTime").toString();
-		formParams.put("intStartTime", Integer.valueOf(DateUtils.getDate(startTime, "yyyyMMdd")));
-		formParams.put("utcStartTime", DateUtils.getUtcDate(startTime, "yyyy-MM-dd"));
-		formParams.put("utcIntStartTime", Integer.valueOf(DateUtils.getUtcDate(startTime, "yyyyMMdd")));
-		formParams.put("intEndTime", Integer.valueOf(DateUtils.getDate(endTime, "yyyyMMdd")));
-		formParams.put("utcEndTime", DateUtils.getUtcDate(endTime, "yyyy-MM-dd"));
-		formParams.put("utcIntEndTime", Integer.valueOf(DateUtils.getUtcDate(endTime, "yyyyMMdd")));
 	}
 
 	private void setQueryParams(final Map<String, Object> formParams, final Map<?, ?> httpReqParamMap) {
@@ -287,33 +257,7 @@ public class TableReportServiceImpl implements TableReportService {
 
 	@Override
 	public List<HtmlDateBox> getDateFormElements(final Report report, final Map<String, Object> buildinParams) {
-		final StringBuilder text = new StringBuilder(report.getSqlText());
-		text.append(" ");
-		text.append(report.getQueryParams());
-
-		final String regex = "\\$\\{.*?\\}";
-		final Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
-		final Matcher matcher = pattern.matcher(text.toString());
-		final Set<String> set = new HashSet<>(2);
-		while (matcher.find()) {
-			final String group = matcher.group(0);
-			String name = group.replaceAll("utc|int|Int|[\\$\\{\\}]", "");
-			name = name.substring(0, 1).toLowerCase() + name.substring(1);
-			if (!set.contains(name) && StringUtils.indexOfIgnoreCase(group, name) != -1) {
-				set.add(name);
-			}
-		}
-
-		final List<HtmlDateBox> dateboxes = new ArrayList<>(2);
-		String name = "startTime";
-		if (set.contains(name)) {
-			dateboxes.add(new HtmlDateBox(name, "开始日期", buildinParams.get(name).toString()));
-		}
-		name = "endTime";
-		if (set.contains(name)) {
-			dateboxes.add(new HtmlDateBox(name, "结束日期", buildinParams.get(name).toString()));
-		}
-		return dateboxes;
+		return new ArrayList<>(0);
 	}
 
 	@Override

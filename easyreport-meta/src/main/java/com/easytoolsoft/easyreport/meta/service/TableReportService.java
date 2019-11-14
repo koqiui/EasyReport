@@ -71,23 +71,15 @@ public interface TableReportService {
 
     /**
      * @param httpReqParamMap
-     * @param dataRange
      * @return
      */
-    Map<String, Object> getBuildInParameters(Map<?, ?> httpReqParamMap, int dataRange);
+    Map<String, Object> getBuildInParameters(Map<?, ?> httpReqParamMap);
 
     /**
      * @param httpReqParamMap
      * @return
      */
     Map<String, Object> getFormParameters(Map<?, ?> httpReqParamMap);
-
-    /**
-     * @param httpReqParamMap
-     * @param dataRange
-     * @return
-     */
-    Map<String, Object> getFormParameters(Map<?, ?> httpReqParamMap, int dataRange);
 
     /**
      * @param uid

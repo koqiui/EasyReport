@@ -98,7 +98,7 @@ public class DesignerController extends BaseController<ReportService, Report, Re
 		return list;
 	}
 
-	//by koqiui 2019-11-11 解析sql中的变量名
+	// by koqiui 2019-11-11 解析sql中的变量名
 	@PostMapping(value = "/parseSqlVarNames")
 	public ResponseResult parseVarNames(final @RequestBody String sqlText) {
 		List<String> varNames = ReportUtils.parseSqlVarNames(sqlText);
@@ -138,13 +138,10 @@ public class DesignerController extends BaseController<ReportService, Report, Re
 	@PostMapping(value = "/execSqlText")
 	@OpLog(name = "获取报表元数据列集合")
 	@RequiresPermissions("report.designer:view")
-	public ResponseResult execSqlText(final Integer dsId, String sqlText, Integer dataRange, final String queryParams, final HttpServletRequest request) {
+	public ResponseResult execSqlText(final Integer dsId, String sqlText, final String queryParams, final HttpServletRequest request) {
 		if (dsId != null) {
-			if (dataRange == null) {
-				dataRange = 7;
-			}
 			try {
-				sqlText = this.getSqlText(sqlText, dataRange, queryParams, request);
+				sqlText = this.getSqlText(sqlText, queryParams, request);
 				return ResponseResult.success(this.service.getMetaDataColumns(dsId, sqlText));
 			} catch (Exception ex) {
 				return ResponseResult.failure(ex.getMessage());
@@ -156,13 +153,10 @@ public class DesignerController extends BaseController<ReportService, Report, Re
 	@PostMapping(value = "/previewSqlText")
 	@OpLog(name = "预览报表SQL语句")
 	@RequiresPermissions("report.designer:view")
-	public ResponseResult previewSqlText(final Integer dsId, String sqlText, Integer dataRange, final String queryParams, final HttpServletRequest request) {
+	public ResponseResult previewSqlText(final Integer dsId, String sqlText, final String queryParams, final HttpServletRequest request) {
 		if (dsId != null) {
-			if (dataRange == null) {
-				dataRange = 7;
-			}
 			try {
-				sqlText = this.getSqlText(sqlText, dataRange, queryParams, request);
+				sqlText = this.getSqlText(sqlText, queryParams, request);
 				this.service.explainSqlText(dsId, sqlText);
 				return ResponseResult.success(sqlText);
 			} catch (Exception ex) {
@@ -184,8 +178,8 @@ public class DesignerController extends BaseController<ReportService, Report, Re
 		return column;
 	}
 
-	private String getSqlText(final String sqlText, final Integer dataRange, final String queryParams, final HttpServletRequest request) {
-		final Map<String, Object> formParameters = this.tableReportService.getBuildInParameters(request.getParameterMap(), dataRange);
+	private String getSqlText(final String sqlText, final String queryParams, final HttpServletRequest request) {
+		final Map<String, Object> formParameters = this.tableReportService.getBuildInParameters(request.getParameterMap());
 		List<QueryParameterOptions> queryParameters = null;
 		if (StringUtils.isNotBlank(queryParams)) {
 			queryParameters = JSON.parseArray(queryParams, QueryParameterOptions.class);
