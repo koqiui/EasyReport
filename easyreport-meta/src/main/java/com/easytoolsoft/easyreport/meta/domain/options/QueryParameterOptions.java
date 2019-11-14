@@ -265,7 +265,7 @@ public class QueryParameterOptions implements Serializable {
 	 * @return
 	 */
 	public Boolean isHidden() {
-		return this.isHidden;
+		return this.isHidden == null ? false : this.isHidden;
 	}
 
 	/**
@@ -275,7 +275,7 @@ public class QueryParameterOptions implements Serializable {
 	 *            true|false
 	 */
 	public void setHidden(Boolean isHidden) {
-		this.isHidden = isHidden;
+		this.isHidden = isHidden == null ? false : isHidden;
 	}
 
 	/**

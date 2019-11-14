@@ -20,9 +20,9 @@ public class EasyUIQueryFormView extends AbstractQueryParamFormView implements Q
 		if (disableIt) {
 			return "";
 		}
-		final String template = "<input id=\"%s\" name=\"%s\" type=\"text\" class=\"easyui-datebox\" required=\"true\" value=\"%s\" %s />";
-		final String easyuiText = String.format(template, dateBox.getName(), dateBox.getName(), dateBox.getValue(), disableIt ? "disabled" : "");
-		return String.format("<span class=\"j-item\"><label style=\"width: 120px;%s\">%s:</label>%s</span>&nbsp;", disableIt ? "color:gray;" : "", dateBox.getText(), easyuiText);
+		final String template = "<input id=\"%s\" name=\"%s\" type=\"text\" class=\"easyui-datebox\" required=\"true\" value=\"%s\" />";
+		final String easyuiText = String.format(template, dateBox.getName(), dateBox.getName(), dateBox.getValue());
+		return String.format("<span class=\"j-item\"><label style=\"width: 120px;\">%s:</label>%s</span>", dateBox.getText(), easyuiText);
 	}
 
 	@Override
@@ -31,9 +31,9 @@ public class EasyUIQueryFormView extends AbstractQueryParamFormView implements Q
 		if (disableIt) {
 			return "";
 		}
-		final String template = "<input id=\"%s\" name=\"%s\" type=\"text\" value=\"%s\" %s />";
-		final String easyuiText = String.format(template, textBox.getName(), textBox.getName(), textBox.getValue(), disableIt ? "disabled" : "");
-		return String.format("<span class=\"j-item\"><label style=\"width: 120px;%s\">%s:</label>%s</span>&nbsp;", disableIt ? "color:gray;" : "", textBox.getText(), easyuiText);
+		final String template = "<input id=\"%s\" name=\"%s\" type=\"text\" value=\"%s\" />";
+		final String easyuiText = String.format(template, textBox.getName(), textBox.getName(), textBox.getValue());
+		return String.format("<span class=\"j-item\"><label style=\"width: 120px;\">%s:</label>%s</span>", textBox.getText(), easyuiText);
 	}
 
 	@Override
@@ -43,8 +43,7 @@ public class EasyUIQueryFormView extends AbstractQueryParamFormView implements Q
 			return "";
 		}
 		final String checked = checkBox.isChecked() ? "" : "checked=\"checked\"";
-		return String.format("<label><input id=\"%s\" name=\"%s\" type=\"checkbox\" value=\"%s\" %s %s />%s</label>&nbsp;", checkBox.getName(), checkBox.getName(), checkBox.getValue(), checked, disableIt ? "disabled" : "",
-				checkBox.getText());
+		return String.format("<label><input id=\"%s\" name=\"%s\" type=\"checkbox\" value=\"%s\" %s />%s</label>", checkBox.getName(), checkBox.getName(), checkBox.getValue(), checked, checkBox.getText());
 	}
 
 	@Override
@@ -55,15 +54,14 @@ public class EasyUIQueryFormView extends AbstractQueryParamFormView implements Q
 		}
 		final String multiple = comboBox.isMultipled() ? "data-options=\"multiple:true\"" : "";
 		final StringBuilder htmlText = new StringBuilder("");
-		htmlText.append(String.format("<span class=\"j-item\" title=\"%s\" style=\"%s\"><label style=\"width: 120px;\">%s:</label>", disableIt ? comboBox.getHintText() : "", disableIt ? "color:#666; background-color:#EFEFEF;" : "",
-				comboBox.getText()));
-		htmlText.append(String.format("<select id=\"%s\" name=\"%s\" class=\"easyui-combobox\" style=\"width: 200px;\" %s %s >", comboBox.getName(), comboBox.getName(), multiple, disableIt ? "disabled" : ""));
+		htmlText.append(String.format("<span class=\"j-item\"><label style=\"width: 120px;\">%s:</label>", comboBox.getText()));
+		htmlText.append(String.format("<select id=\"%s\" name=\"%s\" class=\"easyui-combobox\" style=\"width: 200px;\" %s >", comboBox.getName(), comboBox.getName(), multiple));
 		for (final HtmlSelectOption option : comboBox.getValue()) {
 			final String selected = option.isSelected() ? "selected=\"selected\"" : "";
 			htmlText.append(String.format("<option value=\"%s\" %s>%s</option>", option.getValue(), selected, option.getText()));
 		}
 		htmlText.append("</select>");
-		htmlText.append("</span>&nbsp;");
+		htmlText.append("</span>");
 		return htmlText.toString();
 	}
 
@@ -77,10 +75,10 @@ public class EasyUIQueryFormView extends AbstractQueryParamFormView implements Q
 				isCheckedAll = false;
 			}
 			final String checked = checkBox.isChecked() ? "checked=\"checked\"" : "";
-			htmlText.append(String.format("<label><input name=\"%s\" type=\"checkbox\" value=\"%s\" data-name=\"%s\" %s/>%s</label>&nbsp;", checkBoxList.getName(), checkBox.getName(), checkBox.getText(), checked,
+			htmlText.append(String.format("<label style=\"margin-right:4px;\"><input name=\"%s\" type=\"checkbox\" value=\"%s\" data-name=\"%s\" %s/>%s</label>", checkBoxList.getName(), checkBox.getName(), checkBox.getText(), checked,
 					checkBox.getText()));
 		}
-		htmlText.append(String.format("<input id=\"checkAllStatColumn\" name=\"checkAllStatColumn\" type=\"checkbox\" %s /><label for=\"checkAllStatColumn\">全选</label></span>", isCheckedAll ? "checked=\"checked\"" : ""));
+		htmlText.append(String.format("<label><input id=\"checkAllStatColumn\" name=\"checkAllStatColumn\" type=\"checkbox\" %s />全选</label></span>", isCheckedAll ? "checked=\"checked\"" : ""));
 		return htmlText.toString();
 	}
 }
