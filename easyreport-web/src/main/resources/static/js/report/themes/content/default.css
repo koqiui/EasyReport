@@ -84,3 +84,9 @@ td, th {
 .designer-table td {
     border: solid 0.1px #e6e6e6
 }
+
+.designer-table .j-item {
+	float : left;
+	margin-right:4px;
+	line-height:25px;
+}

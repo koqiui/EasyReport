@@ -1,6 +1,7 @@
 package com.easytoolsoft.easyreport.web.util;
 
 import java.io.OutputStream;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -284,18 +285,24 @@ public class ReportUtils {
 		return tableReportService.getReportTable(report, formParams);
 	}
 
-	public static void exportToExcel(final String uid, final String name, String htmlText, final HttpServletRequest request, final HttpServletResponse response) {
-		htmlText = htmlText.replaceFirst("<table>", "<tableFirst>");
-		htmlText = htmlText.replaceAll("<table>", "<table cellpadding=\"3\" cellspacing=\"0\"  border=\"1\" rull=\"all\" style=\"border-collapse: " + "collapse\">");
-		htmlText = htmlText.replaceFirst("<tableFirst>", "<table>");
+	public static void exportToExcel(final String uid, final String name, String htmlFilter, String htmlTable, final HttpServletRequest request, final HttpServletResponse response) {
 		try (OutputStream out = response.getOutputStream()) {
-			String fileName = name + "_" + DateUtils.getNow("yyyyMMddHHmmss");
-			fileName = new String(fileName.getBytes(), "ISO8859-1") + ".xls";
-			if ("large".equals(htmlText)) {
+			String fileName = name + "_" + DateUtils.getNow("yyyyMMddHHmmss") + ".xls";
+			fileName = URLEncoder.encode(fileName, "UTF-8");
+			//
+			if (htmlFilter == null) {
+				htmlFilter = "";
+			}
+			//
+			if (StringUtils.isBlank(htmlTable) || htmlTable.indexOf("<table") == -1) {// 从后端生成
 				final Report report = reportService.getByUid(uid);
 				final Map<String, Object> formParameters = tableReportService.getFormParameters(request.getParameterMap());
 				final ReportTable reportTable = tableReportService.getReportTable(report, formParameters);
-				htmlText = reportTable.getHtmlText();
+				htmlTable = reportTable.getHtmlText();
+				//
+				htmlTable = htmlTable.replaceAll("<table\\s+", "<table cellpadding=\"3\" cellspacing=\"0\"  border=\"1\" rull=\"all\" style=\"border-collapse:collapse\" ");
+			} else {// 使用前端传回的html
+				htmlTable = htmlTable.replaceAll("<table>", "<table cellpadding=\"3\" cellspacing=\"0\"  border=\"1\" rull=\"all\" style=\"border-collapse:collapse\">");
 			}
 			response.reset();
 			response.setHeader("Content-Disposition", String.format("attachment; filename=%s", fileName));
@@ -303,6 +310,7 @@ public class ReportUtils {
 			// response.addCookie(new Cookie("fileDownload", "true"));
 			response.setHeader("Set-Cookie", "fileDownload=true; path=/");
 			// out.write(new byte[]{(byte) 0xEF, (byte) 0xBB, (byte) 0xBF}); // 生成带bom的utf8文件
+			String htmlText = htmlFilter + htmlTable;
 			out.write(htmlText.getBytes());
 			out.flush();
 		} catch (final Exception ex) {

@@ -6,7 +6,7 @@ $(function() {
 	$('#btnToggleChart').click(ReportChart.toggleChart);
 	$('#checkAllStatColumn').click(ReportChart.checkedAllStatColumn);
 
-	ReportChart.generate();
+	//ReportChart.generate();
 });
 
 var ReportChart = function() {

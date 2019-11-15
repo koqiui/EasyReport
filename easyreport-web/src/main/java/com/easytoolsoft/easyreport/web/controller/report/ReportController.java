@@ -206,9 +206,9 @@ public class ReportController {
 	@PostMapping(value = "/table/exportExcel")
 	@OpLog(name = "导出报表为Excel")
 	// @RequiresPermissions("report.designer:export")
-	public void exportToExcel(final String uid, final String name, final String htmlText, final HttpServletRequest request, final HttpServletResponse response) {
+	public void exportToExcel(final String uid, final String name, final String htmlFilter, final String htmlTable, final HttpServletRequest request, final HttpServletResponse response) {
 		try {
-			ReportUtils.exportToExcel(uid, name, htmlText, request, response);
+			ReportUtils.exportToExcel(uid, name, htmlFilter, htmlTable, request, response);
 		} catch (final Exception ex) {
 			log.error("导出Excel失败", ex);
 		}

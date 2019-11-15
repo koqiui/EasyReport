@@ -78,23 +78,37 @@ var TableReportMVC = {
             });
         },
         exportToExcel: function (e) {
-            var htmlText = '';
-            htmlText += (TableReportMVC.Util.filterTable || '');
-            htmlText += '<table>' + $('#easyreport').html() + '</table>';
-
-            var bytes = TableReportMVC.Util.getExcelBytes(htmlText);
-            if (bytes > 2000000) {
-                htmlText = "large";
+            var htmlFilter = TableReportMVC.Util.filterTable;
+            if(htmlFilter == null){
+            	$.messager.show({
+                    title: '提示',
+                    msg: '没有报表可以导出（请先生成报表）'
+                });
+            	return;
             }
-
-            var url = TableReportMVC.URLs.exportExcel.url;
+            
+            var htmlTableLarge = false;//htmlTable内容是否过大
+            var htmlTable = '<table>' + $('#easyreport').html() + '</table>';
+            var bytes = TableReportMVC.Util.getExcelBytes(htmlTable);
+            if (bytes > 2000000) {
+            	htmlTableLarge = true;
+            }
             var data = $('#table-report-form').serializeObject();
-            data["htmlText"] = htmlText;
-
+            data["htmlFilter"] = htmlFilter;
+            if(htmlTableLarge){
+            	data["htmlTable"] = "";
+            }
+            else {
+            	data["htmlTable"] = htmlTable;
+            }
+            //
             $.messager.progress({
                 title: '请稍后...',
                 text: '报表正在生成中...',
             });
+            //
+            var url = TableReportMVC.URLs.exportExcel.url;
+            data = $.param(data, true);
             $.fileDownload(url, {
                 httpMethod: "POST",
                 data: data
@@ -199,42 +213,84 @@ var TableReportMVC = {
             });
         },
         // 将报表上面的过滤信息拼成table，用于写入excel中
-        renderFilterTable: function (result) {
+        renderFilterTable: function (result) {//table-report-title
             var html = '<table>';
-            html += '<tr><td align="center" colspan="' + result.metaDataColumnCount + '"><h3>' + $('#table-report-name').text() + '</h3></td></tr>';
-            html += '<tr><td align="right" colspan="' + result.metaDataColumnCount + '"><h3>导出时间:' + TableReportMVC.Util.getCurrentTime() + '</h3></td></tr>';
+            html += '<tr><td align="center" colspan="' + result.metaDataColumnCount + '"><h3>' + $('#table-report-name').val() + '</h3></td></tr>';
+            html += '<tr><td align="right" colspan="' + result.metaDataColumnCount + '"><h3>导出时间: ' + TableReportMVC.Util.getCurrentTime() + '</h3></td></tr>';
             $('#table-report-form .j-item').each(function () {
-                var type = $(this).attr('data-type');
-                if (type === 'date-range') {
-                    var input = $(this).find('.combo-text');
-                    html += '<tr><td align="right" colspan="' + result.metaDataColumnCount + '"><strong>时间范围:</strong>' + input.eq(0).val() + '~' + input.eq(1).val() + '</td></tr>';
-                } else if (type === 'checkbox') {
-                    html += '<tr><td align="right" colspan="' + result.metaDataColumnCount + '"><strong>筛选统计列:</strong>';
+                var type = $(this).attr('ctrl-type');
+                if (type == "datebox") {
+                    var label = $(this).find('label').text().replace(':', '');
+                    var val = $(this).find("input[class*='textbox-value']").val();
+                    html += '<tr><td><strong>' + label + '</strong></td><td align="left">' + (val || '') + '</td></tr>';
+                }
+                else if(type == "combobox"){
+                	var label = $(this).find('label').text().replace(':', '');
+                	var val = null;
+                    var inputs = $(this).find("input[class*='textbox-value']");
+                    if(inputs.size() >1){
+                    	val = [];
+                    	$(inputs).each(function(input){
+                    		val.push(this.value);
+                    	});
+                    }
+                    else {
+                    	val = inputs.val();
+                    }
+                    //console.log(val);
+                    //优先从下来列表获取（显示文本）
+                    var optMap = {};
+                    var selCtrl = $(this).find('select');
+                    if(selCtrl.size() > 0){
+                    	var optList = selCtrl.get(0).options;
+                		for(var i=0, c=optList.length; i<c; i++){
+                			var opt = optList[i];
+                			optMap[opt.value] = opt.text;
+                		}
+                    }
+                    if($.isArray(val)){
+                    	var vals = val;
+                    	var txts = [];
+                    	for(var i=0, c=vals.length; i<c; i++){
+                    		var valTmp = vals[i];
+                    		txts.push(optMap[valTmp] || valTmp);
+                    	}
+                    	val = txts.join('、');
+                    }
+                    else {
+                    	val = optMap[val] || val;
+                    }
+                    html += '<tr><td><strong>' + label + '</strong></td><td align="left">' + (val || '') + '</td></tr>';
+                }
+                else if(type === 'textbox') {
+                	var label = $(this).find('label').text().replace(':', '');
+                	var input = $(this).find('input[type="text"]');
+                	var val = input.val();
+                	html += '<tr><td><strong>' + label + '</strong></td><td align="left">' + (val || '') + '</td></tr>';
+                }
+                else if (type == 'checkboxlist') {
+                    html += '<tr><td><strong>筛选统计列:</strong></td><td align="left" colspan="' + (result.metaDataColumnCount-1) + '">';
                     var rowChoose = [];
                     $(this).find('input[type="checkbox"]:checked').each(function () {
-                        rowChoose.push($(this).attr('data-name'));
+                    	var dataName = $(this).attr('data-name');
+                    	if(dataName){
+                    		rowChoose.push(dataName);
+                    	}
                     })
                     html += rowChoose.join('、');
                     html += '</td></tr>';
                 }
-                else if (new RegExp('datebox').test($(this).find("input").attr("class"))) {
-                    var label = $(this).find('label').text().replace(':', '');
-                    var val = $(this).find("input").attr("value");
-                    if (!val) {
-                        val = $(this).find('.combo-text').val();
-                    }
-                    html += '<tr><td><strong>' + label + '</strong></td><td>' + val + '</td></tr>';
-                }
-                else {
-                    var label = $(this).find('label').text().replace(':', '');
-                    var val = $(this).find('.combo-text').val();
-                    if (!val) {
-                        val = $(this).find("input").attr("value");
-                    }
-                    html += '<tr><td><strong>' + label + '</strong></td><td>' + val + '</td></tr>';
+                else if(type === 'checkbox') {//combobox
+                	var label = $(this).find('label').text().replace(':', '');
+                	var input = $(this).find('input[type="checkbox"]');
+                	var val = input.prop("checked") ? '是' : '否';
+                	html += '<tr><td><strong>' + label + '</strong></td><td  align="left">' + (val || '') + '</td></tr>';
+                } else if (type == 'date-range') {
+                    var input = $(this).find('.combo-text');
+                    html += '<tr><td><strong>时间范围:</strong></td><td align="left" colspan="' + (result.metaDataColumnCount -1) + '">' + input.eq(0).val() + '~' + input.eq(1).val() + '</td></tr>';
                 }
             })
-            html += '<tr></tr><tr></tr><tr></tr></table>';
+            html += '<tr></tr></table>';
             return html;
         },
         getExcelBytes: function (str) {

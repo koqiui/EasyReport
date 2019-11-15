@@ -814,8 +814,8 @@ var DesignerMVC = {
 
             $('#report-query-param-formElement').combobox({
                 onSelect: function (rec) {
-                    var value = "sql";
-                    if (rec.value == "text") {
+                    var value = "text";
+                    if (rec.value == "text" || rec.value == "date") {
                         value = 'none';
                     }
                     $('#report-query-param-dataSource').combobox('setValue', value);

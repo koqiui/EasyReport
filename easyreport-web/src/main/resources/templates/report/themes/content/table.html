@@ -6,9 +6,10 @@
             </tr>
             <tr>
                 <td style="text-align: left;padding-right:4px;"><span th:utext="${formHtmlText}"></span>
-                    <label style="float:right;clear:right;margin-top:4px;"><input id="table-report-isMergeRow" type="checkbox" name="isMergeRow" checked="checked"/>合并左边相同维度行</label>
+                    <label style="float:right;clear:right;margin-top:4px;">
+                    <input id="table-report-isMergeRow" type="checkbox" name="isMergeRow" checked="checked"/>合并左边相同维度行</label>
                 </td>
-                <td style="text-align: right;width:140px;">
+                <td style="text-align: right;width:140px;padding-left:4px;">
                 	<a id="btn-generate" href="#" style="float:left" class="easyui-linkbutton" data-options="iconCls:'icon-ok'">生成</a>
                     <img id="btn-export-excel" title="导出到Excel" style="cursor: pointer;padding-right: 5px;"
                          src="../../static/custom/easyui/themes/icons/excel_24.png"

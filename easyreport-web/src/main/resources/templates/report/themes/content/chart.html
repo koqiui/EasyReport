@@ -2,13 +2,14 @@
     <form id="chart-report-form" method="post">
         <table class="designer-table" style="width: 100%;padding: 6px;">
             <tr>
-                <td style="text-align: left;" th:utext="${formHtmlText}">&nbsp;&nbsp;
-                    <a id="btn-chart-generate" href="#" class="easyui-linkbutton"
-                       data-options="iconCls:'icon-ok'">生成</a>
+                <td style="text-align: left;padding-right:4px;">
+                	<span th:utext="${formHtmlText}"></span>
                 </td>
-                <td><input id="chart-report-id" type="hidden" name="id" th:value="${id}"/>
+                <td style="width:80px;padding-left:4px;"><input id="chart-report-id" type="hidden" name="id" th:value="${id}"/>
                     <input id="chart-report-name" type="hidden" name="name" th:value="${name}"/>
                     <input id="chart-report-uid" type="hidden" name="uid" th:value="${uid}"/>
+                    <a id="btn-chart-generate" href="#" class="easyui-linkbutton"
+                       data-options="iconCls:'icon-ok'">生成</a>
                 </td>
             </tr>
             <tr id="chart-report-columns">

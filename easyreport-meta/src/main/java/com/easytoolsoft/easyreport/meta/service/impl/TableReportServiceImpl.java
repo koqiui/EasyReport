@@ -501,8 +501,7 @@ public class TableReportServiceImpl implements TableReportService {
 			checkbox.setChecked(!column.isOptional());
 			checkBoxes.add(checkbox);
 		}
-		// 统计列 -> 数值列
-		return new HtmlCheckBoxList("statColumns", "数值列", checkBoxes);
+		return new HtmlCheckBoxList("statColumns", "统计列", checkBoxes);
 	}
 
 	@Override

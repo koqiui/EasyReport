@@ -22,7 +22,7 @@ public class EasyUIQueryFormView extends AbstractQueryParamFormView implements Q
 		}
 		final String template = "<input id=\"%s\" name=\"%s\" type=\"text\" class=\"easyui-datebox\" required=\"true\" value=\"%s\" />";
 		final String easyuiText = String.format(template, dateBox.getName(), dateBox.getName(), dateBox.getValue());
-		return String.format("<span class=\"j-item\"><label style=\"width: 120px;\">%s:</label>%s</span>", dateBox.getText(), easyuiText);
+		return String.format("<span class=\"j-item\" ctrl-type=\"%s\"><label style=\"width: 120px;\">%s:</label>%s</span>", dateBox.getType(), dateBox.getText(), easyuiText);
 	}
 
 	@Override
@@ -33,7 +33,7 @@ public class EasyUIQueryFormView extends AbstractQueryParamFormView implements Q
 		}
 		final String template = "<input id=\"%s\" name=\"%s\" type=\"text\" value=\"%s\" />";
 		final String easyuiText = String.format(template, textBox.getName(), textBox.getName(), textBox.getValue());
-		return String.format("<span class=\"j-item\"><label style=\"width: 120px;\">%s:</label>%s</span>", textBox.getText(), easyuiText);
+		return String.format("<span class=\"j-item\" ctrl-type=\"%s\"><label style=\"width: 120px;\">%s:</label>%s</span>", textBox.getType(), textBox.getText(), easyuiText);
 	}
 
 	@Override
@@ -43,7 +43,8 @@ public class EasyUIQueryFormView extends AbstractQueryParamFormView implements Q
 			return "";
 		}
 		final String checked = checkBox.isChecked() ? "" : "checked=\"checked\"";
-		return String.format("<label><input id=\"%s\" name=\"%s\" type=\"checkbox\" value=\"%s\" %s />%s</label>", checkBox.getName(), checkBox.getName(), checkBox.getValue(), checked, checkBox.getText());
+		return String.format("<span class=\"j-item\" ctrl-type=\"%s\"><label><input id=\"%s\" name=\"%s\" type=\"checkbox\" value=\"%s\" %s />%s</label></span>", checkBox.getType(), checkBox.getName(), checkBox.getName(),
+				checkBox.getValue(), checked, checkBox.getText());
 	}
 
 	@Override
@@ -54,7 +55,7 @@ public class EasyUIQueryFormView extends AbstractQueryParamFormView implements Q
 		}
 		final String multiple = comboBox.isMultipled() ? "data-options=\"multiple:true\"" : "";
 		final StringBuilder htmlText = new StringBuilder("");
-		htmlText.append(String.format("<span class=\"j-item\"><label style=\"width: 120px;\">%s:</label>", comboBox.getText()));
+		htmlText.append(String.format("<span class=\"j-item\" ctrl-type=\"%s\"><label style=\"width: 120px;\">%s:</label>", comboBox.getType(), comboBox.getText()));
 		htmlText.append(String.format("<select id=\"%s\" name=\"%s\" class=\"easyui-combobox\" style=\"width: 200px;\" %s >", comboBox.getName(), comboBox.getName(), multiple));
 		for (final HtmlSelectOption option : comboBox.getValue()) {
 			final String selected = option.isSelected() ? "selected=\"selected\"" : "";
@@ -69,7 +70,7 @@ public class EasyUIQueryFormView extends AbstractQueryParamFormView implements Q
 	protected String getCheckboxListText(final HtmlCheckBoxList checkBoxList) {
 		boolean isCheckedAll = true;
 		final StringBuilder htmlText = new StringBuilder("");
-		htmlText.append(String.format("<span class=\"j-item\" data-type=\"checkbox\"><label style=\"width: 120px;\">%s:</label>", checkBoxList.getText()));
+		htmlText.append(String.format("<span class=\"j-item\" ctrl-type=\"%s\"><label style=\"width: 120px;\">%s:</label>", checkBoxList.getType(), checkBoxList.getText()));
 		for (final HtmlCheckBox checkBox : checkBoxList.getValue()) {
 			if (!checkBox.isChecked()) {
 				isCheckedAll = false;

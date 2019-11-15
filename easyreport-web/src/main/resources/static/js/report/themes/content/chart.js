@@ -3,7 +3,7 @@ var ChartReport = {
         ChartReportMVC.View.initControl();
         ChartReportMVC.View.bindEvent();
         ChartReportMVC.View.bindValidate();
-        ChartReportMVC.View.initData();
+        //ChartReportMVC.View.initData();//禁用立刻查询 by koqiui
     }
 };
 

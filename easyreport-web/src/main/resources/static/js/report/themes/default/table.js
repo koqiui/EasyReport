@@ -8,7 +8,7 @@ $(function() {
 	$('#btnExportToExcel').click(ReportTemplate.exportToExcel);
 	$('#btnFullScreen').click(ReportTemplate.fullScreen);
 
-	ReportTemplate.generate(ReportTemplate.Mode.classic,null);
+	//ReportTemplate.generate(ReportTemplate.Mode.classic,null);
 });
 
 var ReportTemplate = function() {
@@ -146,7 +146,7 @@ ReportTemplate.renderDatatablesReport = function(table) {
 // 将报表上面的过滤信息拼成table，用于写入excel中
 ReportTemplate.renderFilterTable = function(result) {
 	var html = '<table>';
-	html += '<tr><td align="center" colspan="'+result.metaDataColumnCount+'"><h3>' + $('#rpTitle').text() + '</h3></td></tr>';
+	html += '<tr><td align="center" colspan="'+result.metaDataColumnCount+'"><h3>' + $('#rpTitle').val() + '</h3></td></tr>';
 	html += '<tr><td align="right" colspan="'+result.metaDataColumnCount+'"><h3>导出时间:' + currentTime()+ '</h3></td></tr>';
 	$('#templateFrom .j-item').each(function() {
 		var type = $(this).attr('data-type');
@@ -162,7 +162,7 @@ ReportTemplate.renderFilterTable = function(result) {
 			html += rowChoose.join('、');
 			html += '</td></tr>';
 		}
-		else if (new RegExp('datebox').test($(this).find("input").attr("class"))) {
+		else if (/\-datebox/i.test($(this).find("input").attr("class"))) {
 			var label = $(this).find('label').text().replace(':', '');
 			var val = $(this).find("input").attr("value");
 			if(!val){
@@ -184,19 +184,32 @@ ReportTemplate.renderFilterTable = function(result) {
 };
 
 ReportTemplate.exportToExcel = function(e) {
-	var htmlText = '';
-	htmlText += (ReportTemplate.filterTable || '');
-	htmlText += '<table>' + $('#easyreport').html() + '</table>';
-	var bytes = ReportTemplate.getBytes(htmlText);
-	if (bytes > 2000000) {
-		htmlText = "large";
-	}
-	var postUrl = ReportTemplate.URL.exportToExcel;
+	var htmlFilter = ReportTemplate.filterTable || '';
+    var htmlTableLarge = false;//htmlTable内容是否过大
+    var htmlTable = '<table>' + $('#easyreport').html() + '</table>';
+    var bytes = ReportTemplate.getBytes(htmlTable);
+    if (bytes > 2000000) {
+    	htmlTableLarge = true;
+    }
 	var postData = $('#templateFrom').serializeObject();
-	postData["htmlText"] = htmlText;
-
+	postData["htmlFilter"] = htmlFilter;
+    if(htmlTableLarge){
+    	postData["htmlTable"] = "";
+    }
+    else {
+    	postData["htmlTable"] = htmlTable;
+    }
+    //
+    $.messager.progress({
+        title: '请稍后...',
+        text: '报表正在生成中...',
+    });
+    
 	$('#loadingText').html("正在导出Excel中, 请稍等...");
 	$('#loading').show();
+	
+	var postUrl = ReportTemplate.URL.exportToExcel;
+	postData = $.param(postData, true);
 	$.fileDownload(postUrl, {
 		httpMethod : "POST",
 		data : postData
