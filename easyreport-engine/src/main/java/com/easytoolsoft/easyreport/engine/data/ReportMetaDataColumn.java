@@ -1,5 +1,18 @@
 package com.easytoolsoft.easyreport.engine.data;
 
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+
+import org.apache.commons.lang3.StringUtils;
+
+import com.easytoolsoft.easyreport.engine.util.ClrLvlUtils;
+import com.easytoolsoft.easyreport.engine.util.JdbcUtils;
+import com.easytoolsoft.easyreport.engine.util.NumberFormatUtils;
+
 /**
  * 报表元数据列类
  *
@@ -10,6 +23,15 @@ public class ReportMetaDataColumn {
 	private String name;
 	private String text;
 	private String dataType;
+	private String javaType;
+	// 对齐方式
+	private String align;
+	// 色阶
+	private Boolean clrLvlEnabled = false;// 是否启用色阶
+	private Integer clrLvlValve;// 最少异值数量
+	private String clrLvlStart;// 色阶起始色
+	private String clrLvlEnd;// 色阶终止色
+	//
 	private String expression;
 	private String format;
 	private String comment;
@@ -23,14 +45,86 @@ public class ReportMetaDataColumn {
 	private boolean isOptional;
 	private boolean isDisplayInMail;
 	private boolean isHidden;
+	// 不同地数值集合
+	private Set<Number> diffValues;
+	private Map<Number, String> clrLvlMap;
 
 	public ReportMetaDataColumn() {
+		//
 	}
 
 	public ReportMetaDataColumn(final String name, final String text, final ColumnType type) {
 		this.name = name;
 		this.text = text;
 		this.type = type;
+	}
+
+	private String asNumStr(Object cellValue) {
+		String valueStr = cellValue == null ? null : cellValue.toString();
+		if (valueStr == null) {
+			return null;
+		}
+		if (NumberFormatUtils.isNumber(valueStr)) {
+			return valueStr;
+		}
+		return null;
+	}
+
+	public void addCellValue(Object cellValue) {
+		if (diffValues == null) {
+			diffValues = new TreeSet<>();
+		}
+		if (clrLvlEnabled && clrLvlValve != null && clrLvlValve.intValue() > 0 && StringUtils.isNotBlank(this.clrLvlStart) && StringUtils.isNotBlank(this.clrLvlEnd)) {
+			if ((ColumnType.STATISTICAL.equals(this.type) || ColumnType.COMPUTED.equals(this.type))) {
+				if (cellValue != null) {
+					String theType = this.javaType;
+					String valStr = this.asNumStr(cellValue);
+					if (valStr != null) {// 有可能是tinyint之类的bool值
+						if ("integer".equals(theType)) {
+							diffValues.add(Long.valueOf(valStr));
+						} else if ("float".equals(theType)) {
+							diffValues.add(Double.valueOf(valStr));
+						}
+					}
+				}
+			}
+		}
+	}
+
+	public void calCellValues() {
+		if (clrLvlEnabled && clrLvlValve != null && clrLvlValve.intValue() > 0 && StringUtils.isNotBlank(this.clrLvlStart) && StringUtils.isNotBlank(this.clrLvlEnd)) {
+			if (diffValues != null && diffValues.size() >= clrLvlValve.intValue()) {
+				System.out.println(diffValues);
+				// TODO 计算色阶colorMap
+				Color startColor = ClrLvlUtils.hexColorToColor(this.clrLvlStart);
+				if (startColor == null) {
+					return;
+				}
+				Color endColor = ClrLvlUtils.hexColorToColor(this.clrLvlEnd);
+				if (endColor == null) {
+					return;
+				}
+				String theType = this.javaType;
+				if ("integer".equals(theType)) {
+					int ukCount = this.diffValues.size();
+					long[] ukNums = new long[ukCount];
+					int ukIndex = 0;
+					for (Number diffValue : this.diffValues) {
+						ukNums[ukIndex++] = (long) diffValue;
+					}
+					this.clrLvlMap = ClrLvlUtils.getGradientColorMap(startColor, endColor, ukNums, this.clrLvlValve);
+				} else if ("float".equals(theType)) {
+					int ukCount = this.diffValues.size();
+					double[] ukNums = new double[ukCount];
+					int ukIndex = 0;
+					for (Number diffValue : this.diffValues) {
+						ukNums[ukIndex++] = (double) diffValue;
+					}
+					this.clrLvlMap = ClrLvlUtils.getGradientColorMap(startColor, endColor, ukNums, this.clrLvlValve);
+				}
+			}
+		}
+
 	}
 
 	/**
@@ -107,6 +201,67 @@ public class ReportMetaDataColumn {
 	 */
 	public void setDataType(final String dataType) {
 		this.dataType = dataType;
+		//
+		this.setJavaType(JdbcUtils.toSimpleDataType(dataType));
+	}
+
+	/** string, integer, float, date */
+	public String getJavaType() {
+		return javaType;
+	}
+
+	public void setJavaType(String javaType) {
+		this.javaType = javaType;
+	}
+
+	public String getAlign() {
+		if (StringUtils.isBlank(align)) {
+			String theType = this.javaType;
+			if ("integer".equals(theType) || "float".equals(theType)) {
+				return "right";
+			}
+			if ("date".equals(theType)) {
+				return "center";
+			}
+			return "left";
+		}
+		return align;
+	}
+
+	public void setAlign(String align) {
+		this.align = align;
+	}
+
+	public Boolean getClrLvlEnabled() {
+		return clrLvlEnabled == null ? false : clrLvlEnabled;
+	}
+
+	public void setClrLvlEnabled(Boolean clrLvlEnabled) {
+		this.clrLvlEnabled = clrLvlEnabled == null ? false : clrLvlEnabled;
+	}
+
+	public Integer getClrLvlValve() {
+		return clrLvlValve;
+	}
+
+	public void setClrLvlValve(Integer clrLvlValve) {
+		this.clrLvlValve = clrLvlValve;
+	}
+
+	public String getClrLvlStart() {
+		return clrLvlStart;
+	}
+
+	public void setClrLvlStart(String clrLvlStart) {
+		this.clrLvlStart = clrLvlStart;
+	}
+
+	public String getClrLvlEnd() {
+		return clrLvlEnd;
+	}
+
+	public void setClrLvlEnd(String clrLvlEnd) {
+		this.clrLvlEnd = clrLvlEnd;
 	}
 
 	/**
@@ -346,30 +501,59 @@ public class ReportMetaDataColumn {
 		this.comment = comment;
 	}
 
-	public ReportMetaDataColumn copyToNew() {
-		return this.copyToNew(this.name, this.text);
+	public String getStyle(Object cellValue) {
+		List<String> styleItems = new ArrayList<>();
+		// 对齐
+		String align = this.getAlign();
+		styleItems.add("text-align: " + align);
+		// 色阶
+		if (cellValue != null && this.clrLvlMap != null) {
+			String theType = this.javaType;
+			String valStr = this.asNumStr(cellValue);
+			if (valStr != null) {// 有可能是tinyint之类的bool值
+				Number valueKey = null;
+				if ("integer".equals(theType)) {
+					valueKey = Long.valueOf(valStr);
+				} else if ("float".equals(theType)) {
+					valueKey = Double.valueOf(valStr);
+				}
+				if (valueKey != null) {
+					String color = this.clrLvlMap.get(valueKey);
+					if (color != null) {
+						styleItems.add("background-color: " + color);
+					}
+				}
+			}
+		}
+		//
+		return StringUtils.join(styleItems, "; ");
 	}
 
-	public ReportMetaDataColumn copyToNew(final String name, final String text) {
-		return this.copyToNew(name, text, this.isPercent);
-	}
-
-	public ReportMetaDataColumn copyToNew(final String name, final String text, final boolean isPercent) {
-		final ReportMetaDataColumn column = new ReportMetaDataColumn();
-		column.setName(name);
-		column.setText(text);
-		column.setPercent(isPercent);
-		column.setDataType(this.dataType);
-		column.setExtensions(this.isExtensions);
-		column.setFootings(this.isFootings);
-		column.setHidden(this.isHidden);
-		column.setSortType(this.sortType.getValue());
-		column.setType(this.type.getValue());
-		column.setWidth(this.width);
-		column.setDecimals(this.decimals);
-		column.setOptional(this.isOptional);
-		column.setDisplayInMail(this.isDisplayInMail);
-		column.setComment(this.comment);
-		return column;
-	}
+	// public ReportMetaDataColumn copyToNew() {
+	// return this.copyToNew(this.name, this.text);
+	// }
+	//
+	// public ReportMetaDataColumn copyToNew(final String name, final String text) {
+	// return this.copyToNew(name, text, this.isPercent);
+	// }
+	//
+	// public ReportMetaDataColumn copyToNew(final String name, final String text, final boolean isPercent) {
+	// final ReportMetaDataColumn column = new ReportMetaDataColumn();
+	// column.setName(name);
+	// column.setText(text);
+	// column.setPercent(isPercent);
+	// column.setDataType(this.dataType);
+	// column.setAlign(this.align);
+	// column.setExtensions(this.isExtensions);
+	// column.setFootings(this.isFootings);
+	// column.setHidden(this.isHidden);
+	// column.setSortType(this.sortType.getValue());
+	// column.setType(this.type.getValue());
+	// column.setWidth(this.width);
+	// column.setDecimals(this.decimals);
+	// column.setOptional(this.isOptional);
+	// column.setDisplayInMail(this.isDisplayInMail);
+	// column.setComment(this.comment);
+	// return column;
+	// }
 }

@@ -97,11 +97,11 @@ var DesignerMVC = {
             name: "percent",
             text: "百分比",
             type: 1
-        }, {
+        },/* {
             name: "displayInMail",
             text: "邮件显示",
             type: 1
-        }, /*{
+        }, {
          name : "footings",
          text : "合计",
          type : 1
@@ -118,11 +118,11 @@ var DesignerMVC = {
             text: "备注",
             type: 2
         }
-            /*, {
-             name: "format",
-             text: "格式",
-             type: 2
-             }*/],
+        /*, {
+         name: "format",
+         text: "格式",
+         type: 2
+         }*/],
         MetaColumnTypes: [{
             text: "布局列",
             value: 1
@@ -151,6 +151,19 @@ var DesignerMVC = {
         }, {
             text: "字符优先降序",
             value: 4
+        }], 
+        MetaColumnAligns: [{
+            text: "默认",
+            value: ""
+        },{
+            text: "居左",
+            value: "left"
+        }, {
+            text: "居中",
+            value: "center"
+        }, {
+            text: "居右",
+            value: "right"
         }],
         DataSourceList: []
     },
@@ -367,6 +380,11 @@ var DesignerMVC = {
                                 row.text = row.name;
                                 row.type = 4;
                                 row.sortType = 0;
+                                row.align = '';
+                                row.clrLvlEnabled = false;
+                                row.clrLvlValve = 0;
+                                row.clrLvlStart = '';
+                                row.clrLvlEnd = '';
                                 $('#report-meta-column-grid').datagrid('appendRow', row);
                             }
                         });
@@ -410,7 +428,8 @@ var DesignerMVC = {
                 }, {
                     field: 'type',
                     title: '类型',
-                    width: 75,
+                    width: 70,
+                    align : 'center',
                     formatter: function (value, row, index) {
                         var id = "type" + index;
                         var tmpl =
@@ -432,17 +451,19 @@ var DesignerMVC = {
                 }, {
                     field: 'width',
                     title: '宽度',
-                    width: 40
+                    width: 40,
+                    align : 'right'
                 }, {
                     field: 'decimals',
                     title: '精度',
                     width: 50,
+                    align : 'center',
                     formatter: function (value, row, index) {
                         var id = "decimals" + index;
                         if (!row.decimals) {
                             row.decimals = 0;
                         }
-                        var tmpl = '<input style="width:42px;" type="text" id="${id}" name="decimals" value="${value}" />';
+                        var tmpl = '<input style="width:42px;text-align:center;" type="text" id="${id}" name="decimals" value="${value}" />';
                         return juicer(tmpl, {
                             id: id,
                             value: row.decimals
@@ -453,7 +474,7 @@ var DesignerMVC = {
                     title: '排序类型',
                     width: 100,
                     formatter: function (value, row, index) {
-                        var id = "sortType" + index;
+                		var id = "sortType" + index;
                         var tmpl =
                             '<select id="${id}" name=\"sortType\">' +
                             '{@each list as item}' +
@@ -465,6 +486,42 @@ var DesignerMVC = {
                             currValue: value,
                             list: DesignerMVC.Model.MetaColumnSortTypes
                         });
+                    }
+                }, {
+                    field: 'align',
+                    title: '对齐方式',
+                    width: 70,
+                    align : 'center',
+                    formatter: function (value, row, index) {
+                    	if(row.type == 3 || row.type == 4){
+                    		var id = "align" + index;
+                            var tmpl =
+                                '<select id="${id}" name=\"align\">' +
+                                '{@each list as item}' +
+                                '<option value="${item.value}" {@if item.value == currValue} selected {@/if}>${item.text}</option>' +
+                                '{@/each}' +
+                                '</select>';
+                            return juicer(tmpl, {
+                                id: id,
+                                currValue: value || '',
+                                list: DesignerMVC.Model.MetaColumnAligns
+                            });
+                    	}
+                    	return '';
+                    }
+                }, {
+                	field: 'clrLvl',
+                	title: '色阶样式',
+                    width: 70,
+                    align : 'center',
+                    formatter: function (value, row, index) {
+                    	if(DesignerMVC.Util.isNumbericCol(row.dataType, row.type)){
+                            var tmpl = '<input type="button" style="cursor: pointer;border:1px solid gray;height:20px;border-radius:2px;" value="..设置.." onclick="DesignerMVC.Controller.showMetaColumnClrLvl(${index})" />';
+                            return juicer(tmpl, {
+                                index : index
+                            });
+                    	}
+                    	return '';
                     }
                 }, {
                     field: 'options',
@@ -770,8 +827,8 @@ var DesignerMVC = {
                 closed: true,
                 modal: true,
                 iconCls: 'icon-formula',
-                top: (screen.height - 500) / 2,
-                left: (screen.width - 300) / 2,
+                top: (window.screen.height - 500) / 2,
+                left: (window.screen.width - 300) / 2,
                 width: 500,
                 height: 310,
                 buttons: [{
@@ -781,7 +838,7 @@ var DesignerMVC = {
                         $("#report-column-expression-dlg").dialog('close');
                     }
                 }, {
-                    text: '保存',
+                    text: '应用',
                     iconCls: 'icon-save',
                     handler: function () {
                         DesignerMVC.Controller.saveMetaColumnOption('expression');
@@ -793,8 +850,8 @@ var DesignerMVC = {
                 closed: true,
                 modal: true,
                 iconCls: 'icon-comment',
-                top: (screen.height - 500) / 2,
-                left: (screen.width - 300) / 2,
+                top: (window.screen.height - 500) / 2,
+                left: (window.screen.width - 300) / 2,
                 width: 500,
                 height: 310,
                 buttons: [{
@@ -804,10 +861,33 @@ var DesignerMVC = {
                         $("#report-column-comment-dlg").dialog('close');
                     }
                 }, {
-                    text: '保存',
+                    text: '应用',
                     iconCls: 'icon-save',
                     handler: function () {
                         DesignerMVC.Controller.saveMetaColumnOption('comment');
+                    }
+                }]
+            });
+            //
+            $('#report-column-clrLvl-dlg').dialog({
+                closed: true,
+                modal: true,
+                iconCls: 'icon-comment',
+                top: (window.screen.height - 400) / 2,
+                left: (window.screen.width - 300) / 2,
+                width: 400,
+                height: 300,
+                buttons: [{
+                    text: '关闭',
+                    iconCls: 'icon-no',
+                    handler: function () {
+                        $("#report-column-clrLvl-dlg").dialog('close');
+                    }
+                }, {
+                    text: '应用',
+                    iconCls: 'icon-save',
+                    handler: function () {
+                        DesignerMVC.Controller.saveMetaColumnClrLvl();
                     }
                 }]
             });
@@ -903,6 +983,13 @@ var DesignerMVC = {
             });
             //
             $('#btn-refresh-report-ds-list').bind('click', DesignerMVC.Util.reloadDataSourceList);
+            //
+            $('#report-column-clrLvlStart').bind('change', function(){
+            	$('#'+ this.id +'-feedback').css('background-color', this.value);
+            });
+            $('#report-column-clrLvlEnd').bind('change', function(){
+            	$('#'+ this.id +'-feedback').css('background-color', this.value);
+            });
         },
         bindValidate: function () {
         },
@@ -1247,11 +1334,40 @@ var DesignerMVC = {
                 return $("#report-column-comment").val(row.comment);
             }
         },
+        showMetaColumnClrLvl: function (index) {
+            $("#report-meta-column-grid").datagrid('selectRow', index);
+            var row = $("#report-meta-column-grid").datagrid('getSelected');
+            $('#report-column-clrLvl-dlg').dialog('open');
+            $("#report-column-clrLvlEnabled").prop('checked', row.clrLvlEnabled);
+            $("#report-column-clrLvlValve").val(row.clrLvlValve);
+            $("#report-column-clrLvlStart").val(row.clrLvlStart);
+            $("#report-column-clrLvlEnd").val(row.clrLvlEnd);
+            //
+            $("#report-column-clrLvlStart").trigger('change');
+            $("#report-column-clrLvlEnd").trigger('change');
+        },
+        saveMetaColumnClrLvl: function(){
+            var row = $("#report-meta-column-grid").datagrid('getSelected');
+            row.clrLvlEnabled = $("#report-column-clrLvlEnabled").prop('checked');
+            row.clrLvlValve = parseInt($("#report-column-clrLvlValve").val()) || null;
+            row.clrLvlStart = $.trim($("#report-column-clrLvlStart").val());
+            row.clrLvlEnd = $.trim($("#report-column-clrLvlEnd").val());
+            //TODO 验证数据
+            return $('#report-column-clrLvl-dlg').dialog('close');
+        },
         saveMetaColumnOption: function (name) {
             var row = $("#report-meta-column-grid").datagrid('getSelected');
             if (name == "expression") {
                 row.expression = $("#report-column-expression").val();
                 return $('#report-column-expression-dlg').dialog('close');
+            }
+            if (name == "clrLvl") {
+                row.clrLvlEnabled = $("#report-column-clrLvlEnabled").prop('checked');
+                row.clrLvlValve = parseInt($("#report-column-clrLvlValve").val()) || null;
+                row.clrLvlStart = $.trim($("#report-column-clrLvlStart").val());
+                row.clrLvlEnd = $.trim($("#report-column-clrLvlEnd").val());
+                //TODO 验证数据
+                return $('#report-column-clrLvl-dlg').dialog('close');
             }
             if (name == "comment") {
                 row.comment = $("#report-column-comment").val();
@@ -1422,6 +1538,14 @@ var DesignerMVC = {
             }
             return 0;
         },
+        isNumbericCol: function(sqlTypeName, type){
+        	if(sqlTypeName.indexOf('INT') != -1 || "DECIMAL" == sqlTypeName || "DOUBLE" == sqlTypeName || "FLOAT" == sqlTypeName){
+        		if(type == 3 || type == 4){
+            		return true;
+            	}
+        	}
+        	return false;
+        },
         checkBasicConfParam: function () {
             if (DesignerMVC.View.SqlEditor.getValue() == "") {
                 $.messager.alert('失败', "未发现操作的SQL语句！", 'error');
@@ -1467,6 +1591,7 @@ var DesignerMVC = {
                 column["text"] = $("#text" + rowIndex).val();
                 column["type"] = $("#type" + rowIndex).val();
                 column["sortType"] = $("#sortType" + rowIndex).val();
+                column["align"] = $("#align" + rowIndex).val();
                 column["decimals"] = $("#decimals" + rowIndex).val();
             }
             return columns;

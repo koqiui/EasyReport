@@ -145,9 +145,9 @@ public class ReportController {
 	public ResponseResult<?> getDataSet(final String uid, final HttpServletRequest request) {
 		ResponseResult<?> result;
 		try {
-			final Report po = this.reportService.getByUid(uid);
+			final Report report = this.reportService.getByUid(uid);
 			final Map<String, Object> formParameters = this.tableReportService.getFormParameters(request.getParameterMap());
-			result = ResponseResult.success(this.tableReportService.getReportDataSet(po, formParameters));
+			result = ResponseResult.success(this.tableReportService.getReportDataSet(report, formParameters));
 		} catch (QueryParamsException | NotFoundLayoutColumnException | SQLQueryException | TemplatePraseException ex) {
 			log.error("报表生成失败", ex);
 			result = ResponseResult.failure(10007, "报表生成失败", ex.getMessage());
@@ -185,9 +185,9 @@ public class ReportController {
 		final JSONObject data = ReportUtils.getDefaultChartData();
 		if (StringUtils.isNotBlank(uid)) {
 			try {
-				final Report po = this.reportService.getByUid(uid);
+				final Report report = this.reportService.getByUid(uid);
 				final Map<String, Object> formParameters = this.tableReportService.getFormParameters(request.getParameterMap());
-				final ReportDataSet reportDataSet = this.tableReportService.getReportDataSet(po, formParameters);
+				final ReportDataSet reportDataSet = this.tableReportService.getReportDataSet(report, formParameters);
 				data.put("dimColumnMap", this.chartReportService.getDimColumnMap(reportDataSet));
 				data.put("dimColumns", this.chartReportService.getDimColumns(reportDataSet));
 				data.put("statColumns", this.chartReportService.getStatColumns(reportDataSet));

@@ -18,6 +18,7 @@ public class ReportParameter {
     private List<ReportMetaDataColumn> metaColumns;
     private Set<String> enabledStatColumns;
     private boolean isRowSpan = true;
+    
 
     public ReportParameter() {
     }

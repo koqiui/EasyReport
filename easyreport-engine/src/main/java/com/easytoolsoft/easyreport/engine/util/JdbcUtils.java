@@ -20,35 +20,49 @@ import org.slf4j.LoggerFactory;
  * @author tomdeng
  */
 public class JdbcUtils {
-    private static final Logger logger = LoggerFactory.getLogger(JdbcUtils.class);
-    private static final Map<String, DataSource> dataSourceMap = new ConcurrentHashMap<>(100);
+	private static final Logger logger = LoggerFactory.getLogger(JdbcUtils.class);
+	private static final Map<String, DataSource> dataSourceMap = new ConcurrentHashMap<>(100);
 
-    public static DataSource getDataSource(final ReportDataSource rptDs) {
-        //用数据源用户名,密码,jdbcUrl做为key
-        final String key = String.format("%s|%s|%s", rptDs.getUser(), rptDs.getPassword(), rptDs.getJdbcUrl())
-            .toLowerCase();
-        DataSource dataSource = dataSourceMap.get(key);
-        if (dataSource == null) {
-            dataSource = DataSourcePoolFactory.create(rptDs.getDbPoolClass()).wrap(rptDs);
-            dataSourceMap.put(key, dataSource);
-        }
-        return dataSource;
-    }
+	public static DataSource getDataSource(final ReportDataSource rptDs) {
+		// 用数据源用户名,密码,jdbcUrl做为key
+		final String key = String.format("%s|%s|%s", rptDs.getUser(), rptDs.getPassword(), rptDs.getJdbcUrl()).toLowerCase();
+		DataSource dataSource = dataSourceMap.get(key);
+		if (dataSource == null) {
+			dataSource = DataSourcePoolFactory.create(rptDs.getDbPoolClass()).wrap(rptDs);
+			dataSourceMap.put(key, dataSource);
+		}
+		return dataSource;
+	}
 
-    public static void releaseJdbcResource(final Connection conn, final Statement stmt, final ResultSet rs) {
-        try {
-            if (stmt != null) {
-                stmt.close();
-            }
-            if (rs != null) {
-                rs.close();
-            }
-            if (conn != null) {
-                conn.close();
-            }
-        } catch (final SQLException ex) {
-            logger.error("数据库资源释放异常", ex);
-            throw new RuntimeException("数据库资源释放异常", ex);
-        }
-    }
+	public static void releaseJdbcResource(final Connection conn, final Statement stmt, final ResultSet rs) {
+		try {
+			if (stmt != null) {
+				stmt.close();
+			}
+			if (rs != null) {
+				rs.close();
+			}
+			if (conn != null) {
+				conn.close();
+			}
+		} catch (final SQLException ex) {
+			logger.error("数据库资源释放异常", ex);
+			throw new RuntimeException("数据库资源释放异常", ex);
+		}
+	}
+
+	public static String toSimpleDataType(String sqlTypeName) {
+		if (sqlTypeName != null) {
+			if ("DECIMAL".equals(sqlTypeName) || "DOUBLE".equals(sqlTypeName) || "FLOAT".equals(sqlTypeName)) {
+				return "float";
+			}
+			if (sqlTypeName.indexOf("INT") != -1) {
+				return "integer";
+			}
+			if ("DATE".equals(sqlTypeName) || "TIMESTAMP".equals(sqlTypeName) || "TIME".equals(sqlTypeName)) {
+				return "date";
+			}
+		}
+		return "string";
+	}
 }

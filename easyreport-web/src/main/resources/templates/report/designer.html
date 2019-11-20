@@ -168,9 +168,9 @@
                         <tr>
                         	<td colspan="8" style="text-align: center;">
                             	<a id="btn-report-parse-sql-var-names" href="#" class="easyui-linkbutton"
-                                   >提取SQL参数</a>&nbsp;&nbsp;;&nbsp;
+                                   >提取SQL参数</a>&nbsp;&nbsp;&nbsp;
                                 <a id="btn-report-exec-sql" href="#" class="easyui-linkbutton"
-                                   iconCls="icon-ok">执行SQL</a>&nbsp;&nbsp;;&nbsp;
+                                   iconCls="icon-ok">执行SQL</a>&nbsp;&nbsp;&nbsp;
                                 <a id="btn-report-preview-sql" href="#" class="easyui-linkbutton"
                                    iconCls="icon-sql">预览SQL</a>
                             </td>
@@ -352,6 +352,37 @@
             <td class="top">
                 <textarea id="report-column-expression" name="expression"
                           style="border:solid 1px; width: 98%; height: 215px;"></textarea></td>
+        </tr>
+    </table>
+</div>
+<!-- 设置色阶样式弹框  -->
+<div id="report-column-clrLvl-dlg" title="数值列色阶信息">
+    <table class="designer-table" style="height: 90%">
+        <tr>
+        	<td>&nbsp;</td>
+            <td>
+            	<label><input id="report-column-clrLvlEnabled" name="clrLvlEnabled" class="easyui-checkbox" type="checkbox"/>启用色阶</label>
+            </td>
+        </tr>
+        <tr>
+        	<td style="text-align:right;">最少异值数量：</td>
+            <td>
+            	<input id="report-column-clrLvlValve" name="clrLvlValve" type="number" style="line-height:23px;height:23px;border:1px dotted #AAAAA;text-align:center;" title="如果该列不同数值的数量少于指定的数量则不会出现色阶样式（建议 > 5）" />
+            </td>
+        </tr>
+        <tr>
+        	<td style="text-align:right;">色阶起始颜色：</td>
+            <td>
+            	<input id="report-column-clrLvlStart" name="clrLvlStart" type="text" style="line-height:23px;height:23px;border:1px dotted #AAAAA;text-align:center;" title="十六进制颜色，形如：#RRGGBB" />
+            	<div id="report-column-clrLvlStart-feedback" style="display:inline-block;width:40px;line-height:23px;height:23px;border:1px dotted #AAAAA;">&nbsp;</div>
+            </td>
+        </tr>
+        <tr>
+        	<td style="text-align:right;">色阶终止颜色：</td>
+            <td>
+            	<input id="report-column-clrLvlEnd" name="clrLvlEnd" type="text" style="line-height:23px;height:23px;border:1px dotted #AAAAA;text-align:center;" title="十六进制颜色，形如：#RRGGBB" />
+            	<div id="report-column-clrLvlEnd-feedback" style="display:inline-block;width:40px;line-height:23px;height:23px;border:1px dotted #AAAAA;">&nbsp;</div>
+            </td>
         </tr>
     </table>
 </div>

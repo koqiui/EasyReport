@@ -28,7 +28,7 @@ import com.easytoolsoft.easyreport.engine.util.JdbcUtils;
 /**
  * @author tomdeng
  */
-public abstract class AbstractQueryer {
+public abstract class AbstractQueryer implements Queryer {
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 	protected final ReportDataSource dataSource;
 	protected final ReportParameter parameter;
@@ -136,6 +136,11 @@ public abstract class AbstractQueryer {
 			}
 			rows.add(row);
 		}
+		// 计算列的异值（便于实现色阶逻辑）
+		for (final ReportMetaDataColumn column : sqlColumns) {
+			column.calCellValues();
+		}
+		//
 		return rows;
 	}
 
