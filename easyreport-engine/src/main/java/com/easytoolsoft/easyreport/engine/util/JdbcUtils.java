@@ -53,8 +53,11 @@ public class JdbcUtils {
 
 	public static String toSimpleDataType(String sqlTypeName) {
 		if (sqlTypeName != null) {
-			if ("DECIMAL".equals(sqlTypeName) || "DOUBLE".equals(sqlTypeName) || "FLOAT".equals(sqlTypeName)) {
+			if ("DECIMAL".equals(sqlTypeName) || "DOUBLE".equals(sqlTypeName) || "FLOAT".equals(sqlTypeName) || "REAL".equals(sqlTypeName)) {
 				return "float";
+			}
+			if ("BOOLEAN".equals(sqlTypeName)) {
+				return "bool";
 			}
 			if (sqlTypeName.indexOf("INT") != -1) {
 				return "integer";

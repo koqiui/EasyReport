@@ -206,7 +206,7 @@ public abstract class AbstractReportDataSet implements ReportDataSet {
             Set<String> columnValueSet = new HashSet<>();
             List<String> valueList = new ArrayList<>();
             for (ReportMetaDataRow metaDataRow : metaDataRows) {
-                String value = this.getMetaCellValue(metaDataRow, column);
+                String value = this.getMetaCellString(metaDataRow, column);
                 if (!columnValueSet.contains(value)) {
                     columnValueSet.add(value);
                     valueList.add(value);
@@ -318,7 +318,7 @@ public abstract class AbstractReportDataSet implements ReportDataSet {
     protected String getDataRowMapKey(ReportMetaDataRow metaDataRow, List<ReportDataColumn> nonStatColumns) {
         StringBuilder rowMapKeyBuilder = new StringBuilder("");
         for (ReportDataColumn nonStatColumn : nonStatColumns) {
-            String value = this.getMetaCellValue(metaDataRow, nonStatColumn);
+            String value = this.getMetaCellString(metaDataRow, nonStatColumn);
             rowMapKeyBuilder.append(StringUtils.replace(value, PATH_SEPARATOR, "*"));
             rowMapKeyBuilder.append(PATH_SEPARATOR);
         }
@@ -345,7 +345,7 @@ public abstract class AbstractReportDataSet implements ReportDataSet {
         ColumnTreeNode parentNode = null;
         if (depth > 0) {
             ReportDataColumn parentColumn = columns.get(depth - 1);
-            String parentValue = this.getMetaCellValue(metaDataRow, parentColumn);
+            String parentValue = this.getMetaCellString(metaDataRow, parentColumn);
             String parentPath = this.getLevelPath(metaDataRow, columns, depth - 1);
             parentNode = new ColumnTreeNode(parentColumn.getName(), parentColumn.getText(), parentValue, null);
             parentNode.setPath(parentPath);
@@ -353,7 +353,7 @@ public abstract class AbstractReportDataSet implements ReportDataSet {
         }
 
         ReportDataColumn column = columns.get(depth);
-        String value = this.getMetaCellValue(metaDataRow, column);
+        String value = this.getMetaCellString(metaDataRow, column);
         ColumnTreeNode treeNode = new ColumnTreeNode(column.getName(), column.getText(), value, parentNode);
         treeNode.setDepth(depth);
         treeNode.setPath(path);
@@ -366,16 +366,15 @@ public abstract class AbstractReportDataSet implements ReportDataSet {
         StringBuilder pathBuilder = new StringBuilder();
         for (int i = 0; i <= level; i++) {
             ReportDataColumn column = columns.get(i);
-            String value = this.getMetaCellValue(metaDataRow, column);
+            String value = this.getMetaCellString(metaDataRow, column);
             pathBuilder.append(StringUtils.replace(value, PATH_SEPARATOR, "*"));
             pathBuilder.append(PATH_SEPARATOR);
         }
         return pathBuilder.toString();
     }
 
-    protected String getMetaCellValue(ReportMetaDataRow metaDataRow, ReportDataColumn column) {
-        Object cellValue = metaDataRow.getCellValue(column.getName());
-        return (cellValue == null) ? "" : cellValue.toString().trim();
+    protected String getMetaCellString(ReportMetaDataRow metaDataRow, ReportDataColumn column) {
+        return metaDataRow.getCellString(column.getName());
     }
 
     protected void setTreeNodeSpansAndDepth(List<ColumnTreeNode> roots, List<ReportDataColumn> columns) {

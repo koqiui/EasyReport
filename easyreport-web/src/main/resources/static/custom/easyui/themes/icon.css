@@ -289,3 +289,11 @@
 .icon-webpage {
     background: url('icons/webpage.png') no-repeat center center;
 }
+
+.icon-format {
+    background: url('icons/format.png') no-repeat center left;
+}
+
+.icon-format2 {
+    background: url('icons/format2.png') no-repeat center left;
+}

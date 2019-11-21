@@ -136,9 +136,9 @@ public abstract class AbstractQueryer implements Queryer {
 			}
 			rows.add(row);
 		}
-		// 计算列的异值（便于实现色阶逻辑）
+		// 实现列各种格式化
 		for (final ReportMetaDataColumn column : sqlColumns) {
-			column.calCellValues();
+			column.initFormatInfo();
 		}
 		//
 		return rows;

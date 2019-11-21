@@ -1,8 +1,6 @@
 package com.easytoolsoft.easyreport.engine.data;
 
-import java.text.SimpleDateFormat;
-
-import com.easytoolsoft.easyreport.engine.util.NumberFormatUtils;
+import java.text.Format;
 
 /**
  * @author tomdeng
@@ -40,35 +38,23 @@ public class ReportDataCell {
 
 	@Override
 	public String toString() {
-		ReportMetaDataColumn metaData = this.column.getMetaData();
-		int decimals = metaData.getDecimals();
-		if (metaData.isPercent()) {
-			decimals = decimals <= 0 ? 2 : decimals;
-			return NumberFormatUtils.percentFormat(this.value, decimals);
+		if (this.value == null) {
+			return "";
 		}
-		String sqlType = metaData.getDataType();
+		//
+		ReportMetaDataColumn metaData = this.column.getMetaData();
 		String theType = metaData.getJavaType();
-		if ("float".equals(theType)) {
-			decimals = decimals <= 0 ? 4 : decimals;
-			return NumberFormatUtils.decimalFormat(this.value, decimals);
-		} else if ("date".equals(theType)) {
-			if (this.value instanceof java.util.Date) {
-				if ("DATE".equals(sqlType)) {
-					SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-					return df.format(this.value);
-				}
-				if ("TIMESTAMP".equals(sqlType)) {
-					SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-					return df.format(this.value);
-				}
-				if ("TIME".equals(sqlType)) {
-					SimpleDateFormat df = new SimpleDateFormat("HH:mm:ss");
-					return df.format(this.value);
+		Format format = metaData.getFormatX();
+		if ("float".equals(theType) || "integer".equals(theType) || "date".equals(theType)) {
+			if (format != null) {
+				try {
+					return format.format(this.value);
+				} catch (Exception ex) {
+					//
 				}
 			}
 		}
-
-		return NumberFormatUtils.format(this.value);
-
+		//
+		return this.value.toString();
 	}
 }

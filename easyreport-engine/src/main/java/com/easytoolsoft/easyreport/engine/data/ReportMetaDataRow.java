@@ -19,8 +19,8 @@ public class ReportMetaDataRow {
 	public ReportMetaDataRow add(final ReportMetaDataCell cell) {
 		this.cells.put(cell.getName(), cell);
 		if (cell.getColumn().getType() != ColumnType.STATISTICAL) {
-			final Object cellValue = cell.getValue();
-			this.rowKeyBuilder.append((cellValue == null) ? "" : cellValue.toString().trim());
+			final String cellValueStr = cell.toString();
+			this.rowKeyBuilder.append(cellValueStr.trim());
 			this.rowKeyBuilder.append("$");
 		}
 		return this;
@@ -42,6 +42,11 @@ public class ReportMetaDataRow {
 	public Object getCellValue(final String name) {
 		final ReportMetaDataCell cell = this.cells.get(name);
 		return (cell == null) ? null : cell.getValue();
+	}
+
+	public String getCellString(final String name) {
+		final ReportMetaDataCell cell = this.cells.get(name);
+		return (cell == null) ? "" : cell.toString();
 	}
 
 	public String getRowKey() {

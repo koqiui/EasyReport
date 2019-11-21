@@ -1,6 +1,9 @@
 package com.easytoolsoft.easyreport.engine.data;
 
 import java.awt.Color;
+import java.text.DecimalFormat;
+import java.text.Format;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +25,7 @@ public class ReportMetaDataColumn {
 	private int ordinal;
 	private String name;
 	private String text;
-	private String dataType;
+	private String dataType;// sqlTypeName
 	private String javaType;
 	// 对齐方式
 	private String align;
@@ -33,10 +36,10 @@ public class ReportMetaDataColumn {
 	private String clrLvlEnd;// 色阶终止色
 	//
 	private String expression;
-	private String format;
+	private String format;// 日期、数值格式化字符串
+	private Format formatX;
 	private String comment;
 	private int width;
-	private int decimals;
 	private ColumnType type = ColumnType.DIMENSION;
 	private ColumnSortType sortType = ColumnSortType.DEFAULT;
 	private boolean isExtensions;
@@ -70,7 +73,8 @@ public class ReportMetaDataColumn {
 		return null;
 	}
 
-	public void addCellValue(Object cellValue) {
+	/** 收集单元格的值（异值） */
+	public void clctCellValue(Object cellValue) {
 		if (diffValues == null) {
 			diffValues = new TreeSet<>();
 		}
@@ -91,11 +95,49 @@ public class ReportMetaDataColumn {
 		}
 	}
 
-	public void calCellValues() {
+	public void initFormatInfo() {
+		String theType = this.javaType;
+		//
+		String theFormat = null;
+		if (StringUtils.isBlank(this.format)) {
+			if ("date".equals(theType)) {
+				if ("DATE".equals(dataType)) {
+					theFormat = "yyyy-MM-dd";
+				} else if ("TIME".equals(dataType)) {
+					theFormat = "HH:mm:ss";
+				} else {// "TIMESTAMP".equals(dataType)
+					theFormat = "yyyy-MM-dd HH:mm:ss";
+				}
+				formatX = new SimpleDateFormat(theFormat);
+			} else if ("float".equals(theType)) {
+				theFormat = "#0.00";
+				if (this.isPercent) {
+					theFormat += "%";
+				}
+				formatX = new DecimalFormat(theFormat);
+			}
+		} else {
+			theFormat = this.format.trim();
+			try {
+				if ("date".equals(theType)) {
+					formatX = new SimpleDateFormat(theFormat);
+				} else if ("float".equals(theType)) {
+					if (this.isPercent && theFormat.indexOf("%") == -1) {
+						theFormat += "%";
+					}
+					formatX = new DecimalFormat(theFormat);
+				} else if ("integer".equals(theType)) {
+					formatX = new DecimalFormat(theFormat);
+				}
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+		}
+		// 色阶信息
 		if (clrLvlEnabled && clrLvlValve != null && clrLvlValve.intValue() > 0 && StringUtils.isNotBlank(this.clrLvlStart) && StringUtils.isNotBlank(this.clrLvlEnd)) {
 			if (diffValues != null && diffValues.size() >= clrLvlValve.intValue()) {
-				System.out.println(diffValues);
-				// TODO 计算色阶colorMap
+				// System.out.println(diffValues);
+				// 计算色阶colorMap
 				Color startColor = ClrLvlUtils.hexColorToColor(this.clrLvlStart);
 				if (startColor == null) {
 					return;
@@ -104,7 +146,6 @@ public class ReportMetaDataColumn {
 				if (endColor == null) {
 					return;
 				}
-				String theType = this.javaType;
 				if ("integer".equals(theType)) {
 					int ukCount = this.diffValues.size();
 					long[] ukNums = new long[ukCount];
@@ -202,16 +243,12 @@ public class ReportMetaDataColumn {
 	public void setDataType(final String dataType) {
 		this.dataType = dataType;
 		//
-		this.setJavaType(JdbcUtils.toSimpleDataType(dataType));
+		this.javaType = JdbcUtils.toSimpleDataType(dataType);
 	}
 
 	/** string, integer, float, date */
 	public String getJavaType() {
 		return javaType;
-	}
-
-	public void setJavaType(String javaType) {
-		this.javaType = javaType;
 	}
 
 	public String getAlign() {
@@ -284,12 +321,12 @@ public class ReportMetaDataColumn {
 	}
 
 	/**
-	 * 获取报表元数据列的格式 .String.format(format,text)
+	 * 获取报表元数据列的格式 日期、数值格式化字符串
 	 *
 	 * @return 格式化字符串
 	 */
 	public String getFormat() {
-		return this.format == null ? "" : this.format;
+		return this.format;
 	}
 
 	/**
@@ -300,6 +337,10 @@ public class ReportMetaDataColumn {
 	 */
 	public void setFormat(final String format) {
 		this.format = format;
+	}
+
+	public Format getFormatX() {
+		return this.formatX;
 	}
 
 	/**
@@ -318,25 +359,6 @@ public class ReportMetaDataColumn {
 	 */
 	public void setWidth(final int width) {
 		this.width = width;
-	}
-
-	/**
-	 * 获取报表元数据列的精度（即保留多少位小数,默认浮点数为4位，百分比为2位，其他为0)
-	 *
-	 * @return 小数精度, 默认浮点数为4位，百分比为2位
-	 */
-	public int getDecimals() {
-		return this.decimals;
-	}
-
-	/**
-	 * 设置报表元数据列的精度（即保留多少位小数,默认浮点数为4位，百分比为2位，其他为0)
-	 *
-	 * @param decimals
-	 *            小数精度,默认浮点数为4位，百分比为2位，其他为0
-	 */
-	public void setDecimals(final int decimals) {
-		this.decimals = decimals;
 	}
 
 	/**
@@ -528,32 +550,4 @@ public class ReportMetaDataColumn {
 		//
 		return StringUtils.join(styleItems, "; ");
 	}
-
-	// public ReportMetaDataColumn copyToNew() {
-	// return this.copyToNew(this.name, this.text);
-	// }
-	//
-	// public ReportMetaDataColumn copyToNew(final String name, final String text) {
-	// return this.copyToNew(name, text, this.isPercent);
-	// }
-	//
-	// public ReportMetaDataColumn copyToNew(final String name, final String text, final boolean isPercent) {
-	// final ReportMetaDataColumn column = new ReportMetaDataColumn();
-	// column.setName(name);
-	// column.setText(text);
-	// column.setPercent(isPercent);
-	// column.setDataType(this.dataType);
-	// column.setAlign(this.align);
-	// column.setExtensions(this.isExtensions);
-	// column.setFootings(this.isFootings);
-	// column.setHidden(this.isHidden);
-	// column.setSortType(this.sortType.getValue());
-	// column.setType(this.type.getValue());
-	// column.setWidth(this.width);
-	// column.setDecimals(this.decimals);
-	// column.setOptional(this.isOptional);
-	// column.setDisplayInMail(this.isDisplayInMail);
-	// column.setComment(this.comment);
-	// return column;
-	// }
 }

@@ -1,5 +1,7 @@
 package com.easytoolsoft.easyreport.engine;
 
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,6 +26,28 @@ public class XTest {
 		String sqlResult = preprocessSqlText(sqlText);
 		
 		System.out.println(sqlResult);
+	}
+	
+	
+	@Test
+	public void test_double() {
+		BigDecimal dec = new BigDecimal(3.4555);
+		//
+		String decStr = dec.toString();
+		
+		System.out.println(decStr);
+		
+		double dbl = Double.valueOf(decStr);
+		
+		System.out.println(dbl);
+	}
+	
+	@Test
+	public void test_numformat() {
+		DecimalFormat df = new DecimalFormat("###,##0.00%");
+		//
+		double val = 0.53;
+		System.out.println(df.format(val));
 	}
 
 }

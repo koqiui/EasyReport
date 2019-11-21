@@ -141,15 +141,14 @@ var TableReportMVC = {
              return TableReportMVC.renderDatatables(table);*/
         },
         renderClassicTable: function (table) {
-            $("#easyreport>tbody>tr").click(function () {
-                $('#easyreport .selected').removeClass('selected').removeAttr('title');
-                $(this).addClass('selected');
+            $("#easyreport>tbody>tr").dblclick(function () {
+                $(this).toggleClass('selected');
             });
             $('#easyreport>tbody>tr').mouseover(function (e) {
-                $(this).addClass('selected');
+                $(this).addClass('hover');
             });
             $('#easyreport>tbody>tr').mouseleave(function (e) {
-                $('#easyreport .selected').removeClass('selected').removeAttr('title');
+                $(this).removeClass('hover');
             });
 
             var noRowSpan = !TableReportMVC.Util.hasRowSpan();
@@ -202,14 +201,8 @@ var TableReportMVC = {
                     }
                 }
             });
-            $('#easyreport tbody').on('click', 'tr', function () {
-                if ($(this).hasClass('selected')) {
-                    $(this).removeClass('selected');
-                }
-                else {
-                    dt.$('tr.selected').removeClass('selected');
-                    $(this).addClass('selected');
-                }
+            $('#easyreport tbody').on('dblclick', 'tr', function () {
+            	$(this).toggleClass('selected');
             });
         },
         // 将报表上面的过滤信息拼成table，用于写入excel中

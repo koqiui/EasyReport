@@ -93,10 +93,6 @@ var DesignerMVC = {
             name: "optional",
             text: "可选的",
             type: 1
-        }, {
-            name: "percent",
-            text: "百分比",
-            type: 1
         },/* {
             name: "displayInMail",
             text: "邮件显示",
@@ -117,12 +113,7 @@ var DesignerMVC = {
             name: "comment",
             text: "备注",
             type: 2
-        }
-        /*, {
-         name: "format",
-         text: "格式",
-         type: 2
-         }*/],
+        }],
         MetaColumnTypes: [{
             text: "布局列",
             value: 1
@@ -353,6 +344,12 @@ var DesignerMVC = {
                 singleSelect: true,
                 rownumbers: true,
                 tools: [{
+                	tooltip: '设为日期、时间、数值等的默认格式',
+                    iconCls: 'icon-format2',
+                    handler: function () {
+                    	DesignerMVC.Controller.setMetaColumnFormat();
+                    }
+                }, '-',{
                     iconCls: 'icon-up',
                     handler: function () {
                         EasyUIUtils.move("#report-meta-column-grid", 'up');
@@ -381,6 +378,8 @@ var DesignerMVC = {
                                 row.type = 4;
                                 row.sortType = 0;
                                 row.align = '';
+                                row.format = '';
+                                row.percent = false;
                                 row.clrLvlEnabled = false;
                                 row.clrLvlValve = 0;
                                 row.clrLvlStart = '';
@@ -398,13 +397,16 @@ var DesignerMVC = {
                             $("#report-meta-column-grid").datagrid('deleteRow', index);
                             var rows = $("#report-meta-column-grid").datagrid('getRows');
                             $("#report-meta-column-grid").datagrid('loadData', rows);
+                            if(rows.length > index){
+                            	$("#report-meta-column-grid").datagrid('selectRow', index);
+                            }
                         }
                     }
                 }],
                 columns: [[{
                     field: 'name',
                     title: '列名',
-                    width: 100,
+                    width: 120,
                     formatter: function (value, row, index) {
                         var id = "name" + index;
                         var tmpl = '<input style="width:98%;" type="text" id="${id}" name="name" value="${value}" />';
@@ -454,22 +456,6 @@ var DesignerMVC = {
                     width: 40,
                     align : 'right'
                 }, {
-                    field: 'decimals',
-                    title: '精度',
-                    width: 50,
-                    align : 'center',
-                    formatter: function (value, row, index) {
-                        var id = "decimals" + index;
-                        if (!row.decimals) {
-                            row.decimals = 0;
-                        }
-                        var tmpl = '<input style="width:42px;text-align:center;" type="text" id="${id}" name="decimals" value="${value}" />';
-                        return juicer(tmpl, {
-                            id: id,
-                            value: row.decimals
-                        });
-                    }
-                }, {
                     field: 'sortType',
                     title: '排序类型',
                     width: 100,
@@ -493,21 +479,55 @@ var DesignerMVC = {
                     width: 70,
                     align : 'center',
                     formatter: function (value, row, index) {
-                    	if(row.type == 3 || row.type == 4){
-                    		var id = "align" + index;
-                            var tmpl =
-                                '<select id="${id}" name=\"align\">' +
-                                '{@each list as item}' +
-                                '<option value="${item.value}" {@if item.value == currValue} selected {@/if}>${item.text}</option>' +
-                                '{@/each}' +
-                                '</select>';
+                		var id = "align" + index;
+                        var tmpl =
+                            '<select id="${id}" name=\"align\">' +
+                            '{@each list as item}' +
+                            '<option value="${item.value}" {@if item.value == currValue} selected {@/if}>${item.text}</option>' +
+                            '{@/each}' +
+                            '</select>';
+                        return juicer(tmpl, {
+                            id: id,
+                            currValue: value || '',
+                            list: DesignerMVC.Model.MetaColumnAligns
+                        });
+                    }
+                }, {
+                    field: 'format',
+                    title: '格式化字符串',
+                    width: 140,
+                    formatter: function (value, row, index) {
+                    	if(DesignerMVC.Util.isNumbericOrDateCol(row.dataType)){
+                    		var id = "format" + index;
+                            if (!row.format) {
+                                row.format = '';
+                            }
+                            var tmpl = '<input style="width:98%;text-align:left;" type="text" id="${id}" name="format" value="${value}" />';
                             return juicer(tmpl, {
                                 id: id,
-                                currValue: value || '',
-                                list: DesignerMVC.Model.MetaColumnAligns
+                                value: row.format
                             });
                     	}
-                    	return '';
+                        return '';
+                    }
+                }, {
+                    field: 'percent',
+                    title: '百分比',
+                    width: 50,
+                    align: 'center',
+                    formatter: function (value, row, index) {
+                    	if(DesignerMVC.Util.isDecimalCol(row.dataType)){
+                    		var id = "percent" + index;
+                            if (row.percent == null) {
+                                row.percent = false;
+                            }
+                            var tmpl = '<input type="checkbox" id="${id}" name="percent" ${checked} />';
+                            return juicer(tmpl, {
+                                id: id,
+                                checked: row.percent ? 'checked="checked"' : ''
+                            });
+                    	}
+                        return '';
                     }
                 }, {
                 	field: 'clrLvl',
@@ -515,7 +535,7 @@ var DesignerMVC = {
                     width: 70,
                     align : 'center',
                     formatter: function (value, row, index) {
-                    	if(DesignerMVC.Util.isNumbericCol(row.dataType, row.type)){
+                    	if(DesignerMVC.Util.isNumbericCol(row.dataType) && (row.type == 3 || row.type == 4)){
                             var tmpl = '<input type="button" style="cursor: pointer;border:1px solid gray;height:20px;border-radius:2px;" value="..设置.." onclick="DesignerMVC.Controller.showMetaColumnClrLvl(${index})" />';
                             return juicer(tmpl, {
                                 index : index
@@ -526,7 +546,7 @@ var DesignerMVC = {
                 }, {
                     field: 'options',
                     title: '配置',
-                    width: 300,
+                    width: 220,
                     formatter: function (value, row, index) {
                         var subOptions = [];
                         // 4:计算列,3:统计列,2:维度列,1:布局列
@@ -556,12 +576,13 @@ var DesignerMVC = {
                                 onClick: ""
                             };
                             var tmpl = "";
-                            if (name == "expression" || name == "comment" || name == "format") {
+                            if (name == "expression" || name == "comment") {
                                 data.imgSrc = DesignerCommon.baseIconUrl + name + ".png";
                                 data.onClick = "MetaDataDesigner.showMetaColumnOption('" + index + "','" + name + "')";
-                                tmpl = '<img style="cursor: pointer;" id="${id}" title="${text}" src="${imgSrc}" onclick="${onClick}" />';
+                                data.extStyle = name == "comment" ? 'float:right;' : '';
+                                tmpl = '<img style="cursor: pointer;${extStyle}" id="${id}" title="${text}" src="${imgSrc}" onclick="${onClick}" />';
                             } else {
-                                tmpl = '<input type="checkbox" id="${id}" name="${name}" ${checked}>${text}</input>'
+                                tmpl = '<label><input type="checkbox" id="${id}" name="${name}" ${checked} />${text}</label>'
                             }
                             htmlOptions.push(juicer(tmpl, data));
                         }
@@ -1294,7 +1315,8 @@ var DesignerMVC = {
         },
         deleteQueryParam: function (index) {
             $("#report-query-param-grid").datagrid('deleteRow', index);
-            $("#report-query-param-grid").datagrid('reload', $("#report-query-param-grid").datagrid('getRows'));
+            var rows = $("#report-query-param-grid").datagrid('getRows');
+            $("#report-query-param-grid").datagrid('reload', rows);
             //
             $('#report-query-param-form').form('reset');
         },
@@ -1345,6 +1367,45 @@ var DesignerMVC = {
             //
             $("#report-column-clrLvlStart").trigger('change');
             $("#report-column-clrLvlEnd").trigger('change');
+        },
+        setMetaColumnFormat:function(){
+        	var row = $("#report-meta-column-grid").datagrid('getSelected');
+        	if(row == null){
+        		$.messager.alert('默认格式设置', '请选中一个日期、时间或数值的列!', 'warning');
+        		return;
+        	}
+        	var index = $("#report-meta-column-grid").datagrid('getRowIndex', row);
+        	var colName = row.text || row.name;
+        	var sqlTypeName = row.dataType || "";
+        	var format = null;
+        	if("DATE" == sqlTypeName){
+        		format = 'yyyy-MM-dd';
+        	}
+        	else if("TIMESTAMP" == sqlTypeName){
+        		format = 'yyyy-MM-dd HH:mm:ss';
+        	}
+        	else if("TIME" == sqlTypeName){
+        		format = 'HH:mm:ss';
+        	}//
+        	else if("DECIMAL" == sqlTypeName || "DOUBLE" == sqlTypeName || "FLOAT" == sqlTypeName || "REAL" == sqlTypeName){
+        		format = '#0.00';
+        	}
+        	else if(sqlTypeName.indexOf('INT') != -1){
+        		format = '#0';
+        	}
+        	if(format){
+        		row.format = format;
+        		var rows = $("#report-meta-column-grid").datagrid('getRows');
+                $("#report-meta-column-grid").datagrid('loadData', rows);
+                $("#report-meta-column-grid").datagrid('selectRow', index);
+                //
+                $.messager.show({
+                	title:'提示',
+                	msg: '【' + colName + '】的默认格式已设置',
+                	timeout:5000,
+                	showType:'slide'
+                });
+        	}
         },
         saveMetaColumnClrLvl: function(){
             var row = $("#report-meta-column-grid").datagrid('getSelected');
@@ -1538,11 +1599,24 @@ var DesignerMVC = {
             }
             return 0;
         },
-        isNumbericCol: function(sqlTypeName, type){
-        	if(sqlTypeName.indexOf('INT') != -1 || "DECIMAL" == sqlTypeName || "DOUBLE" == sqlTypeName || "FLOAT" == sqlTypeName){
-        		if(type == 3 || type == 4){
-            		return true;
-            	}
+        isNumbericOrDateCol: function(sqlTypeName){
+        	if(sqlTypeName.indexOf('INT') != -1 || "DECIMAL" == sqlTypeName || "DOUBLE" == sqlTypeName || "FLOAT" == sqlTypeName || "REAL" == sqlTypeName){
+        		return true;
+        	}
+        	if("DATE" == sqlTypeName || "TIMESTAMP" == sqlTypeName || "TIME" == sqlTypeName){
+        		return true;
+        	}
+        	return false;
+        },
+        isNumbericCol: function(sqlTypeName){
+        	if(sqlTypeName.indexOf('INT') != -1 || "DECIMAL" == sqlTypeName || "DOUBLE" == sqlTypeName || "FLOAT" == sqlTypeName || "REAL" == sqlTypeName){
+        		return true;
+        	}
+        	return false;
+        },
+        isDecimalCol: function(sqlTypeName){
+        	if("DECIMAL" == sqlTypeName || "DOUBLE" == sqlTypeName || "FLOAT" == sqlTypeName || "REAL" == sqlTypeName){
+        		return true;
         	}
         	return false;
         },
@@ -1592,7 +1666,8 @@ var DesignerMVC = {
                 column["type"] = $("#type" + rowIndex).val();
                 column["sortType"] = $("#sortType" + rowIndex).val();
                 column["align"] = $("#align" + rowIndex).val();
-                column["decimals"] = $("#decimals" + rowIndex).val();
+                column["format"] = $("#format" + rowIndex).val();
+                column["percent"] = $("#percent" + rowIndex).prop("checked") || false;
             }
             return columns;
         },

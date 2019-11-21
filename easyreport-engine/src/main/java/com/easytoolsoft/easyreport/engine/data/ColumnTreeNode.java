@@ -62,6 +62,10 @@ public class ColumnTreeNode {
     public String getValue() {
         return this.value;
     }
+    
+    public String getStyle() {
+        return this.column.getStyle(null);
+    }
 
     /**
      * 设置报表树型列的值
