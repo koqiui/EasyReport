@@ -148,10 +148,13 @@ var EasyUIUtils = {
             }
         });
     },
-    loadToDatagrid: function (id, href) {
+    loadToDatagrid: function (id, href, fn) {
         var grid = $(id);
         $.getJSON(href, function (data) {
             grid.datagrid('loadData', data);
+            if (fn instanceof Function) {
+                fn();
+            }
         });
     },
     reloadDatagrid: function (id) {

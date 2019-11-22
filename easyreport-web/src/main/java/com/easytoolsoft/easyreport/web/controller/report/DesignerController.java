@@ -124,7 +124,7 @@ public class DesignerController extends BaseController<ReportService, Report, Re
 	public ResponseResult edit(@CurrentUser final User loginUser, final Report po) {
 		this.service.editById(po);
 		this.reportHistoryService.add(this.getReportHistory(loginUser, po));
-		return ResponseResult.success("");
+		return ResponseResult.success(po.getId());
 	}
 
 	@PostMapping(value = "/remove")

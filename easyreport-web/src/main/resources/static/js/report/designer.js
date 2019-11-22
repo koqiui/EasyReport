@@ -213,7 +213,24 @@ var DesignerMVC = {
                     field: 'id',
                     title: 'ID',
                     width: 50,
-                    sortable: true
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                    	var data = {
+                			id : value
+                		};
+                    	var tmpl = '<span>${id}</span>';
+                    	//展示自定义代码标记
+                    	var ucode = row.ucode || '';
+                    	if($.trim(ucode) != ''){
+                    		data.imgSrc = DesignerCommon.baseIconUrl + 'flag.png?ts=2';
+                    		data.title = '自定义代码：' + ucode;
+                    		data.msg = data.title;
+                    		//
+                    		tmpl += '<img style="float:right;margin-top:2px;" src="${imgSrc}" title="${title}" onclick="$.messager.alert(\'提示\', \'${msg}\', \'info\')"/>';
+                    	}
+                    	//
+                    	return juicer(tmpl, data);
+                    }
                 }, {
                     field: 'name',
                     title: '名称',
@@ -281,7 +298,7 @@ var DesignerMVC = {
                         	var padding = i==0 ? '' : ' style="padding-left:4px;" ';
                             var tmpl = '<a href="#" title ="${title}"' + padding +
                                 'onclick="DesignerMVC.Controller.doOption(\'${index}\',\'${name}\')">' +
-                                '<img src="${imgSrc}" alt="${title}"/"></a>';
+                                '<img src="${imgSrc}" alt="${title}" /></a>';
                             var data = {
                                 title: icons[i].title,
                                 name: icons[i].name,
@@ -636,6 +653,7 @@ var DesignerMVC = {
                     field: 'dataSource',
                     title: '来源类型',
                     width: 100,
+                    align: 'center',
                     formatter: function (value, row, index) {
                         if (value == "sql") {
                             return "SQL语句";
@@ -643,32 +661,56 @@ var DesignerMVC = {
                         if (value == "text") {
                             return "文本定义";
                         }
-                        return "无";
+                        return "";
                     }
                 }, {
                     field: 'dataType',
                     title: '数据类型',
-                    width: 100
+                    width: 100,
+                    align: 'center'
                 }, {
                     field: 'width',
                     title: '数据长度',
-                    width: 100
+                    width: 100,
+                    align: 'right'
                 }, {
                     field: 'required',
                     title: '是否必选',
-                    width: 80
+                    width: 80,
+                    align: 'center',
+                    formatter: function (value, row, index) {
+                        if (value == true) {
+                            return "√";
+                        }
+                        return "";
+                    }
                 }, {
                     field: 'hidden',
                     title: '是否隐藏',
-                    width: 80
+                    width: 80,
+                    align: 'center',
+                    formatter: function (value, row, index) {
+                        if (value == true) {
+                            return "√";
+                        }
+                        return "";
+                    }
                 }, {
                     field: 'autoComplete',
                     title: '自动提示',
-                    width: 80
+                    width: 80,
+                    align: 'center',
+                    formatter: function (value, row, index) {
+                        if (value == true) {
+                            return "√";
+                        }
+                        return "";
+                    }
                 }, {
                     field: 'options',
                     title: '操作',
                     width: 50,
+                    align: 'center',
                     formatter: function (value, row, index) {
                         var imgPath = DesignerCommon.baseIconUrl + 'remove.png';
                         var tmpl = '<a href="#" title ="移除" ' +
@@ -1156,7 +1198,25 @@ var DesignerMVC = {
         find: function () {
             var keyword = $("#report-search-keyword").val();
             var url = DesignerMVC.URLs.find.url + '?fieldName=name&keyword=' + keyword;
-            EasyUIUtils.loadToDatagrid('#report-datagrid', url)
+            //
+            var row = $("#report-datagrid").datagrid('getSelected');
+            var reportId = row == null ? null : row.id;
+            //
+            EasyUIUtils.loadToDatagrid('#report-datagrid', url, function(){
+            	if(reportId != null){
+            		var rows = $("#report-datagrid").datagrid('getRows');
+                	var index = -1;
+                	for(var i=0, c=rows.length; i<c; i++){
+                		if(rows[i].id == reportId){
+                			index = i;
+                			break;
+                		}
+                	}
+                	if(index != -1){
+                		$("#report-datagrid").datagrid('selectRow', index);
+                	}
+            	}
+            });
         },
         parseSqlVarNames : function(){//解析sql脚本变量名
         	var sqlText = DesignerMVC.View.SqlEditor.getValue();
@@ -1282,6 +1342,7 @@ var DesignerMVC = {
             var action = $('#modal-action').val();
             var actUrl = action === "edit" ? DesignerMVC.URLs.edit.url : DesignerMVC.URLs.add.url;
             var data = $('#report-basic-conf-form').serializeObject();
+            var reportId = data.id;
             data.isChange = $('#report-sqlTextIsChange').val() != 0;
             data.sqlText = DesignerMVC.View.SqlEditor.getValue();
             data["options"] = JSON.stringify({
@@ -1294,10 +1355,10 @@ var DesignerMVC = {
                 $.messager.progress("close");
                 if (!result.code) {
                     $('#report-sqlTextIsChange').val('0');
-                    var id = $("#report-categoryId").val();
+                    var catId = $("#report-categoryId").val();
                     return $.messager.alert('操作提示', "操作成功", 'info', function () {
                         $('#report-designer-dlg').dialog('close');
-                        DesignerMVC.Controller.listReports(id);
+                        DesignerMVC.Controller.listReports(catId, reportId);
                     });
                 }
                 $.messager.alert('操作提示', result.msg, 'error');
@@ -1456,9 +1517,24 @@ var DesignerMVC = {
                 return $('#report-column-comment-dlg').dialog('close');
             }
         },
-        listReports: function (id) {
-            var gridUrl = DesignerMVC.URLs.list.url + '?id=' + id;
-            EasyUIUtils.loadDataWithUrl('#report-datagrid', gridUrl);
+        listReports: function (catId, reportId) {
+            var gridUrl = DesignerMVC.URLs.list.url + '?id=' + catId;
+            //EasyUIUtils.loadDataWithUrl('#report-datagrid', gridUrl);
+            EasyUIUtils.loadDataWithCallback('#report-datagrid', gridUrl, function(){
+            	if(reportId != null){
+            		var rows = $("#report-datagrid").datagrid('getRows');
+                	var index = -1;
+                	for(var i=0, c=rows.length; i<c; i++){
+                		if(rows[i].id == reportId){
+                			index = i;
+                			break;
+                		}
+                	}
+                	if(index != -1){
+                		$("#report-datagrid").datagrid('selectRow', index);
+                	}
+            	}
+            });
         }
     },
     Util: {
