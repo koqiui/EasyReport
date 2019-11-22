@@ -94,10 +94,11 @@ public class ReportServiceImpl extends AbstractCrudService<ReportRepository, Rep
 				final ReportMetaDataColumn commonColumn = commonColumnMap.get(columnName);
 				column.setType(commonColumn.getType().getValue());
 				column.setText(commonColumn.getText());
-			}
-			if (commonOptionColumnMap.containsKey(columnName)) {
+			} else if (commonOptionColumnMap.containsKey(columnName)) {
 				column.setOptional(true);
 				column.setType(commonOptionColumnMap.get(columnName).getType().getValue());
+			} else {
+				column.setType(column.guessType().getValue());
 			}
 		}
 		return metaDataColumns;

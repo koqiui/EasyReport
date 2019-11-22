@@ -370,6 +370,15 @@ public class ReportMetaDataColumn {
 		return this.type;
 	}
 
+	public ColumnType guessType() {
+		String theType = this.javaType;
+		if ("integer".equals(theType) || "float".equals(theType)) {
+			return ColumnType.STATISTICAL;
+		}
+		//
+		return this.type;
+	}
+
 	/**
 	 * 设置报表元数据列类型
 	 *

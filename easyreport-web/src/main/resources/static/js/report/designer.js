@@ -147,13 +147,13 @@ var DesignerMVC = {
             text: "默认",
             value: ""
         },{
-            text: "居左",
+            text: "|<---",
             value: "left"
         }, {
-            text: "居中",
+            text: "->||<-",
             value: "center"
         }, {
-            text: "居右",
+            text: "--->|",
             value: "right"
         }],
         DataSourceList: []
@@ -343,11 +343,16 @@ var DesignerMVC = {
                 fitColumns: true,
                 singleSelect: true,
                 rownumbers: true,
-                tools: [{
-                	tooltip: '设为日期、时间、数值等的默认格式',
+                toolbar: [{
+                	text: '设为日期、时间、数值等的默认格式',
                     iconCls: 'icon-format2',
                     handler: function () {
                     	DesignerMVC.Controller.setMetaColumnFormat();
+                    }
+                }, '-',{
+                    iconCls: 'icon-reload',
+                    handler: function () {
+                    	DesignerMVC.Controller.refreshMetaColumnList();
                     }
                 }, '-',{
                     iconCls: 'icon-up',
@@ -376,7 +381,6 @@ var DesignerMVC = {
                                 row.name = row.name + index;
                                 row.text = row.name;
                                 row.type = 4;
-                                row.sortType = 0;
                                 row.align = '';
                                 row.format = '';
                                 row.percent = false;
@@ -384,6 +388,7 @@ var DesignerMVC = {
                                 row.clrLvlValve = 0;
                                 row.clrLvlStart = '';
                                 row.clrLvlEnd = '';
+                                row.sortType = 0;
                                 $('#report-meta-column-grid').datagrid('appendRow', row);
                             }
                         });
@@ -429,7 +434,7 @@ var DesignerMVC = {
                     }
                 }, {
                     field: 'type',
-                    title: '类型',
+                    title: '列类型',
                     width: 70,
                     align : 'center',
                     formatter: function (value, row, index) {
@@ -452,27 +457,9 @@ var DesignerMVC = {
                     width: 75
                 }, {
                     field: 'width',
-                    title: '宽度',
-                    width: 40,
+                    title: '字符宽度',
+                    width: 60,
                     align : 'right'
-                }, {
-                    field: 'sortType',
-                    title: '排序类型',
-                    width: 100,
-                    formatter: function (value, row, index) {
-                		var id = "sortType" + index;
-                        var tmpl =
-                            '<select id="${id}" name=\"sortType\">' +
-                            '{@each list as item}' +
-                            '<option value="${item.value}" {@if item.value == currValue} selected {@/if}>${item.text}</option>' +
-                            '{@/each}' +
-                            '</select>';
-                        return juicer(tmpl, {
-                            id: id,
-                            currValue: value,
-                            list: DesignerMVC.Model.MetaColumnSortTypes
-                        });
-                    }
                 }, {
                     field: 'align',
                     title: '对齐方式',
@@ -544,6 +531,24 @@ var DesignerMVC = {
                     	return '';
                     }
                 }, {
+                    field: 'sortType',
+                    title: '排序类型',
+                    width: 100,
+                    formatter: function (value, row, index) {
+                		var id = "sortType" + index;
+                        var tmpl =
+                            '<select id="${id}" name=\"sortType\">' +
+                            '{@each list as item}' +
+                            '<option value="${item.value}" {@if item.value == currValue} selected {@/if}>${item.text}</option>' +
+                            '{@/each}' +
+                            '</select>';
+                        return juicer(tmpl, {
+                            id: id,
+                            currValue: value,
+                            list: DesignerMVC.Model.MetaColumnSortTypes
+                        });
+                    }
+                }, {
                     field: 'options',
                     title: '配置',
                     width: 220,
@@ -579,10 +584,10 @@ var DesignerMVC = {
                             if (name == "expression" || name == "comment") {
                                 data.imgSrc = DesignerCommon.baseIconUrl + name + ".png";
                                 data.onClick = "MetaDataDesigner.showMetaColumnOption('" + index + "','" + name + "')";
-                                data.extStyle = name == "comment" ? 'float:right;' : '';
+                                data.extStyle = name == "comment" ? 'float:right;' : 'float:left; margin-right:4px;';
                                 tmpl = '<img style="cursor: pointer;${extStyle}" id="${id}" title="${text}" src="${imgSrc}" onclick="${onClick}" />';
                             } else {
-                                tmpl = '<label><input type="checkbox" id="${id}" name="${name}" ${checked} />${text}</label>'
+                                tmpl = '<label style="float:left; margin-top:2px; margin-right:4px;"><input type="checkbox" id="${id}" name="${name}" ${checked} />${text}</label>'
                             }
                             htmlOptions.push(juicer(tmpl, data));
                         }
@@ -1407,6 +1412,22 @@ var DesignerMVC = {
                 });
         	}
         },
+        refreshMetaColumnList: function(){
+        	var rows = $("#report-meta-column-grid").datagrid('getRows');
+            if (rows == null || rows.length == 0) {
+                return;
+            }
+            var index = -1;
+        	var row = $("#report-meta-column-grid").datagrid('getSelected');
+        	if(row){
+        		index = $("#report-meta-column-grid").datagrid('getRowIndex', row);
+        	}
+            var metaColumns = DesignerMVC.Util.getMetaColumns(rows);
+            $("#report-meta-column-grid").datagrid('loadData', metaColumns);
+            if(index !=-1){
+            	$("#report-meta-column-grid").datagrid('selectRow', index);
+            }
+        },
         saveMetaColumnClrLvl: function(){
             var row = $("#report-meta-column-grid").datagrid('getSelected');
             row.clrLvlEnabled = $("#report-column-clrLvlEnabled").prop('checked');
@@ -1441,6 +1462,10 @@ var DesignerMVC = {
         }
     },
     Util: {
+    	isJustVarName(chkStr){
+    		var reg = /^\s*[a-z_0-0]*\s*$/ig;
+    		return reg.test(chkStr);
+    	},
     	copy: function(src){
     		var ret = null;
     		if(src != null){
@@ -1633,23 +1658,44 @@ var DesignerMVC = {
             if (oldColumns == null || oldColumns.length == 0) {
                 return $("#report-meta-column-grid").datagrid('loadData', newColumns);
             }
-
             //如果列表中存在旧的列则需要替换相同的列并增加新列
             oldColumns = DesignerMVC.Util.getMetaColumns(oldColumns);
-            var oldRowMap = {};
+            var oldColIndexMap = {};//旧有列
+            var oldCalcColIndexMap = {};//旧有的计算列
             for (var i = 0; i < oldColumns.length; i++) {
-                var name = oldColumns[i].name;
-                oldRowMap[name] = oldColumns[i];
-            }
-
-            for (var i = 0; i < newColumns.length; i++) {
-                var name = newColumns[i].name;
-                if (oldRowMap[name]) {
-                    oldRowMap[name].dataType = newColumns[i].dataType;
-                    oldRowMap[name].width = newColumns[i].width;
-                    newColumns[i] = oldRowMap[name];
+            	var oldCol = oldColumns[i];
+                var nameLwr = oldCol.name.toLowerCase();
+                oldColIndexMap[nameLwr] = i;
+                if(oldCol.type == 4){//计算列
+                	oldCalcColIndexMap[nameLwr] = i;
                 }
             }
+            var newColCount = newColumns.length;
+            for (var i = 0; i < newColCount; i++) {
+            	var newCol = newColumns[i];
+                var nameLwr = newCol.name.toLowerCase();
+                var oldColIndex = oldColIndexMap[nameLwr];
+                if (oldColIndex != null) {
+                	var oldCol = oldColumns[oldColIndex];
+                	oldCol.name = newCol.name;//
+                	oldCol.dataType = newCol.dataType;
+                	oldCol.width = newCol.width;
+                	oldCol.align = oldCol.align || newCol.align;
+                	if(DesignerMVC.Util.isJustVarName(oldCol.text)){
+                		oldCol.text = newCol.text;
+                	}
+                	//
+                	newColumns[i] = oldCol;
+                }
+                //删除重名计算列信息
+                delete oldCalcColIndexMap[nameLwr];
+            }
+            //追加保留计算列
+            for(var oldCalcName in oldCalcColIndexMap){
+            	var oldColIndex = oldCalcColIndexMap[oldCalcName];
+            	newColumns[newColCount++] = oldColumns[oldColIndex];
+            }
+            //
             return $("#report-meta-column-grid").datagrid('loadData', newColumns);
         },
         getMetaColumns: function (columns) {
@@ -1661,12 +1707,12 @@ var DesignerMVC = {
                     var optionId = "#" + option.name + rowIndex;
                     column[option.name] = $(optionId).prop("checked");
                 }
-                column["name"] = $("#name" + rowIndex).val();
-                column["text"] = $("#text" + rowIndex).val();
+                column["name"] = $.trim($("#name" + rowIndex).val());
+                column["text"] = $.trim($("#text" + rowIndex).val());
                 column["type"] = $("#type" + rowIndex).val();
-                column["sortType"] = $("#sortType" + rowIndex).val();
                 column["align"] = $("#align" + rowIndex).val();
-                column["format"] = $("#format" + rowIndex).val();
+                column["format"] = $("#format" + rowIndex).val() || '';
+                column["sortType"] = $("#sortType" + rowIndex).val();
                 column["percent"] = $("#percent" + rowIndex).prop("checked") || false;
             }
             return columns;

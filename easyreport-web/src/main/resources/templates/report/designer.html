@@ -24,6 +24,18 @@
             th:src="@{/vendor/codemirror/addon/hint/sql-hint.js}"></script>
     <script src="../../static/js/report/category.js" th:src="@{'/js/report/category.js?v='+${version}}"></script>
     <script src="../../static/js/report/designer.js" th:src="@{'/js/report/designer.js?v='+${version}}"></script>
+        <style>
+ 		.datagrid-toolbar {
+		  height: auto;
+		  padding: 1px 2px;
+		  border-width: 0 0 1px 0;
+		  border-style: solid;
+		  height: 30px;
+		}
+		.datagrid-toolbar table{
+		    float: right;
+		}
+ 	</style>
 </head>
 <body id="body-layout" class="easyui-layout" layout:fragment="content">
 <!-- 左边报表分类tree -->
@@ -170,7 +182,7 @@
                             	<a id="btn-report-parse-sql-var-names" href="#" class="easyui-linkbutton"
                                    >提取SQL参数</a>&nbsp;&nbsp;&nbsp;
                                 <a id="btn-report-exec-sql" href="#" class="easyui-linkbutton"
-                                   iconCls="icon-ok">执行SQL</a>&nbsp;&nbsp;&nbsp;
+                                   iconCls="icon-ok">执行SQL+刷新列</a>&nbsp;&nbsp;&nbsp;
                                 <a id="btn-report-preview-sql" href="#" class="easyui-linkbutton"
                                    iconCls="icon-sql">预览SQL</a>
                             </td>
