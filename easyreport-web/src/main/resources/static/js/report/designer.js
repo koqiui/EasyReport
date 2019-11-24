@@ -1203,20 +1203,23 @@ var DesignerMVC = {
             var reportId = row == null ? null : row.id;
             //
             EasyUIUtils.loadToDatagrid('#report-datagrid', url, function(){
-            	if(reportId != null){
-            		var rows = $("#report-datagrid").datagrid('getRows');
-                	var index = -1;
-                	for(var i=0, c=rows.length; i<c; i++){
-                		if(rows[i].id == reportId){
-                			index = i;
-                			break;
-                		}
-                	}
-                	if(index != -1){
-                		$("#report-datagrid").datagrid('selectRow', index);
-                	}
-            	}
+            	DesignerMVC.Controller.selectRowById(reportId);
             });
+        },
+        selectRowById: function(reportId){
+        	if(reportId != null){
+        		var rows = $("#report-datagrid").datagrid('getRows');
+            	var index = -1;
+            	for(var i=0, c=rows.length; i<c; i++){
+            		if(rows[i].id == reportId){
+            			index = i;
+            			break;
+            		}
+            	}
+            	if(index != -1){
+            		$("#report-datagrid").datagrid('selectRow', index);
+            	}
+        	}
         },
         parseSqlVarNames : function(){//解析sql脚本变量名
         	var sqlText = DesignerMVC.View.SqlEditor.getValue();
@@ -1519,21 +1522,10 @@ var DesignerMVC = {
         },
         listReports: function (catId, reportId) {
             var gridUrl = DesignerMVC.URLs.list.url + '?id=' + catId;
+            console.log("listReports");
             //EasyUIUtils.loadDataWithUrl('#report-datagrid', gridUrl);
-            EasyUIUtils.loadDataWithCallback('#report-datagrid', gridUrl, function(){
-            	if(reportId != null){
-            		var rows = $("#report-datagrid").datagrid('getRows');
-                	var index = -1;
-                	for(var i=0, c=rows.length; i<c; i++){
-                		if(rows[i].id == reportId){
-                			index = i;
-                			break;
-                		}
-                	}
-                	if(index != -1){
-                		$("#report-datagrid").datagrid('selectRow', index);
-                	}
-            	}
+            EasyUIUtils.loadDataWithUrl('#report-datagrid', gridUrl, function(){
+            	DesignerMVC.Controller.selectRowById(reportId);
             });
         }
     },

@@ -138,8 +138,16 @@ define(function (require, exports, module) {
                 }
             });
         },
-        loadDataWithUrl: function (gridId, href) {
+        loadDataWithUrl: function (gridId, href, fn) {
             $(gridId).datagrid({url: href});
+            var options = {
+        		url : href
+        	};
+        	if(fn){
+        		options.onLoadSuccess = fn;
+        	}
+        	//
+            $(gridId).datagrid(options);
         },
         loadDataWithCallback: function (id, href, fn) {
             var grid = $(id);

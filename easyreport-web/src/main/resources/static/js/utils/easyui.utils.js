@@ -136,8 +136,15 @@ var EasyUIUtils = {
             }
         });
     },
-    loadDataWithUrl: function (gridId, href) {
-        $(gridId).datagrid({url: href});
+    loadDataWithUrl: function (gridId, href, fn) {
+    	var options = {
+    		url : href
+    	};
+    	if(fn){
+    		options.onLoadSuccess = fn;
+    	}
+    	//
+        $(gridId).datagrid(options);
     },
     loadDataWithCallback: function (id, href, fn) {
         var grid = $(id);
