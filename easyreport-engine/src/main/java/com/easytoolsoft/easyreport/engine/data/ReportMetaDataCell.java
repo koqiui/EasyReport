@@ -41,7 +41,7 @@ public class ReportMetaDataCell {
 		}
 		//
 		ReportMetaDataColumn metaData = this.column;
-		String theType = metaData.getJavaType();
+		String theType = metaData.getTheType();
 		Format format = metaData.getFormatX();
 		if ("float".equals(theType) || "integer".equals(theType) || "date".equals(theType)) {
 			if (format != null) {
@@ -51,6 +51,9 @@ public class ReportMetaDataCell {
 					//
 				}
 			}
+		} else if ("bool".equals(theType)) {
+			Boolean blValue = (Boolean) value;
+			return Boolean.TRUE.equals(blValue) ? "√" : "";
 		}
 		//
 		return this.value.toString();

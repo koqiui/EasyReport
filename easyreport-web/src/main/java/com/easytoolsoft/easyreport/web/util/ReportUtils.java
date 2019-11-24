@@ -79,19 +79,19 @@ public class ReportUtils {
 			}
 			//
 			QueryParameterOptions qryParm = null;
-			String dataType = null; // (string|float|integer|date)
+			String dataType = null; // (string|float|integer|date|bool)
 			String varText = null;
 			String strVal = null;
 			boolean isMulSelect = false;
 			for (String sqlVarName : sqlVarNames) {
 				qryParm = qryParamMap.get(sqlVarName);
+				dataType = qryParm == null ? "string" : qryParm.getDataType();
 				varText = qryParm == null || StringUtils.isBlank(qryParm.getText()) ? sqlVarName : qryParm.getText();
 				Object objValue = qryValueMap.get(sqlVarName);
 				if (objValue == null) {
 					lckParamNames.add(varText);
 					continue;
 				}
-				dataType = qryParm == null ? "string" : qryParm.getDataType();
 				strVal = String.valueOf(objValue);
 				if (!"string".equals(dataType) && StringUtils.isBlank(strVal)) {
 					lckParamNames.add(varText);

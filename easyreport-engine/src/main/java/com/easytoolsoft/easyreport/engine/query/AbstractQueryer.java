@@ -45,7 +45,6 @@ public abstract class AbstractQueryer implements Queryer {
 		Statement stmt = null;
 		ResultSet rs = null;
 		List<ReportMetaDataColumn> columns = null;
-
 		try {
 			this.logger.debug("Parse Report MetaDataColumns SQL:{},", sqlText);
 			conn = this.getJdbcConnection();
@@ -57,7 +56,13 @@ public abstract class AbstractQueryer implements Queryer {
 			for (int i = 1; i <= count; i++) {
 				final ReportMetaDataColumn column = new ReportMetaDataColumn();
 				column.setName(rsMataData.getColumnLabel(i));
-				column.setDataType(rsMataData.getColumnTypeName(i));
+				String className = rsMataData.getColumnClassName(i);
+				column.setClassName(className);
+				if (Boolean.class.getName().equals(className)) {
+					column.setSqlType("BOOLEAN");
+				} else {
+					column.setSqlType(rsMataData.getColumnTypeName(i));
+				}
 				column.setWidth(rsMataData.getColumnDisplaySize(i));
 				columns.add(column);
 			}
@@ -129,7 +134,7 @@ public abstract class AbstractQueryer implements Queryer {
 			final ReportMetaDataRow row = new ReportMetaDataRow();
 			for (final ReportMetaDataColumn column : sqlColumns) {
 				Object value = rs.getObject(column.getName());
-				if (column.getDataType().contains("BINARY")) {
+				if (column.getSqlType().contains("BINARY")) {
 					value = new String((byte[]) value);
 				}
 				row.add(new ReportMetaDataCell(column, column.getName(), value));

@@ -25,8 +25,9 @@ public class ReportMetaDataColumn {
 	private int ordinal;
 	private String name;
 	private String text;
-	private String dataType;// sqlTypeName
-	private String javaType;
+	private String className;
+	private String sqlType;// sql type name
+	private String theType; // simple data type
 	// 对齐方式
 	private String align;
 	// 色阶
@@ -81,7 +82,7 @@ public class ReportMetaDataColumn {
 		if (clrLvlEnabled && clrLvlValve != null && clrLvlValve.intValue() > 0 && StringUtils.isNotBlank(this.clrLvlStart) && StringUtils.isNotBlank(this.clrLvlEnd)) {
 			if ((ColumnType.STATISTICAL.equals(this.type) || ColumnType.COMPUTED.equals(this.type))) {
 				if (cellValue != null) {
-					String theType = this.javaType;
+					String theType = this.theType;
 					String valStr = this.asNumStr(cellValue);
 					if (valStr != null) {// 有可能是tinyint之类的bool值
 						if ("integer".equals(theType)) {
@@ -96,16 +97,16 @@ public class ReportMetaDataColumn {
 	}
 
 	public void initFormatInfo() {
-		String theType = this.javaType;
+		String theType = this.theType;
 		//
 		String theFormat = null;
 		if (StringUtils.isBlank(this.format)) {
 			if ("date".equals(theType)) {
-				if ("DATE".equals(dataType)) {
+				if ("DATE".equals(sqlType)) {
 					theFormat = "yyyy-MM-dd";
-				} else if ("TIME".equals(dataType)) {
+				} else if ("TIME".equals(sqlType)) {
 					theFormat = "HH:mm:ss";
-				} else {// "TIMESTAMP".equals(dataType)
+				} else {// "TIMESTAMP".equals(sqlType)
 					theFormat = "yyyy-MM-dd HH:mm:ss";
 				}
 				formatX = new SimpleDateFormat(theFormat);
@@ -114,6 +115,7 @@ public class ReportMetaDataColumn {
 				if (this.isPercent) {
 					theFormat += "%";
 				}
+				// 不给integer默认
 				formatX = new DecimalFormat(theFormat);
 			}
 		} else {
@@ -225,39 +227,56 @@ public class ReportMetaDataColumn {
 		this.text = text;
 	}
 
+	public String getClassName() {
+		return className;
+	}
+
+	public void setClassName(String className) {
+		this.className = className;
+	}
+
 	/**
 	 * 获取报表元数据列数据类型名称
 	 *
-	 * @return dataType java.sql.Types中的类型名称
+	 * @return sqlType java.sql.Types中的类型名称
 	 */
-	public String getDataType() {
-		return this.dataType;
+	public String getSqlType() {
+		return this.sqlType;
 	}
 
 	/**
-	 * 设置报表元数据列数据类型名称
-	 *
-	 * @param dataType
+	 * 设置报表元数据列数据类型名称 => setSqlType
+	 * 
+	 * @param sqlType
 	 *            java.sql.Types中的类型名称
 	 */
-	public void setDataType(final String dataType) {
-		this.dataType = dataType;
+	@Deprecated
+	public void setDataType(final String sqlType) {
+		if (StringUtils.isNotBlank(sqlType)) {
+			this.sqlType = sqlType;
+			//
+			this.theType = JdbcUtils.toSimpleDataType(sqlType);
+		}
+	}
+
+	public void setSqlType(final String sqlType) {
+		this.sqlType = sqlType;
 		//
-		this.javaType = JdbcUtils.toSimpleDataType(dataType);
+		this.theType = JdbcUtils.toSimpleDataType(sqlType);
 	}
 
 	/** string, integer, float, date */
-	public String getJavaType() {
-		return javaType;
+	public String getTheType() {
+		return theType;
 	}
 
 	public String getAlign() {
 		if (StringUtils.isBlank(align)) {
-			String theType = this.javaType;
+			String theType = this.theType;
 			if ("integer".equals(theType) || "float".equals(theType)) {
 				return "right";
 			}
-			if ("date".equals(theType)) {
+			if ("date".equals(theType) || "bool".equals(theType)) {
 				return "center";
 			}
 			return "left";
@@ -371,7 +390,7 @@ public class ReportMetaDataColumn {
 	}
 
 	public ColumnType guessType() {
-		String theType = this.javaType;
+		String theType = this.theType;
 		if ("integer".equals(theType) || "float".equals(theType)) {
 			return ColumnType.STATISTICAL;
 		}
@@ -539,7 +558,7 @@ public class ReportMetaDataColumn {
 		styleItems.add("text-align: " + align);
 		// 色阶
 		if (cellValue != null && this.clrLvlMap != null) {
-			String theType = this.javaType;
+			String theType = this.theType;
 			String valStr = this.asNumStr(cellValue);
 			if (valStr != null) {// 有可能是tinyint之类的bool值
 				Number valueKey = null;

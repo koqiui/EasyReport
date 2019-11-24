@@ -216,10 +216,11 @@
                             <td>数据类型:</td>
                             <td><select class="easyui-combobox" id="report-query-param-dataType" name="dataType"
                                         data-options="required:true" style="width:150px">
-                                <option value="string" selected="selected">字符串</option>
-                                <option value="float">浮点数（包括双精度、浮点数)</option>
-                                <option value="integer">整数</option>
+                                <option value="integer" selected="selected">整数</option>
                                 <option value="date">日期</option>
+                                <option value="string">字符串</option>
+                                <option value="float" title="包括双精度、浮点数">浮点数</option>
+                                <option value="bool">布尔值</option>
                             </select></td>
                             <td>数据长度:</td>
                             <td><input class="easyui-textbox" type="text" id="report-query-param-width" name="width" value="100" data-options="validType:'digit'" style="width:150px"/></td>
@@ -231,12 +232,12 @@
                         <tr>
                             <td>表单控件:</td>
                             <td><select class="easyui-combobox" id="report-query-param-formElement" name="formElement"
-                                        data-options="required:true" style="width:150px">
+                                        data-options="required:true,valueField:'value',textField:'text'" style="width:150px">
                                 <option value="text" selected>文本</option>
                                 <option value="date">日期</option>
-                                <!-- <option value="checkbox">复选框</option> -->
                                 <option value="select">下拉单选</option>
                                 <option value="selectMul">下拉多选</option>
+                                <!-- <option value="checkbox">复选框</option> -->
                             </select></td>
                             <td>数据来源:</td>
                             <td><select title="需要来源内容支持" class="easyui-combobox" id="report-query-param-dataSource"

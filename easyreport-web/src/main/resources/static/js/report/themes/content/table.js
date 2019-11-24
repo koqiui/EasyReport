@@ -212,75 +212,78 @@ var TableReportMVC = {
             html += '<tr><td align="right" colspan="' + result.metaDataColumnCount + '"><h3>导出时间: ' + TableReportMVC.Util.getCurrentTime() + '</h3></td></tr>';
             $('#table-report-form .j-item').each(function () {
                 var type = $(this).attr('ctrl-type');
-                if (type == "datebox") {
-                    var label = $(this).find('label').text().replace(':', '');
-                    var val = $(this).find("input[class*='textbox-value']").val();
-                    html += '<tr><td><strong>' + label + '</strong></td><td align="left">' + (val || '') + '</td></tr>';
-                }
-                else if(type == "combobox"){
-                	var label = $(this).find('label').text().replace(':', '');
-                	var val = null;
-                    var inputs = $(this).find("input[class*='textbox-value']");
-                    if(inputs.size() >1){
-                    	val = [];
-                    	$(inputs).each(function(input){
-                    		val.push(this.value);
-                    	});
+                var hidden = $(this).attr('ctrl-hidden') == 'true';
+                if(!hidden){//不输出隐藏参数信息
+                	if (type == "datebox") {
+                        var label = $(this).find('label').text().replace(':', '');
+                        var val = $(this).find("input[class*='textbox-value']").val();
+                        html += '<tr><td><strong>' + label + '</strong></td><td align="left">' + (val || '') + '</td></tr>';
                     }
-                    else {
-                    	val = inputs.val();
+                    else if(type == "combobox"){
+                    	var label = $(this).find('label').text().replace(':', '');
+                    	var val = null;
+                        var inputs = $(this).find("input[class*='textbox-value']");
+                        if(inputs.size() >1){
+                        	val = [];
+                        	$(inputs).each(function(input){
+                        		val.push(this.value);
+                        	});
+                        }
+                        else {
+                        	val = inputs.val();
+                        }
+                        //console.log(val);
+                        //优先从下来列表获取（显示文本）
+                        var optMap = {};
+                        var selCtrl = $(this).find('select');
+                        if(selCtrl.size() > 0){
+                        	var optList = selCtrl.get(0).options;
+                    		for(var i=0, c=optList.length; i<c; i++){
+                    			var opt = optList[i];
+                    			optMap[opt.value] = opt.text;
+                    		}
+                        }
+                        if($.isArray(val)){
+                        	var vals = val;
+                        	var txts = [];
+                        	for(var i=0, c=vals.length; i<c; i++){
+                        		var valTmp = vals[i];
+                        		txts.push(optMap[valTmp] || valTmp);
+                        	}
+                        	val = txts.join('、');
+                        }
+                        else {
+                        	val = optMap[val] || val;
+                        }
+                        html += '<tr><td><strong>' + label + '</strong></td><td align="left">' + (val || '') + '</td></tr>';
                     }
-                    //console.log(val);
-                    //优先从下来列表获取（显示文本）
-                    var optMap = {};
-                    var selCtrl = $(this).find('select');
-                    if(selCtrl.size() > 0){
-                    	var optList = selCtrl.get(0).options;
-                		for(var i=0, c=optList.length; i<c; i++){
-                			var opt = optList[i];
-                			optMap[opt.value] = opt.text;
-                		}
+                    else if(type === 'textbox') {
+                    	var label = $(this).find('label').text().replace(':', '');
+                    	var input = $(this).find('input[type="text"]');
+                    	var val = input.val();
+                    	html += '<tr><td><strong>' + label + '</strong></td><td align="left">' + (val || '') + '</td></tr>';
                     }
-                    if($.isArray(val)){
-                    	var vals = val;
-                    	var txts = [];
-                    	for(var i=0, c=vals.length; i<c; i++){
-                    		var valTmp = vals[i];
-                    		txts.push(optMap[valTmp] || valTmp);
-                    	}
-                    	val = txts.join('、');
+                    else if (type == 'checkboxlist') {
+                        html += '<tr><td><strong>筛选统计列:</strong></td><td align="left" colspan="' + (result.metaDataColumnCount-1) + '">';
+                        var rowChoose = [];
+                        $(this).find('input[type="checkbox"]:checked').each(function () {
+                        	var dataName = $(this).attr('data-name');
+                        	if(dataName){
+                        		rowChoose.push(dataName);
+                        	}
+                        })
+                        html += rowChoose.join('、');
+                        html += '</td></tr>';
                     }
-                    else {
-                    	val = optMap[val] || val;
+                    else if(type === 'checkbox') {//combobox
+                    	var label = $(this).find('label').text().replace(':', '');
+                    	var input = $(this).find('input[type="checkbox"]');
+                    	var val = input.prop("checked") ? '是' : '否';
+                    	html += '<tr><td><strong>' + label + '</strong></td><td  align="left">' + (val || '') + '</td></tr>';
+                    } else if (type == 'date-range') {
+                        var input = $(this).find('.combo-text');
+                        html += '<tr><td><strong>时间范围:</strong></td><td align="left" colspan="' + (result.metaDataColumnCount -1) + '">' + input.eq(0).val() + '~' + input.eq(1).val() + '</td></tr>';
                     }
-                    html += '<tr><td><strong>' + label + '</strong></td><td align="left">' + (val || '') + '</td></tr>';
-                }
-                else if(type === 'textbox') {
-                	var label = $(this).find('label').text().replace(':', '');
-                	var input = $(this).find('input[type="text"]');
-                	var val = input.val();
-                	html += '<tr><td><strong>' + label + '</strong></td><td align="left">' + (val || '') + '</td></tr>';
-                }
-                else if (type == 'checkboxlist') {
-                    html += '<tr><td><strong>筛选统计列:</strong></td><td align="left" colspan="' + (result.metaDataColumnCount-1) + '">';
-                    var rowChoose = [];
-                    $(this).find('input[type="checkbox"]:checked').each(function () {
-                    	var dataName = $(this).attr('data-name');
-                    	if(dataName){
-                    		rowChoose.push(dataName);
-                    	}
-                    })
-                    html += rowChoose.join('、');
-                    html += '</td></tr>';
-                }
-                else if(type === 'checkbox') {//combobox
-                	var label = $(this).find('label').text().replace(':', '');
-                	var input = $(this).find('input[type="checkbox"]');
-                	var val = input.prop("checked") ? '是' : '否';
-                	html += '<tr><td><strong>' + label + '</strong></td><td  align="left">' + (val || '') + '</td></tr>';
-                } else if (type == 'date-range') {
-                    var input = $(this).find('.combo-text');
-                    html += '<tr><td><strong>时间范围:</strong></td><td align="left" colspan="' + (result.metaDataColumnCount -1) + '">' + input.eq(0).val() + '~' + input.eq(1).val() + '</td></tr>';
                 }
             })
             html += '<tr></tr></table>';

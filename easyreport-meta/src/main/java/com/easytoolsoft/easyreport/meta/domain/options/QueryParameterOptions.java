@@ -167,7 +167,7 @@ public class QueryParameterOptions implements Serializable {
 	}
 
 	/**
-	 * 获取表查询参数的数据类型(string|float|integer|date)，默认是string
+	 * 获取表查询参数的数据类型(string|float|integer|date|bool)，默认是string
 	 *
 	 * @return
 	 */
@@ -176,9 +176,9 @@ public class QueryParameterOptions implements Serializable {
 	}
 
 	/**
-	 * 获取报表查询参数的数据类型(string|float|integer|date)，默认是string
+	 * 获取报表查询参数的数据类型(string|float|integer|date|bool)，默认是string
 	 *
-	 * @param dataType(string|float|integer|date)
+	 * @param dataType(string|float|integer|date|bool)
 	 */
 	public void setDataType(String dataType) {
 		this.dataType = dataType;

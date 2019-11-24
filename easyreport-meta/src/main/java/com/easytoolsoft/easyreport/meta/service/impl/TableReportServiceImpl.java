@@ -162,9 +162,15 @@ public class TableReportServiceImpl implements TableReportService {
 		final List<QueryParameterOptions> queryParams = this.reportService.parseQueryParams(report.getQueryParams());
 		for (final QueryParameterOptions queryParam : queryParams) {
 			String value = "";
+			String dataType = queryParam.getDataType();
 			values = (String[]) httpReqParamMap.get(queryParam.getName());
-			if (values != null && values.length > 0) {
-				value = this.getQueryParamValue(queryParam.getDataType(), values);
+			if (values == null) {
+				// 自定补全bool型false值（前端html不会回传）
+				if ("bool".equals(dataType) && queryParam.isRequired()) {
+					value = Boolean.FALSE.toString();
+				}
+			} else if (values.length > 0) {
+				value = this.getQueryParamValue(dataType, values);
 			}
 			formParams.put(queryParam.getName(), value);
 		}
@@ -173,13 +179,13 @@ public class TableReportServiceImpl implements TableReportService {
 	// 支持in（列表，和字符串转义）
 	private String getQueryParamValue(final String dataType, final String[] values) {
 		if (values.length == 1) {
-			if ("integer".equals(dataType) || "float".equals(dataType)) {
+			if ("integer".equals(dataType) || "float".equals(dataType) || "bool".equals(dataType)) {
 				return values[0];
 			}
 			return StrUtils.toSqlStrValue(values[0]);
 		}
 		// 多个参数值
-		if ("integer".equals(dataType) || "float".equals(dataType)) {
+		if ("integer".equals(dataType) || "float".equals(dataType) || "bool".equals(dataType)) {
 			return StringUtils.join(values, ", ");
 		}
 		// 处理\, \n , \r, '转义问题
@@ -305,13 +311,15 @@ public class TableReportServiceImpl implements TableReportService {
 					for (int i = 0; i < values.length; i++) {
 						value = values[i].trim();// trim,增强容错性
 						objValue = value;
-						if (!"string".equals(theType)) {// integer, float, date
+						if (!"string".equals(theType)) {// integer, float, date, bool
 							if (StringUtils.isBlank(value)) {
 								objValue = null;
 							} else if ("integer".equals(theType)) {
 								objValue = NumUtils.parseLong(value);
 							} else if ("float".equals(theType)) {
 								objValue = NumUtils.parseDouble(value);
+							} else if ("bool".equals(theType)) {
+								objValue = Boolean.valueOf(value);
 							}
 						}
 						if (objValue == null) {
@@ -322,13 +330,15 @@ public class TableReportServiceImpl implements TableReportService {
 					mergedParamMap.put(metaParam.getName(), isInvalidVal ? null : strValue);
 				} else {
 					Object objValue = strValue;
-					if (!"string".equals(theType)) {// integer, float, date
+					if (!"string".equals(theType)) {// integer, float, date, bool
 						if (StringUtils.isBlank(strValue)) {
 							objValue = null;
 						} else if ("integer".equals(theType)) {
 							objValue = NumUtils.parseLong(strValue);
 						} else if ("float".equals(theType)) {
 							objValue = NumUtils.parseDouble(strValue);
+						} else if ("bool".equals(theType)) {
+							objValue = Boolean.valueOf(strValue);
 						}
 					}
 					mergedParamMap.put(metaParam.getName(), objValue);

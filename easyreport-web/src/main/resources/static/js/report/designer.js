@@ -202,11 +202,11 @@ var DesignerMVC = {
                     iconCls: 'icon-remove',
                     handler: DesignerMVC.Controller.remove
                 }],
-                loadFilter: function (src) {
-                    if (!src.code) {
-                        return src.data;
+                loadFilter: function (result) {
+                    if (!result.code) {
+                        return result.data;
                     }
-                    $.messager.alert('失败', src.msg, 'error');
+                    $.messager.alert('失败', result.msg, 'error');
                     return EasyUIUtils.getEmptyDatagridRows();
                 },
                 columns: [[{
@@ -425,6 +425,25 @@ var DesignerMVC = {
                         }
                     }
                 }],
+                loadFilter: function (data) {
+                	//可能以多种形式调用
+                	var rows = null;
+                	if($.isArray(data)){
+                		rows = data;
+                	}
+                	else {
+                		var rows = data.rows || [];
+                	}
+                	//
+                	for(var i=0,c=rows.length; i<c; i++){
+                		var row = rows[i];
+                		if(!row.sqlType){//兼容旧的dataType
+                			row.sqlType = row.dataType;
+                			delete row["dataType"]
+                		}
+                	}
+                    return data;
+                },
                 columns: [[{
                     field: 'name',
                     title: '列名',
@@ -469,8 +488,8 @@ var DesignerMVC = {
                         });
                     }
                 }, {
-                    field: 'dataType',
-                    title: '数据类型',
+                    field: 'sqlType',
+                    title: 'Sql类型',
                     width: 75
                 }, {
                     field: 'width',
@@ -501,7 +520,7 @@ var DesignerMVC = {
                     title: '格式化字符串',
                     width: 140,
                     formatter: function (value, row, index) {
-                    	if(DesignerMVC.Util.isNumbericOrDateCol(row.dataType)){
+                    	if(DesignerMVC.Util.isNumbericOrDateCol(row.sqlType)){
                     		var id = "format" + index;
                             if (!row.format) {
                                 row.format = '';
@@ -520,7 +539,7 @@ var DesignerMVC = {
                     width: 50,
                     align: 'center',
                     formatter: function (value, row, index) {
-                    	if(DesignerMVC.Util.isDecimalCol(row.dataType)){
+                    	if(DesignerMVC.Util.isDecimalCol(row.sqlType)){
                     		var id = "percent" + index;
                             if (row.percent == null) {
                                 row.percent = false;
@@ -539,7 +558,7 @@ var DesignerMVC = {
                     width: 70,
                     align : 'center',
                     formatter: function (value, row, index) {
-                    	if(DesignerMVC.Util.isNumbericCol(row.dataType) && (row.type == 3 || row.type == 4)){
+                    	if(DesignerMVC.Util.isNumbericCol(row.sqlType) && (row.type == 3 || row.type == 4)){
                             var tmpl = '<input type="button" style="cursor: pointer;border:1px solid gray;height:20px;border-radius:2px;" value="..设置.." onclick="DesignerMVC.Controller.showMetaColumnClrLvl(${index})" />';
                             return juicer(tmpl, {
                                 index : index
@@ -756,10 +775,11 @@ var DesignerMVC = {
                 fitColumns: true,
                 singleSelect: true,
                 pageSize: 30,
-                loadFilter: function (src) {
-                    if (!src.code) {
-                        return src.data;
+                loadFilter: function (result) {
+                    if (!result.code) {
+                        return result.data;
                     }
+                    $.messager.alert('失败', result.msg, 'error');
                     return EasyUIUtils.getEmptyDatagridRows();
                 },
                 columns: [[{
@@ -771,13 +791,6 @@ var DesignerMVC = {
                     title: '作者',
                     width: 100
                 }]],
-                loadFilter: function (src) {
-                    if (!src.code) {
-                        return src.data;
-                    }
-                    $.messager.alert('失败', src.msg, 'error');
-                    return EasyUIUtils.getEmptyDatagridRows();
-                },
                 onClickRow: function (index, row) {
                     DesignerMVC.Controller.showHistorySqlDetail(row);
                 },
@@ -959,11 +972,50 @@ var DesignerMVC = {
                     }
                 }]
             });
-
+            //
+            $('#report-query-param-dataType').combobox({
+                onSelect: function (rec) {
+                    if (rec.value == "bool") {
+                    	var optionList = [{
+                    		value : 'checkbox',
+                    		text : '复选框',
+                    		selected : true
+                    	}]; 
+                    	$('#report-query-param-formElement').combobox('loadData', optionList);
+                    }
+                    else {
+                    	var formElementVal = $('#report-query-param-formElement').combobox('getValue');
+                    	if(formElementVal == 'checkbox'){
+                    		var optionList = [{
+                        		value : 'text',
+                        		text : '文本'
+                        	},{
+                        		value : 'date',
+                        		text : '日期'
+                        	},{
+                        		value : 'select',
+                        		text : '下拉单选'
+                        	},{
+                        		value : 'selectMul',
+                        		text : '下拉多选'
+                        	}]; 
+                    		
+                        	$('#report-query-param-formElement').combobox('loadData', optionList);
+                    	}
+                    	
+                    	if(rec.value == "date"){
+                    		$('#report-query-param-formElement').combobox('setValue', 'date');
+                    	}
+                    	else {
+                    		$('#report-query-param-formElement').combobox('setValue', 'text');
+                    	}
+                    }
+                }
+            });
             $('#report-query-param-formElement').combobox({
                 onSelect: function (rec) {
                     var value = "text";
-                    if (rec.value == "text" || rec.value == "date") {
+                    if (rec.value == "text" || rec.value == "date" || rec.value == "checkbox") {
                         value = 'none';
                     }
                     $('#report-query-param-dataSource').combobox('setValue', value);
@@ -1445,7 +1497,7 @@ var DesignerMVC = {
         	}
         	var index = $("#report-meta-column-grid").datagrid('getRowIndex', row);
         	var colName = row.text || row.name;
-        	var sqlTypeName = row.dataType || "";
+        	var sqlTypeName = row.sqlType || "";
         	var format = null;
         	if("DATE" == sqlTypeName){
         		format = 'yyyy-MM-dd';
@@ -1522,7 +1574,6 @@ var DesignerMVC = {
         },
         listReports: function (catId, reportId) {
             var gridUrl = DesignerMVC.URLs.list.url + '?id=' + catId;
-            console.log("listReports");
             //EasyUIUtils.loadDataWithUrl('#report-datagrid', gridUrl);
             EasyUIUtils.loadDataWithUrl('#report-datagrid', gridUrl, function(){
             	DesignerMVC.Controller.selectRowById(reportId);
@@ -1746,7 +1797,9 @@ var DesignerMVC = {
                 if (oldColIndex != null) {
                 	var oldCol = oldColumns[oldColIndex];
                 	oldCol.name = newCol.name;//
-                	oldCol.dataType = newCol.dataType;
+                	oldCol.sqlType = newCol.sqlType;
+                	oldCol.theType = newCol.theType;
+                	oldCol.className = newCol.className;
                 	oldCol.width = newCol.width;
                 	oldCol.align = oldCol.align || newCol.align;
                 	if(DesignerMVC.Util.isJustVarName(oldCol.text)){

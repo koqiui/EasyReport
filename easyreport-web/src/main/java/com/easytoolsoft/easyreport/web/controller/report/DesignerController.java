@@ -171,9 +171,10 @@ public class DesignerController extends BaseController<ReportService, Report, Re
 	@RequiresPermissions("report.designer:view")
 	public ReportMetaDataColumn getMetaColumnScheme() {
 		final ReportMetaDataColumn column = new ReportMetaDataColumn();
-		column.setName("expr");
+		column.setName("calcExpr");
+		// column.setText("计算列");
 		column.setType(4);
-		column.setDataType("DECIMAL");
+		column.setSqlType("DECIMAL");
 		column.setWidth(42);
 		return column;
 	}
