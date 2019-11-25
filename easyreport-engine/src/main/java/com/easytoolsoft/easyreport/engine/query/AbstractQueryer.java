@@ -5,6 +5,8 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -58,11 +60,12 @@ public abstract class AbstractQueryer implements Queryer {
 				column.setName(rsMataData.getColumnLabel(i));
 				String className = rsMataData.getColumnClassName(i);
 				column.setClassName(className);
+				int sqlType = rsMataData.getColumnType(i);
 				if (Boolean.class.getName().equals(className)) {
-					column.setSqlType("BOOLEAN");
-				} else {
-					column.setSqlType(rsMataData.getColumnTypeName(i));
+					sqlType = Types.BOOLEAN;
 				}
+				// 使用标准sql类型名称（而不是 getColumnTypeName）
+				column.setSqlType(JdbcUtils.toStdSqlTypeName(sqlType));
 				column.setWidth(rsMataData.getColumnDisplaySize(i));
 				columns.add(column);
 			}
@@ -169,16 +172,43 @@ public abstract class AbstractQueryer implements Queryer {
 			final ResultSetMetaData rsMataData = rs.getMetaData();
 			final int colCount = rsMataData.getColumnCount();
 			String[] colNames = new String[colCount];
+			// 日期时间格式
+			SimpleDateFormat[] colFormats = new SimpleDateFormat[colCount];
+			String colName = null;
 			for (int i = 1; i <= colCount; i++) {
-				colNames[i - 1] = rsMataData.getColumnLabel(i);
+				colName = rsMataData.getColumnLabel(i);
+				colNames[i - 1] = colName;
+				int sqlType = rsMataData.getColumnType(i);
+				String className = rsMataData.getColumnClassName(i);
+				if (Boolean.class.getName().equals(className)) {
+					sqlType = Types.BOOLEAN;
+				}
+				// 日期格式化
+				if (Types.DATE == sqlType) {
+					colFormats[i - 1] = new SimpleDateFormat("yyyy-MM-dd");
+				} else if (Types.TIME == sqlType) {
+					colFormats[i - 1] = new SimpleDateFormat("HH:mm:ss");
+				} else if (Types.TIMESTAMP == sqlType) {
+					colFormats[i - 1] = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+				} else {
+					colFormats[i - 1] = null;
+				}
 			}
 			// 获取结果集
 			List<Map<String, Object>> retRows = new ArrayList<>();
+			SimpleDateFormat format = null;
 			while (rs.next()) {
 				final Map<String, Object> retRow = new HashMap<>();
 				for (int i = 1; i <= colCount; i++) {
-					String colName = colNames[i - 1];
+					colName = colNames[i - 1];
 					Object value = rs.getObject(colName);
+					if (value != null) {
+						format = colFormats[i - 1];
+						// 日期格式化
+						if (format != null) {
+							value = format.format(value);
+						}
+					}
 					retRow.put(colName, value);
 				}
 				retRows.add(retRow);

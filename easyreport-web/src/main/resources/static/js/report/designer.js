@@ -694,7 +694,7 @@ var DesignerMVC = {
                     align: 'right'
                 }, {
                     field: 'required',
-                    title: '是否必选',
+                    title: '是否必需',
                     width: 80,
                     align: 'center',
                     formatter: function (value, row, index) {
