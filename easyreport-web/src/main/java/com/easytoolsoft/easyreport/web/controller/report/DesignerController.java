@@ -111,7 +111,9 @@ public class DesignerController extends BaseController<ReportService, Report, Re
 	public ResponseResult add(@CurrentUser final User loginUser, final Report po) {
 		po.setCreateUser(loginUser.getAccount());
 		po.setUid(UUID.randomUUID().toString());
-		po.setComment("");
+		if(po.getComment() == null){
+			po.setComment("");
+		}
 		po.setGmtCreated(new Date());
 		this.service.add(po);
 		this.reportHistoryService.add(this.getReportHistory(loginUser, po));

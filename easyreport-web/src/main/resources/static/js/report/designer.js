@@ -177,6 +177,18 @@ var DesignerMVC = {
                     handler: function () {
                         DesignerMVC.Controller.showDetail();
                     }
+                }, '-',{
+                    text: '查看JSON',
+                    iconCls: 'icon-info',
+                    handler: function () {
+                        DesignerMVC.Controller.showJson();
+                    }
+                },'-', {
+                    text: '从JSON新增',
+                    iconCls: 'icon-add',
+                    handler: function(){
+                    	DesignerMVC.Controller.addFromJson();
+                    }
                 }, '-', {
                     text: '增加',
                     iconCls: 'icon-add',
@@ -887,6 +899,102 @@ var DesignerMVC = {
                     }
                 }]
             });
+            
+            $('#report-json-dlg').dialog({
+                closed: true,
+                modal: true,
+                width: window.screen.width - 350,
+                height: window.screen.height - 350,
+                maximizable: true,
+                maximized: true,
+                iconCls: 'icon-info',
+                buttons: [{
+                    text: '关闭',
+                    iconCls: 'icon-no',
+                    handler: function () {
+                        $("#report-json-dlg").dialog('close');
+                    }
+                }]
+            });
+            
+            $('#report-json-copy-dlg').dialog({
+                closed: true,
+                modal: true,
+                width: window.screen.width - 350,
+                height: window.screen.height - 350,
+                maximizable: true,
+                maximized: true,
+                iconCls: 'icon-info',
+                buttons: [{
+                    text: '确定',
+                    iconCls: 'icon-ok',
+                    handler: function () {
+                    	var catId = null;
+                    	var catName = '';
+                    	var node = $('#category-tree').tree('getSelected');
+                        if (node) {
+	                        var category = node.attributes;
+	                        //console.log(category);
+	                        catId = category.id;
+	                        catName = category.name;
+                        }
+                        else {
+                        	$.messager.alert('警告', '没有所属报表分类 !', 'warning');
+                    		return false;
+                        }
+                        //
+                    	var jsonSrcText = $.trim($('#report-json-src-text').val());
+                    	var json = null;
+                    	try{
+                    		json = JSON.parse(jsonSrcText);
+                    	}
+                    	catch(ex){}
+                    	//
+                    	if(json == null){
+                    		$.messager.alert('警告', '无效json !', 'warning');
+                    		return false;
+                    	}
+                    	//
+                    	var dsId = $('#report-dsId').combobox('getValue');
+                    	
+                    	var row = {
+                    		ucode : json['ucode'] || '',
+                    		name : json['name'] || '',
+                    		sqlText : json['sqlText'] || '',
+                    		metaColumns : json['metaColumns'] || '[]',
+                    		queryParams : json['queryParams'] || '[]',
+                    		options : json['options'] || '{}',
+                    		status : json['status'] || 0,
+                    		sequence : json['sequence'] || 10,
+                    		comment : json['comment'] || '',
+                    		//
+                    		dsId : dsId,
+                    		categoryId : catId,
+                    		categoryName : catName
+                    	};
+                    	$("#report-json-copy-dlg").dialog('close');
+                        //console.log(row);
+                    	{//走copy新增逻辑
+                        	EasyUIUtils.clearDatagrid('#report-meta-column-grid');
+                            EasyUIUtils.clearDatagrid('#report-query-param-grid');
+                            $('#report-query-param-form').form('reset');
+                            //
+                            var options = DesignerMVC.Util.getOptions();
+                            options.iconCls = 'icon-designer';
+                            options.data = row;
+                            options.title = '报表设计器--【复制+新增】 报表';
+                            DesignerMVC.Util.editOrCopy(options, 'copy', true);
+                            $('#modal-action').val("add");
+                        }
+                    }
+                }, {
+                    text: '关闭',
+                    iconCls: 'icon-no',
+                    handler: function () {
+                        $("#report-json-copy-dlg").dialog('close');
+                    }
+                }]
+            });
 
             $('#report-preview-sql-dlg').dialog({
                 closed: true,
@@ -1231,6 +1339,17 @@ var DesignerMVC = {
                 DesignerMVC.Util.fillDetailLabels(row);
             });
         },
+        showJson: function () {
+            DesignerMVC.Util.isRowSelected(function (row) {
+            	var dlgTitle = '报表JSON - 【 ' + row.name +' 】';
+                $('#report-json-dlg').dialog('open').dialog('setTitle', dlgTitle);
+                $('#report-json-text').val(JSON.stringify(row));
+            });
+        },
+        addFromJson: function(){
+            $('#report-json-copy-dlg').dialog('open');
+            $('#report-json-src-text').val('/* 在这里粘贴 报表JSON，然后按确定即可 */');
+        },
         showHistorySql: function () {
             DesignerMVC.Util.isRowSelected(function (row) {
                 $('#report-history-sql-dlg').dialog('open').dialog('center');
@@ -1284,9 +1403,9 @@ var DesignerMVC = {
         		success : function(result){
         			if(result.code == 0){
         				var varNames = result.data;
-        				console.log(varNames);
+        				//console.log(varNames);
         				var paramRows = $("#report-query-param-grid").datagrid('getRows');
-        				console.log(paramRows);
+        				//console.log(paramRows);
         				for(var i= 0, c = paramRows.length; i < c; i++){
         					var tmpRow = paramRows[i];
         					var index = varNames.indexOf(tmpRow.name);
@@ -1620,14 +1739,18 @@ var DesignerMVC = {
                 $.messager.alert('警告', '请选中一条记录!', 'info');
             }
         },
-        editOrCopy: function (options, act) {
+        editOrCopy: function (options, act, reserveCopyName) {
+        	reserveCopyName = reserveCopyName || false;//是否保留copy名称
+        	//
             DesignerMVC.Util.clearSqlEditor();
             EasyUIUtils.openEditDlg(options);
 
             var row = options.data;
             if (act === 'copy') {
-            	row.id = null;
-                row.name = '';
+            	row.id = null; ////id不能省（后台实现的bug）
+            	if(!reserveCopyName){
+            		row.name = '';
+            	}
             }
             DesignerMVC.Util.fillReportBasicConfForm(row, $.toJSON(row.options));
             DesignerMVC.View.SqlEditor.setValue(row.sqlText || "");

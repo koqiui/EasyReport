@@ -96,10 +96,7 @@
         <if test="record.gmtModified != null">gmt_modified = #{record.gmtModified,jdbcType=TIMESTAMP} ,</if>
     </sql>
     <!-- insert -->
-    <insert id="insert" parameterType="java.util.Map">
-        <selectKey resultType="java.lang.Integer" keyProperty="id" order="AFTER">
-            SELECT LAST_INSERT_ID()
-        </selectKey>
+    <insert id="insert" parameterType="java.util.Map" useGeneratedKeys="true" keyProperty="record.id">
         insert into
         <include refid="Table_Name"/>
         <trim prefix="(" suffix=")" suffixOverrides=",">
