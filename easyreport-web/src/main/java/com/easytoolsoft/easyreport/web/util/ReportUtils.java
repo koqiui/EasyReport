@@ -301,8 +301,6 @@ public class ReportUtils {
 				htmlTable = reportTable.getHtmlText();
 				//
 				htmlTable = htmlTable.replaceAll("<table\\s+", "<table cellpadding=\"3\" cellspacing=\"0\"  border=\"1\" rull=\"all\" style=\"border-collapse:collapse\" ");
-			} else {// 使用前端传回的html
-				htmlTable = htmlTable.replaceAll("<table>", "<table cellpadding=\"3\" cellspacing=\"0\"  border=\"1\" rull=\"all\" style=\"border-collapse:collapse\">");
 			}
 			response.reset();
 			response.setHeader("Content-Disposition", String.format("attachment; filename=%s", fileName));

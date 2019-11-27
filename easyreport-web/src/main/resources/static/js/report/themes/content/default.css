@@ -27,27 +27,27 @@ td, th {
 
 .easyreport .easyreport-header th, .easyreport .easyreport-header td {
 	height: 24px;
-	background: #308ca5;
+	background-color: #308ca5;
 	border-right: 1px solid #ccc;
 	border-top: none;
-	color: #fff;
 	text-align: center;
+	color: #fff;
 }
 
 .easyreport tr.easyreport-row {
-	background: #e6f1f5ad;
+	background-color: rgba(230, 241, 245, 0.68);
 }
 
 .easyreport tr.hover {
-	background: #fef5c2;
+	background-color: rgba(254, 245, 194, 0.8);
 }
 
 .easyreport tr.easyreport-row.hover {
-	background: #feed8d;
+	background-color: rgba(254, 237, 141, 0.8);
 }
 
 .easyreport tr.selected, .easyreport tr.easyreport-row.selected {
-	background: #e426b92e;
+	background-color: rgba(228, 38, 185, 0.18);
 }
 
 .easyreport th, .easyreport td {
@@ -56,19 +56,15 @@ td, th {
 	color: #36534f;
 }
 
-
-
 .easyreport .easyreport-fixed-column {
-	background: #ecfbd2a6;
+	background-color: rgba(236, 251, 210, 0.65);
 	font-weight: bold;
 	font-size: 11px;
 	text-align: left;
 }
 
-
-
 .easyreport th {
-	background: #308ca5;
+	background-color: #308ca5;
 	border: 1px solid #ccc;
 	font-size: 11px;
 	color: #fff;

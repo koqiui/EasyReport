@@ -78,8 +78,9 @@ var TableReportMVC = {
             });
         },
         exportToExcel: function (e) {
+        	var dataTable = $('#easyreport');
             var htmlFilter = TableReportMVC.Util.filterTable;
-            if(htmlFilter == null){
+            if(htmlFilter == null || dataTable.length < 1){
             	$.messager.show({
                     title: '提示',
                     msg: '没有报表可以导出（请先生成报表）'
@@ -87,36 +88,54 @@ var TableReportMVC = {
             	return;
             }
             
-            var htmlTableLarge = false;//htmlTable内容是否过大
-            var htmlTable = '<table>' + $('#easyreport').html() + '</table>';
-            var bytes = TableReportMVC.Util.getExcelBytes(htmlTable);
-            if (bytes > 2000000) {
-            	htmlTableLarge = true;
-            }
-            var data = $('#table-report-form').serializeObject();
-            data["htmlFilter"] = htmlFilter;
-            if(htmlTableLarge){
-            	data["htmlTable"] = "";
-            }
-            else {
-            	data["htmlTable"] = htmlTable;
-            }
-            //
             $.messager.progress({
                 title: '请稍后...',
                 text: '报表正在生成中...',
             });
+            
+            var htmlTable = dataTable.get(0).outerHTML;
+            //表格加边框
+            htmlTable = htmlTable.replace(/<table\s+/ig, '<table cellpadding="3" cellspacing="0"  border="1" rull="all" style="border-collapse:collapse" ');
+            
+            //从页面直接下载
+            //console.log(htmlTable);
+            var htmlContent = htmlFilter + htmlTable;
+            var date = new Date();
+            var dateName = date.getFullYear() + (date.getMonth() + 1) + date.getDay() + date.getHours() + date.getMinutes() +  + date.getSeconds();
+            var fileName = $('#table-report-name').val() + '_' + dateName + '.xls';
             //
-            var url = TableReportMVC.URLs.exportExcel.url;
-            data = $.param(data, true);
-            $.fileDownload(url, {
-                httpMethod: "POST",
-                data: data
-            }).done(function () {
-                $.messager.progress("close");
-            }).fail(function () {
-                $.messager.progress("close");
-            });
+            TableReportMVC.Util.downloadHtmlAsXls(htmlContent, fileName);
+            
+            setTimeout(function(){
+            	$.messager.progress("close");
+            }, 1000);//从页面直接下载
+            
+            //提交服务器下载
+//            var htmlTableLarge = false;//htmlTable内容是否过大
+//            var bytes = TableReportMVC.Util.getExcelBytes(htmlTable);
+//            if (bytes > 2000000) {
+//            	htmlTableLarge = true;
+//            }
+//            var data = $('#table-report-form').serializeObject();
+//            data["htmlFilter"] = htmlFilter;
+//            if(htmlTableLarge){
+//            	data["htmlTable"] = "";
+//            }
+//            else {
+//            	data["htmlTable"] = htmlTable;
+//            }
+            
+//
+//            var url = TableReportMVC.URLs.exportExcel.url;
+//            data = $.param(data, true);
+//            $.fileDownload(url, {
+//                httpMethod: "POST",
+//                data: data
+//            }).done(function () {
+//                $.messager.progress("close");
+//            }).fail(function () {
+//                $.messager.progress("close");
+//            });
             e.preventDefault();
         }
     },
@@ -304,6 +323,32 @@ var TableReportMVC = {
                 }
             }
             return totalLength;
+        },
+        downloadHtmlAsXls : function(htmlContent, fileName, style) {
+            htmlContent = htmlContent || '';
+            if(htmlContent.indexOf('<html') != 0) {
+                //没有被html包裹
+                style = style || '';
+                htmlContent = '<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><style type="text/css">' + style + '</style></head><body>' + htmlContent + '</body></html>';
+            }
+            var blob = new Blob([htmlContent], {
+                type: "application/vnd.ms-excel"
+            });
+
+            if(window.navigator && window.navigator.msSaveBlob) { //IE
+                window.navigator.msSaveBlob(blob, fileName);
+            } else { //非IE
+                var tmpLink = document.createElement('A');
+                document.body.appendChild(tmpLink);
+                tmpLink.style = 'display: none';
+                var fileUrl = window.URL.createObjectURL(blob);
+                tmpLink.href = fileUrl;
+                tmpLink.download = fileName;
+                tmpLink.click();
+                window.URL.revokeObjectURL(tmpLink.href);
+                document.body.removeChild(tmpLink);
+                tmpLink.remove();
+            }
         },
         getCurrentTime: function currentTime() {
             var d = new Date(), str = '';
