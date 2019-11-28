@@ -238,7 +238,7 @@ var DesignerMVC = {
                     		data.title = '自定义代码：' + ucode;
                     		data.msg = data.title;
                     		//
-                    		tmpl += '<img style="float:right;margin-top:2px;" src="${imgSrc}" title="${title}" onclick="$.messager.alert(\'提示\', \'${msg}\', \'info\')"/>';
+                    		tmpl += '<img style="float:right;margin-top:2px;cursor:default;" src="${imgSrc}" title="${title}" onclick="$.messager.alert(\'提示\', \'${msg}\', \'info\')"/>';
                     	}
                     	//
                     	return juicer(tmpl, data);
@@ -680,13 +680,10 @@ var DesignerMVC = {
                     title: '标签文字',
                     width: 100
                 }, {
-                    field: 'defaultValue',
-                    title: '默认值',
-                    width: 100
-                }, {
-                    field: 'defaultText',
-                    title: '默认文本',
-                    width: 100
+                    field: 'dataType',
+                    title: '数据类型',
+                    width: 100,
+                    align: 'center'
                 }, {
                     field: 'formElement',
                     title: '表单控件',
@@ -706,10 +703,22 @@ var DesignerMVC = {
                         return "";
                     }
                 }, {
-                    field: 'dataType',
-                    title: '数据类型',
+                    field: 'defaultValue',
+                    title: '默认值',
                     width: 100,
-                    align: 'center'
+                    formatter: function (value, row, index) {
+                        if (row.dataType == "date") {
+                           if(row.defaultExpr != null && $.trim(row.defaultExpr) != ''){
+                        	   var hintMsg = '默认值表达式：' + row.defaultExpr;
+                        	   return value + ' <span style="color:darkgreen;font-size:16px;float:right;cursor:default;" title="' + hintMsg + '" onclick="$.messager.alert(\'提示\', \''+ hintMsg + '\', \'info\')">❀</span>';
+                           }
+                        }
+                        return value;
+                    }
+                }, {
+                    field: 'defaultText',
+                    title: '默认文本',
+                    width: 100
                 }, {
                     field: 'width',
                     title: '数据长度',
@@ -786,6 +795,8 @@ var DesignerMVC = {
                     EasyUIUtils.clearDatagrid('#report-query-param-grid');
                     $("#report-query-param-grid").datagrid('loadData', rows);
                     $("#report-query-param-grid").datagrid('selectRow', index);
+                    //
+                    $('.for-query-param-defaultExpr').css('visibility', row.dataType == 'date' ? 'visible' : 'hidden');
                 },
                 rowStyler: function (index, row) {
                 	var curIndex = $.trim($("#report-query-param-curIndex").val());
@@ -1103,7 +1114,7 @@ var DesignerMVC = {
             });
             //
             $('#report-query-param-dataType').combobox({
-                onSelect: function (rec) {
+            	onSelect: function (rec) {
                     if (rec.value == "bool") {
                     	var optionList = [{
                     		value : 'checkbox',
@@ -1138,11 +1149,13 @@ var DesignerMVC = {
                     	else {
                     		$('#report-query-param-formElement').combobox('setValue', 'text');
                     	}
+                    	//
+                        $('.for-query-param-defaultExpr').css('visibility', rec.value == 'date' ? 'visible' : 'hidden');
                     }
                 }
             });
             $('#report-query-param-formElement').combobox({
-                onSelect: function (rec) {
+            	onSelect: function (rec) {
                     var value = "text";
                     if (rec.value == "text" || rec.value == "date" || rec.value == "checkbox") {
                         value = 'none';
@@ -1775,6 +1788,7 @@ var DesignerMVC = {
 				text : name,
 				dataType : 'string',
 				defaultValue : '',
+				defaultExpr : '',
 				formElement : 'text',
 				dataSource : 'none',
 				content : '',

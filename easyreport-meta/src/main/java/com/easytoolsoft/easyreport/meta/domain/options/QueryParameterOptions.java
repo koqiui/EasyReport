@@ -1,7 +1,9 @@
 package com.easytoolsoft.easyreport.meta.domain.options;
 
 import java.io.Serializable;
+import java.util.Date;
 
+import com.easytoolsoft.easyreport.engine.util.DateUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
@@ -20,6 +22,7 @@ public class QueryParameterOptions implements Serializable {
 	private String formElement;
 	private String content;
 	private String defaultValue;
+	private String defaultExpr;
 	private String defaultText;
 	private String dataSource;
 	private String dataType = "string";
@@ -29,6 +32,16 @@ public class QueryParameterOptions implements Serializable {
 	private boolean isRequired;
 	private Boolean isHidden;
 	private boolean isAutoComplete;
+
+	private String getDateStrByExpr() {
+		if ("date".equals(this.dataType) && this.defaultExpr != null) {
+			Date date = DateUtils.evalDateExpr(this.defaultExpr);
+			if (date != null) {
+				return DateUtils.getDate(date, "yyyy-MM-dd");
+			}
+		}
+		return null;
+	}
 
 	/**
 	 * 获取报表查询参数名称
@@ -126,6 +139,14 @@ public class QueryParameterOptions implements Serializable {
 	 */
 	public void setDefaultValue(String defaultValue) {
 		this.defaultValue = defaultValue;
+	}
+
+	public String getDefaultExpr() {
+		return defaultExpr;
+	}
+
+	public void setDefaultExpr(String defaultExpr) {
+		this.defaultExpr = defaultExpr;
 	}
 
 	/**
@@ -334,6 +355,13 @@ public class QueryParameterOptions implements Serializable {
 	 */
 	@JsonIgnore
 	public String getRealDefaultValue() {
+		if ("date".equals(this.dataType)) {
+			String defaultValue = this.getDateStrByExpr();
+			if (defaultValue != null) {
+				return defaultValue;
+			}
+		}
+		//
 		return this.hasDefaultValue() ? this.getDefaultValue() : "";
 	}
 }
