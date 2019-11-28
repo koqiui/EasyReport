@@ -56,7 +56,7 @@ public class EasyUIQueryFormView extends AbstractQueryParamFormView implements Q
 		final String multiple = comboBox.isMultipled() ? "data-options=\"multiple:true\"" : "";
 		final StringBuilder htmlText = new StringBuilder("");
 		htmlText.append(String.format("<span class=\"j-item\" ctrl-hidden=\"%s\" ctrl-type=\"%s\"><label style=\"width: 120px;\">%s:</label>", comboBox.isHidden(), comboBox.getType(), comboBox.getText()));
-		htmlText.append(String.format("<select id=\"%s\" name=\"%s\" class=\"easyui-combobox\" style=\"width: 200px;\" %s >", comboBox.getName(), comboBox.getName(), multiple));
+		htmlText.append(String.format("<select id=\"%s\" name=\"%s\" class=\"easyui-combobox\" editable=\"false\" style=\"width: 200px;\" %s >", comboBox.getName(), comboBox.getName(), multiple));
 		for (final HtmlSelectOption option : comboBox.getValue()) {
 			final String selected = option.isSelected() ? "selected=\"selected\"" : "";
 			htmlText.append(String.format("<option value=\"%s\" %s>%s</option>", option.getValue(), selected, option.getText()));

@@ -23,8 +23,14 @@ var LoginMVC = {
     },
     View: {
         initControl: function () {
-            $("#account").focus();
             $("#login-message-tips").hide();
+            //
+            if(EasyReport.env != 'prod'){
+            	//非生产环境设置默认密码
+            	$('#password').val('123456');
+            }
+            //
+            $("#password").focus();
         },
         bindEvent: function () {
             document.onkeydown = function (e) {

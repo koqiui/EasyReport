@@ -386,28 +386,30 @@ var DesignerMVC = {
                 }, '-',{
                     iconCls: 'icon-up',
                     handler: function () {
+                    	DesignerMVC.Controller.refreshMetaColumnList();
                         EasyUIUtils.move("#report-meta-column-grid", 'up');
                     }
                 }, '-', {
                     iconCls: 'icon-down',
                     handler: function () {
+                    	DesignerMVC.Controller.refreshMetaColumnList();
                         EasyUIUtils.move("#report-meta-column-grid", 'down');
                     }
                 }, '-', {
                     iconCls: 'icon-add',
                     handler: function () {
-                        var index = 1;
-                        var rows = $("#report-meta-column-grid").datagrid('getRows');
-                        if (rows && rows.length) {
-                            for (var i = 0; i < rows.length; i++) {
+                        var rows = $("#report-meta-column-grid").datagrid('getRows') || [];
+                        var seqNo = 1;
+                        if (rows.length > 0) {
+                            for (var i = 0, c=rows.length; i < c; i++) {
                                 var type = $("#type" + i).val();
-                                if (type == 4) index++;
+                                if (type == 4) seqNo++;
                             }
                         }
                         $.getJSON(DesignerMVC.URLs.getMetaColumnScheme.url, function (result) {
                             if (!result.code) {
                                 var row = result.data;
-                                row.name = row.name + index;
+                                row.name = row.name + '_' + seqNo;
                                 row.text = row.name;
                                 row.type = 4;
                                 row.align = '';
@@ -418,13 +420,18 @@ var DesignerMVC = {
                                 row.clrLvlStart = '';
                                 row.clrLvlEnd = '';
                                 row.sortType = 0;
+                                //
                                 $('#report-meta-column-grid').datagrid('appendRow', row);
+                                //
+                                DesignerMVC.Controller.refreshMetaColumnList();
                             }
                         });
                     }
                 }, '-', {
                     iconCls: 'icon-cancel',
                     handler: function () {
+                    	DesignerMVC.Controller.refreshMetaColumnList();
+                    	//
                         var row = $("#report-meta-column-grid").datagrid('getSelected');
                         if (row) {
                             var index = $("#report-meta-column-grid").datagrid('getRowIndex', row);
@@ -653,11 +660,15 @@ var DesignerMVC = {
                     iconCls: 'icon-up',
                     handler: function () {
                         EasyUIUtils.move('#report-query-param-grid', 'up');
+                        $('#report-query-param-form').form('reset');
+                    	$('#report-query-param-curIndex').val('');
                     }
                 }, '-', {
                     iconCls: 'icon-down',
                     handler: function () {
                         EasyUIUtils.move('#report-query-param-grid', 'down');
+                        $('#report-query-param-form').form('reset');
+                    	$('#report-query-param-curIndex').val('');
                     }
                 }],
                 columns: [[{
@@ -745,7 +756,7 @@ var DesignerMVC = {
                     formatter: function (value, row, index) {
                         var imgPath = DesignerCommon.baseIconUrl + 'remove.png';
                         var tmpl = '<a href="#" title ="移除" ' +
-                            'onclick="MetaDataDesigner.deleteQueryParam(\'${index}\')"><img src="${imgPath}" ' +
+                            'onclick="MetaDataDesigner.deleteQueryParam(${index})"><img src="${imgPath}" ' +
                             'alt="移除"/"></a>';
                         return juicer(tmpl, {
                             index: index,
@@ -764,18 +775,27 @@ var DesignerMVC = {
                 		row.content = '';
                 	}
                 	//
+                	$("#report-query-param-curIndex").val(index);
+                	//
                     $('#report-query-param-form').form('load', row);
                     $("#report-query-param-required").prop("checked", row.required);
                     $("#report-query-param-hidden").prop("checked", row.hidden);
                     $("#report-query-param-autoComplete").prop("checked", row.autoComplete);
-                    $("#report-query-param-gridIndex").val(index);
                     //
-                    if(someWasNull){//反馈初始化变更
-                    	$('#report-query-param-grid').datagrid('updateRow', {
-                            index: index,
-                            row: row
-                        });
-                    }
+                    var rows = $("#report-query-param-grid").datagrid('getRows');
+                    EasyUIUtils.clearDatagrid('#report-query-param-grid');
+                    $("#report-query-param-grid").datagrid('loadData', rows);
+                    $("#report-query-param-grid").datagrid('selectRow', index);
+                },
+                rowStyler: function (index, row) {
+                	var curIndex = $.trim($("#report-query-param-curIndex").val());
+                	if(curIndex != '' ){
+                		curIndex = parseInt(curIndex);
+                		if(index == curIndex){
+                			return 'color:#0000FF';
+                		}
+                	}
+                	return 'color : inherit';
                 }
             });
 
@@ -978,6 +998,7 @@ var DesignerMVC = {
                         	EasyUIUtils.clearDatagrid('#report-meta-column-grid');
                             EasyUIUtils.clearDatagrid('#report-query-param-grid');
                             $('#report-query-param-form').form('reset');
+                            $('#report-query-param-curIndex').val('');
                             //
                             var options = DesignerMVC.Util.getOptions();
                             options.iconCls = 'icon-designer';
@@ -1207,6 +1228,16 @@ var DesignerMVC = {
                 DesignerMVC.Controller.addOrEditQueryParam('add');
             });
             $('#btn-report-query-param-edit').bind('click', function (e) {
+            	var edtIndex = $.trim($('#report-query-param-curIndex').val());
+            	if(edtIndex == ''){
+            		$.messager.show({
+            			title : '提示',
+            			msg : '请事先双击指定要修改的参数行',
+            			timeout : 3000
+            		});
+            		return;
+            	}
+            	//
                 DesignerMVC.Controller.addOrEditQueryParam('edit');
             });
             //
@@ -1259,6 +1290,7 @@ var DesignerMVC = {
                 EasyUIUtils.clearDatagrid('#report-meta-column-grid');
                 EasyUIUtils.clearDatagrid('#report-query-param-grid');
                 $('#report-query-param-form').form('reset');
+                $('#report-query-param-curIndex').val('');
                 //
                 var row = {
                     name: "",
@@ -1281,6 +1313,7 @@ var DesignerMVC = {
             	EasyUIUtils.clearDatagrid('#report-meta-column-grid');
                 EasyUIUtils.clearDatagrid('#report-query-param-grid');
                 $('#report-query-param-form').form('reset');
+                $('#report-query-param-curIndex').val('');
                 //
                 var options = DesignerMVC.Util.getOptions();
                 options.iconCls = 'icon-designer';
@@ -1294,6 +1327,7 @@ var DesignerMVC = {
             	EasyUIUtils.clearDatagrid('#report-meta-column-grid');
                 EasyUIUtils.clearDatagrid('#report-query-param-grid');
                 $('#report-query-param-form').form('reset');
+                $('#report-query-param-curIndex').val('');
                 //
                 var options = DesignerMVC.Util.getOptions();
                 options.iconCls = 'icon-designer';
@@ -1419,22 +1453,14 @@ var DesignerMVC = {
         				var newCount = varNames.length;
         				for(var i=0; i<newCount; i++){
         					var name = varNames[i];
-        					paramRows.push({
-        						name : name,
-        						text : name,
-        						dataType : 'string',
-        						defaultValue : '',
-        						formElement : 'text',
-        						dataSource : 'none',
-        						content : '',
-        						width : '100',
-        						required : true,
-        						hidden : false,
-        						autoComplete : false
-        					});
+        					var info = DesignerMVC.Util.newParamInfo(name);
+        					paramRows.push(info);
         				}
         				//
-        				DesignerMVC.Util.loadQueryParams(paramRows);
+        				$('#report-query-param-form').form('reset');
+        				$('#report-query-param-curIndex').val('');
+                        EasyUIUtils.clearDatagrid('#report-query-param-grid');
+                        $("#report-query-param-grid").datagrid('loadData', paramRows);
         				$.messager.alert('提示', "参数列表已刷新" + (newCount >0 ? '，新发现并追加了变量参数：<br/></br>'+ varNames.join('、') + '</br></br>注意：补全变量参数类型和默认值信息' : ''), 'info');
         			}
         			else {
@@ -1555,10 +1581,24 @@ var DesignerMVC = {
         },
         deleteQueryParam: function (index) {
             $("#report-query-param-grid").datagrid('deleteRow', index);
-            var rows = $("#report-query-param-grid").datagrid('getRows');
-            $("#report-query-param-grid").datagrid('reload', rows);
             //
-            $('#report-query-param-form').form('reset');
+            var edtIndex = $.trim($('#report-query-param-curIndex').val());
+            if(edtIndex != ''){
+            	edtIndex = parseInt(edtIndex);
+            	if(edtIndex == index){//已删除编辑行
+            		$('#report-query-param-form').form('reset');
+                	$('#report-query-param-curIndex').val('');
+                }
+                else if(index < edtIndex){//删除了前面的行
+                	//需要调整编辑行的索引
+                	edtIndex--;
+                	$('#report-query-param-curIndex').val(edtIndex);
+                }
+            }
+            //
+            var rows = $("#report-query-param-grid").datagrid('getRows');
+            EasyUIUtils.clearDatagrid('#report-query-param-grid');
+            $("#report-query-param-grid").datagrid('loadData', rows);
         },
         addOrEditQueryParam: function (act) {
             if ($("#report-query-param-form").form('validate')) {
@@ -1572,16 +1612,27 @@ var DesignerMVC = {
                 row.hidden = $("#report-query-param-hidden").prop("checked");
                 row.autoComplete = $("#report-query-param-autoComplete").prop("checked");
 
+                var index = -1;
+                var rows = [];
                 if (act == "add") {
                     $('#report-query-param-grid').datagrid('appendRow', row);
+                    rows = $("#report-query-param-grid").datagrid('getRows');
+                    index = rows.length -1;
                 } else if (act == "edit") {
-                    var index = $("#report-query-param-gridIndex").val();
-                    $('#report-query-param-grid').datagrid('updateRow', {
+                    index = $("#report-query-param-curIndex").val();
+                    index = parseInt(index);
+                	$('#report-query-param-grid').datagrid('updateRow', {
                         index: index,
                         row: row
                     });
+                	rows = $("#report-query-param-grid").datagrid('getRows');
                 }
                 $('#report-query-param-form').form('reset');
+                $('#report-query-param-curIndex').val('');//
+                //
+                EasyUIUtils.clearDatagrid('#report-query-param-grid');
+                $("#report-query-param-grid").datagrid('loadData', rows);
+                $("#report-query-param-grid").datagrid('selectRow', index);
             }
         },
         showMetaColumnOption: function (index, name) {
@@ -1700,7 +1751,7 @@ var DesignerMVC = {
         }
     },
     Util: {
-    	isJustVarName(chkStr){
+    	isJustVarName : function(chkStr){
     		var reg = /^\s*[a-z_0-0]*\s*$/ig;
     		return reg.test(chkStr);
     	},
@@ -1716,6 +1767,98 @@ var DesignerMVC = {
     			$.extend(true, ret, src);
     		}
     		return ret;
+    	},
+    	//智能判断参数类型
+    	newParamInfo: function(name){
+    		var info = {
+				name : name,
+				text : name,
+				dataType : 'string',
+				defaultValue : '',
+				formElement : 'text',
+				dataSource : 'none',
+				content : '',
+				width : '100',
+				required : true,
+				hidden : false,
+				autoComplete : false
+			};
+    		//
+    		if(/(Date|_date|Time|_time|Ts|_ts)/.test(info.name)){
+    			info.dataType = 'date';
+    			info.formElement = 'date';
+    			info.defaultValue = DesignerMVC.Util.getCurrentDate();
+    			info.text = info.text.replace(/(Date|_date)/, '日期');
+    			info.text = info.text.replace(/(Time|_time|Ts|_ts)/, '时间');
+    			if(info.text.toLowerCase().indexOf('start') != -1){
+    				info.text = info.text.replace(/start/i, '起始');
+    				info.text = info.text.replace(/end/i, '截止');
+    			}
+    			else {
+    				info.text = info.text.replace(/begin/i, '开始');
+    				info.text = info.text.replace(/end/i, '结束');
+    			}
+    		}
+    		else if(/^(is|has)|(ed|Flag|_flag)$/.test(info.name)){
+    			info.dataType = 'bool';
+    			info.formElement = 'checkbox';
+    			info.defaultValue = 'false';
+    			info.text = info.text.replace('is', '是否');
+    			info.text = info.text.replace('has', '有无');
+    			info.text = info.text.replace(/(Flag|_flag)/, '标记');
+    			info.text = info.text.replace(/(disabled|disable)/i, '禁用');
+    			info.text = info.text.replace(/(enabled|enable)/i, '启用');
+    			info.text = info.text.replace(/(deleted|delete)/i, '删除');
+    		}
+    		else if(/(Count|_count|Quantity|Qty|_quantity|_qty|Times|_times|Id|_id|Hours|_hours|Minutes|Mins|_minutes|_mins|Seconds|Snds|_seconds|_snds)$/.test(info.name)){
+    			info.dataType = 'integer';
+    			info.defaultValue = '0';
+    			info.text = info.text.replace(/(Count|_count)$/, '数量');
+    			info.text = info.text.replace(/(Quantity|Qty|_quantity|_qty)$/, '数量');
+    			info.text = info.text.replace(/(Times|_times)$/, '次数');
+    			info.text = info.text.replace(/(Id|_id)$/, 'ID');
+    			info.text = info.text.replace(/(Hours|_hours)$/, '小时数');
+    			info.text = info.text.replace(/(Minutes|Mins|_minutes|_mins)$/, '分钟数');
+    			info.text = info.text.replace(/(Seconds|Snds|_seconds|_snds)$/, '秒数');
+    		}
+    		else if(/(Price|_price|Amount|Amnt|_amount|_amnt|Rate|_rate|Ratio|_ratio|Percent|Pcnt|Pct|_percent|_pcnt|_pct|Money|Mny|_money|_mny)$/.test(info.name)){
+    			info.dataType = 'float';
+    			info.defaultValue = '0';
+    			info.text = info.text.replace(/(Price|_price)$/, '价格');
+    			info.text = info.text.replace(/(Amount|Amnt|_amount|_amnt)$/, '金额');
+    			info.text = info.text.replace(/(Rate|_rate)$/, '比率');
+    			info.text = info.text.replace(/(Ratio|_ratio)$/, '比例');
+    			info.text = info.text.replace(/(Percent|Pcnt|Pct|_percent|_pcnt|_pct)$/, '百分比');
+    			info.text = info.text.replace(/(Money|Mny|_money|_mny)$/, '钱数');
+    		}
+    		info.text = info.text.replace(/year/i, '年份');
+    		info.text = info.text.replace(/month/i, '月份');
+    		info.text = info.text.replace(/day/i, '日期');
+    		//
+    		info.text = info.text.replace('create', '创建');
+			info.text = info.text.replace('update', '更新');
+			info.text = info.text.replace('modify', '修改');
+			info.text = info.text.replace('change', '变更');
+			info.text = info.text.replace('disable', '禁用');
+			info.text = info.text.replace('enable', '启用');
+			info.text = info.text.replace('delete', '删除');
+			//
+			info.text = info.text.replace('total', '总的');
+			info.text = info.text.replace('sum', '汇总');
+			info.text = info.text.replace('avg', '平均');
+			info.text = info.text.replace('max', '最大');
+			info.text = info.text.replace('min', '最小');
+			info.text = info.text.replace('top', '靠前');
+			info.text = info.text.replace('btm', '垫底');
+			info.text = info.text.replace('old', '老的');
+			info.text = info.text.replace('new', '新的');
+			info.text = info.text.replace('prev', '之前');
+			info.text = info.text.replace('next', '之后');
+			//
+			info.text = info.text.replace(/from/i, '从');
+    		info.text = info.text.replace(/to/i, '到');
+    		//
+			return info;
     	},
         getOptions: function () {
             return {
@@ -2036,6 +2179,24 @@ var DesignerMVC = {
         reloadDataSourceList : function(){
         	var dsId = $('#report-dsId').combobox('getValue');
         	DesignerMVC.Data.loadDataSourceList(dsId);
+        },
+        getCurrentDate: function() {
+            var d = new Date();
+            var str = '', tmp = '';
+            str += d.getFullYear() + '-';
+            //
+            tmp = d.getMonth() + 1 +'';
+            if(tmp.length <2){
+            	tmp = '0'+tmp;
+            }
+            str += tmp + '-';
+            //
+            tmp = d.getDate() + '';
+            if(tmp.length <2){
+            	tmp = '0'+tmp;
+            }
+            str += tmp;
+            return str;
         }
     },
     Data: {

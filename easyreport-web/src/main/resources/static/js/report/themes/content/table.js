@@ -100,8 +100,8 @@ var TableReportMVC = {
             //从页面直接下载
             //console.log(htmlTable);
             var htmlContent = htmlFilter + htmlTable;
-            var date = new Date();
-            var dateName = date.getFullYear() + (date.getMonth() + 1) + date.getDay() + date.getHours() + date.getMinutes() +  + date.getSeconds();
+            var dateName = TableReportMVC.Util.getCurrentTime();
+            dateName = dateName.replace(/\s/g, '_').replace(/\-/g, '').replace(/\:/g, '');
             var fileName = $('#table-report-name').val() + '_' + dateName + '.xls';
             //
             TableReportMVC.Util.downloadHtmlAsXls(htmlContent, fileName);
@@ -350,14 +350,40 @@ var TableReportMVC = {
                 tmpLink.remove();
             }
         },
-        getCurrentTime: function currentTime() {
-            var d = new Date(), str = '';
+        getCurrentTime: function() {
+            var d = new Date();
+            var str = '', tmp = '';
             str += d.getFullYear() + '-';
-            str += d.getMonth() + 1 + '-';
-            str += d.getDate() + ' ';
-            str += d.getHours() + ':';
-            str += d.getMinutes() + ':';
-            str += d.getSeconds() + '';
+            //
+            tmp = d.getMonth() + 1 +'';
+            if(tmp.length <2){
+            	tmp = '0'+tmp;
+            }
+            str += tmp + '-';
+            //
+            tmp = d.getDate() + '';
+            if(tmp.length <2){
+            	tmp = '0'+tmp;
+            }
+            str += tmp + ' ';
+            //
+            tmp =  d.getHours() + '';
+            if(tmp.length <2){
+            	tmp = '0'+tmp;
+            }
+            str += tmp + ':';
+            //
+            tmp =  d.getMinutes() + '';
+            if(tmp.length <2){
+            	tmp = '0'+tmp;
+            }
+            str += tmp + ':';
+            //
+            tmp =  d.getSeconds() + '';
+            if(tmp.length <2){
+            	tmp = '0'+tmp;
+            }
+            str += tmp;
             return str;
         },
         filterTable: null

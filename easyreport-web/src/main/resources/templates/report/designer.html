@@ -73,7 +73,7 @@
                 </tr>
                 <tr>
                     <td>状态:</td>
-                    <td><select class="easyui-combobox" id="category-status" name="status" style="width: 148px">
+                    <td><select class="easyui-combobox" id="category-status" name="status" editable="false" style="width: 148px">
                         <option selected="selected" value="1">启用</option>
                         <option value="0">禁用</option>
                     </select></td>
@@ -118,13 +118,14 @@
                             <td>数据源名:</td>
                             <td><select class="easyui-combobox" id="report-dsId" name="dsId"
                                         data-options="required:true,valueField:'id',textField:'name'"
+                                        editable="false"
                                         style="width:150px">
                             </select><a id="btn-refresh-report-ds-list" style="height:23px;" href="#" class="easyui-linkbutton icon-reload"
                                     title="刷新加载数据源列表">&nbsp;&nbsp;</a>
                             </td>
                             <td>布局形式:</td>
                             <td><select class="easyui-combobox" id="report-layout" name="layout"
-                                        data-options="required:true" style="width:100px">
+                                        data-options="required:true" editable="false" style="width:100px">
                                 <option value="1">横向布局</option>
                                 <option value="2">纵向布局</option>
                             </select>
@@ -132,7 +133,7 @@
                             <td>数值列在:</td>
                             <td colspan="3"><select class="easyui-combobox" id="report-statColumnLayout"
                                                     name="statColumnLayout"
-                                        data-options="required:true" style="width:100px">
+                                        data-options="required:true" editable="false" style="width:100px">
                                 <option value="1">上侧</option>
                                 <option value="2">左侧</option>
                             </select>
@@ -143,7 +144,7 @@
                             <td><label id="report-category-name"/></td>
                             <td>当前状态:</td>
                             <td><select class="easyui-combobox" id="report-status" name="status"
-                                        data-options="required:true" style="width:150px">
+                                        data-options="required:true" editable="false" style="width:150px">
                                 <option value="0">禁用</option>
                                 <option value="1" selected="selected">启用</option>
                             </select>
@@ -215,7 +216,7 @@
                         <tr>
                             <td>数据类型:</td>
                             <td><select class="easyui-combobox" id="report-query-param-dataType" name="dataType"
-                                        data-options="required:true" style="width:150px">
+                                        data-options="required:true" editable="false" style="width:150px">
                                 <option value="integer" selected="selected">整数</option>
                                 <option value="date">日期</option>
                                 <option value="string">字符串</option>
@@ -232,7 +233,7 @@
                         <tr>
                             <td>表单控件:</td>
                             <td><select class="easyui-combobox" id="report-query-param-formElement" name="formElement"
-                                        data-options="required:true,valueField:'value',textField:'text'" style="width:150px">
+                                        data-options="required:true,valueField:'value',textField:'text'" editable="false" style="width:150px">
                                 <option value="text" selected>文本</option>
                                 <option value="date">日期</option>
                                 <option value="select">下拉单选</option>
@@ -241,7 +242,7 @@
                             </select></td>
                             <td>数据来源:</td>
                             <td><select title="需要来源内容支持" class="easyui-combobox" id="report-query-param-dataSource"
-                                                    name="dataSource" data-options="required:true" style="width:150px">
+                                                    name="dataSource" data-options="required:true" editable="false" style="width:150px">
                                 <option value="none">无</option>
                                 <option value="text">文本定义</option>
                                 <option value="sql">SQL语句</option>
@@ -256,7 +257,7 @@
                             <td colspan="7">
                             <textarea id="report-query-param-content" name="content" style="width: 95%; height: 100px;"
                                       placeholder="(select col1 as name,col2 as text from table ...) or (name1,text1|name2,text2|...) or (name1|name2|...)"></textarea>
-                                <input type="hidden" id="report-query-param-gridIndex" value="0"/>
+                                <input type="hidden" id="report-query-param-curIndex" value=""/>
                                 <input type="hidden" id="report-query-param-json"/>
                         </tr>
                         <tr>

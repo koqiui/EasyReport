@@ -8,7 +8,7 @@
 </head>
 <body class="easyui-layout" layout:fragment="content">
 <div id="toolbar" class="toolbar">
-    属性:<select class="easyui-combobox" id="field-name" name="fieldName" style="width: 100px">
+    属性:<select class="easyui-combobox" id="field-name" name="fieldName" editable="false" style="width: 100px">
     <option value="name">名称</option>
     <option value="driver_class">驱动类名</option>
     <option value="dbpool_class">连接池类名</option>
@@ -46,12 +46,12 @@
                     <td>
                         <select class="easyui-combobox" id="dbType" name="dbType"
                                 data-options="required:true,valueField:'value',textField:'name'"
-                                style="width: 180px"></select>
+                                editable="false" style="width: 180px"></select>
                     </td>
                     <td>连接池:</td>
                     <td colspan="3"><select class="easyui-combobox" id="dbPoolType" name="dbPoolType"
                                             data-options="required:true,valueField:'value',textField:'name'"
-                                            style="width: 180px"></select>
+                                            editable="false" style="width: 180px"></select>
                     </td>
                 </tr>
                 <tr>
