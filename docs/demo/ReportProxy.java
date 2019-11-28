@@ -2,13 +2,17 @@ package com.swb.web.base;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -73,6 +77,98 @@ public class ReportProxy {
 		}
 	}
 
+	//
+	// today
+	public static Date getToday() {
+		return new Date();
+	}
+
+	// month.firstday
+	public static Date getMonthFirstDay() {
+		Calendar cal = Calendar.getInstance();
+		cal.add(Calendar.MONTH, 0);
+		cal.set(Calendar.DAY_OF_MONTH, 1);
+		return cal.getTime();
+	}
+
+	// month.lastday
+	public static Date getMonthLastDay() {
+		Calendar cal = Calendar.getInstance();
+		cal.add(Calendar.MONTH, 1);
+		cal.set(Calendar.DAY_OF_MONTH, 0);
+		return cal.getTime();
+	}
+
+	// year.firstday
+	public static Date getYearFirstDay() {
+		Calendar cal = Calendar.getInstance();
+		cal.add(Calendar.YEAR, 0);
+		cal.set(Calendar.DAY_OF_YEAR, 1);
+		return cal.getTime();
+	}
+
+	// year.lastday
+	public static Date getYearLastDay() {
+		Calendar cal = Calendar.getInstance();
+		cal.add(Calendar.YEAR, 1);
+		cal.set(Calendar.DAY_OF_YEAR, 0);
+		return cal.getTime();
+	}
+
+	private static Pattern DATE_EXPR_REGEX = Pattern.compile("(today|month\\.firstday|month\\.lastday|year\\.firstday|year\\.lastday)");
+
+	public static Date evalDateExpr(String dateExpr) {
+		if (StrUtil.isNullOrBlank(dateExpr)) {
+			return null;
+		}
+		dateExpr = dateExpr.replaceAll("\\s+", "");
+		dateExpr = dateExpr.trim().toLowerCase();
+		// System.out.println("-------------------");
+		// System.out.println("'" + dateExpr + "'");
+		Matcher matcher = DATE_EXPR_REGEX.matcher(dateExpr);
+		if (matcher.find()) {
+			String calcExpr = null;
+			String coreExpr = matcher.group();
+			int end = matcher.end();
+			if (dateExpr.length() > end) {
+				calcExpr = dateExpr.substring(end).trim();
+			}
+			// System.out.println("'" + coreExpr + "'");
+			// System.out.println("'" + (calcExpr == null ? "" : calcExpr) + "'");
+			Date baseDate = null;
+			if ("month.firstday".equals(coreExpr)) {
+				baseDate = getMonthFirstDay();
+			} else if ("month.lastday".equals(coreExpr)) {
+				baseDate = getMonthLastDay();
+			} else if ("year.firstday".equals(coreExpr)) {
+				baseDate = getYearFirstDay();
+			} else if ("year.lastday".equals(coreExpr)) {
+				baseDate = getYearLastDay();
+			} else {// today
+				baseDate = getToday();
+			}
+			Date retDate = baseDate;
+			if (StrUtil.hasText(calcExpr)) {
+				int diffDays = 0;
+				try {
+					diffDays = Integer.parseInt(calcExpr);
+				} catch (NumberFormatException ex) {
+					// 无效数字
+				}
+				if (diffDays != 0) {
+					retDate = DateUtils.addDays(baseDate, diffDays);
+				}
+			}
+			return retDate;
+		}
+		return null;
+	}
+
+	public static String getDateStrByExpr(String dateExpr) {
+		Date theDate = evalDateExpr(dateExpr);
+		return theDate == null ? null : DateUtil.toStdDateStr(theDate);
+	}
+
 	// --------------------------------------------------------------------------------------------
 	private static Ajax newAjax() {
 		Ajax ajax = new Ajax();
@@ -80,7 +176,8 @@ public class ReportProxy {
 		return ajax;
 	}
 
-	private static final int REPORT_INFO_CACHE_MINUTES = 30;
+	/** 报表元数据缓存时间（分钟） */
+	private static final int REPORT_INFO_CACHE_MINUTES = 10;
 
 	private static void saveReportInfoCache(ReportMeta reportInfo) {
 		if (!useCache) {
@@ -142,13 +239,21 @@ public class ReportProxy {
 						targetInfo.setMetaColumns(metaColumns);
 						List<Map<String, Object>> metaColList = new ArrayList<>(metaColumns.size());
 						targetInfo.setMetaColList(metaColList);
+						Integer colType = null;
 						for (Map<String, Object> metaColumn : metaColumns) {
-							Map<String, Object> metaCol = new HashMap<>();
+							Map<String, Object> metaCol = new LinkedHashMap<>();
 							metaColList.add(metaCol);
 							metaCol.put("name", metaColumn.get("name"));
 							metaCol.put("text", metaColumn.get("text"));
+							metaCol.put("sqlType", metaColumn.get("sqlType"));
+							metaCol.put("dataType", metaColumn.get("theType"));
+							metaCol.put("format", metaColumn.get("format"));
+							metaCol.put("align", metaColumn.get("align"));
+							metaCol.put("percent", metaColumn.get("percent"));
 							metaCol.put("width", metaColumn.get("width"));
-							metaCol.put("dataType", metaColumn.get("dataType"));
+							colType = NumUtil.parseInteger(String.valueOf(metaColumn.get("type")));
+							// 是否统计/计算列
+							metaCol.put("statis", colType != null && (colType.intValue() == 3 || colType.intValue() == 4));
 						}
 						String queryParamsJson = (String) mapData.get("queryParams");
 						targetInfo.setQueryParams(JsonUtil.fromJson(queryParamsJson, TypeUtil.TypeRefs.StringObjectMapListType));
@@ -253,7 +358,7 @@ public class ReportProxy {
 								logger.error("参数错误：" + name + " " + value.toString());
 								continue;
 							}
-							// integer, float, date, string
+							// integer, float, date, bool, string
 							if (itemValue instanceof String) {
 								List<String> valuesTmp = new ArrayList<>(valueItemList.size());
 								for (int i = 0; i < valueItemList.size(); i++) {
@@ -314,22 +419,9 @@ public class ReportProxy {
 		return retList;
 	}
 
-	/**
-	 * 获取指定报表的初始参数信息（便于界面显示，以便支持用户交互，注意：隐藏参数已经过滤掉了）
-	 * 
-	 * @author koqiui
-	 * @date 2019年11月11日 上午1:04:24
-	 * 
-	 * @param reportCode
-	 *            报表自定代码
-	 * @param sqlParamMap
-	 *            基于sql的列表参数中sql所需的变量
-	 * @return
-	 */
-	public static Result<List<Map<String, Object>>> fetchReportInitParams(String reportCode, Map<String, Object> sqlParamMap) {
+	private static Result<List<Map<String, Object>>> fetchReportInitParamsInner(ReportMeta reportInfo, Map<String, Object> sqlParamMap) {
 		Result<List<Map<String, Object>>> result = Result.newOne();
 		//
-		ReportMeta reportInfo = fetchReportInfoByCode(reportCode);
 		if (reportInfo == null) {
 			result.type = Type.error;
 			result.message = "获取不到指定报表的配置信息";
@@ -364,6 +456,14 @@ public class ReportProxy {
 					} else {
 						defValue = defValue.trim();
 					}
+					//
+					if ("date".equalsIgnoreCase(dataType)) {
+						String defExpr = (String) queryParam.get("defaultExpr");
+						String tmpValue = getDateStrByExpr(defExpr);
+						if (tmpValue != null) {
+							defValue = tmpValue;
+						}
+					}
 				}
 				initParam.put("defValue", defValue);
 				if ("select".equalsIgnoreCase(ctrlType) || "selectMul".equalsIgnoreCase(ctrlType)) {// 单选和多选
@@ -395,6 +495,74 @@ public class ReportProxy {
 	}
 
 	/**
+	 * 获取指定报表的初始参数信息（便于界面显示，以便支持用户交互，注意：隐藏参数已经过滤掉了）
+	 * 
+	 * @author koqiui
+	 * @date 2019年11月11日 上午1:04:24
+	 * 
+	 * @param reportCode
+	 *            报表自定代码
+	 * @param sqlParamMap
+	 *            基于sql的列表参数中sql所需的变量
+	 * @return
+	 */
+	public static Result<List<Map<String, Object>>> fetchReportInitParams(String reportCode, Map<String, Object> sqlParamMap) {
+		ReportMeta reportInfo = fetchReportInfoByCode(reportCode);
+		return fetchReportInitParamsInner(reportInfo, sqlParamMap);
+	}
+
+	/**
+	 * 获取指定报表的初始参数信息 + 统计列(name,text)列表 和 是否合并左边相同维度行（便于界面显示，以便支持用户交互，注意：隐藏参数已经过滤掉了）
+	 * 
+	 * @author koqiui
+	 * @date 2019年11月25日 下午5:49:45
+	 * 
+	 * @param reportCode
+	 * @param sqlParamMap
+	 * @return data : { initParams : [], initExtra : { statColumns :[], isRowSpan }}
+	 */
+	public static Result<Map<String, Object>> fetchReportInitParamsX(String reportCode, Map<String, Object> sqlParamMap) {
+		Result<Map<String, Object>> result = Result.newOne();
+		//
+		ReportMeta reportInfo = fetchReportInfoByCode(reportCode);
+
+		Result<List<Map<String, Object>>> qryParamResult = fetchReportInitParamsInner(reportInfo, sqlParamMap);
+		result.type = qryParamResult.type;
+		result.message = qryParamResult.message;
+		if (qryParamResult.isSuccess()) {
+			Map<String, Object> resultData = new HashMap<>();
+			result.data = resultData;
+			//
+			List<Map<String, Object>> initParamList = qryParamResult.data;
+			resultData.put("initParams", initParamList);
+			if (initParamList != null) {
+				Map<String, Object> initExtra = new HashMap<>();
+				resultData.put("initExtra", initExtra);
+				//
+				List<Map<String, Object>> statColumns = new ArrayList<>();
+				initExtra.put("statColumns", statColumns);// 传回来时为name的列表
+				// 所有统计列列表（默认都选中）
+				Map<String, Object> statColumn = null;
+				List<Map<String, Object>> metaColList = reportInfo.getMetaColList();
+				for (Map<String, Object> metaCol : metaColList) {
+					Boolean isStatis = (Boolean) metaCol.getOrDefault("statis", false);
+					if (isStatis) {
+						statColumn = new HashMap<>();
+						statColumns.add(statColumn);
+						//
+						statColumn.put("name", metaCol.get("name"));
+						statColumn.put("text", metaCol.get("text"));
+						statColumn.put("selected", true);
+					}
+				}
+				// 是否合并左边相同维度行
+				resultData.put("isRowSpan", true);
+			}
+		}
+		return result;
+	}
+
+	/**
 	 * 检查并过滤报表参数（必须的参数是否有有效值），返回缺少的参数名称列表（、分割）
 	 * 
 	 * @author koqiui
@@ -407,6 +575,17 @@ public class ReportProxy {
 	 */
 	@SuppressWarnings("unchecked")
 	private static String checkAndFilterReportParams(ReportMeta reportInfo, Map<String, Object> paramMap) {
+		// 处理 statColumns, isRowSpan
+		Boolean isRowSpan = !BoolUtil.isFalse((Boolean) paramMap.get("isRowSpan"));
+		paramMap.put("isRowSpan", isRowSpan);
+		Object statColumnsVal = paramMap.get("statColumns");
+		List<String> statColumns = (List<String>) TypeUtil.asList(statColumnsVal, true);
+		if (statColumns != null && !statColumns.isEmpty()) {
+			paramMap.put("statColumns", statColumns);
+		} else {
+			paramMap.remove("statColumns");
+		}
+		//
 		List<String> lackParamNames = new ArrayList<>();
 		List<Map<String, Object>> queryParams = reportInfo.getQueryParams();
 		for (Map<String, Object> queryParam : queryParams) {
@@ -437,7 +616,7 @@ public class ReportProxy {
 						String strValue = String.valueOf(objValue);
 						if (!"string".equalsIgnoreCase(dataType)) {
 							strValue = strValue.trim();
-							if (StrUtil.EmptyStr.equals(strValue)) {// integer,float,date
+							if (StrUtil.EmptyStr.equals(strValue)) {// integer,float,date,bool
 								invalidIndex = i;
 								invalidMsg = "无效";
 								break;
@@ -477,6 +656,8 @@ public class ReportProxy {
 								invalidMsg = "不是yyyy-MM-dd日期形式";
 								break;
 							}
+						} else if ("bool".equalsIgnoreCase(dataType)) {
+							objValue = BoolUtil.isTrue(strValue);
 						} else {// string
 							objValue = strValue;
 						}
@@ -500,7 +681,7 @@ public class ReportProxy {
 					}
 					if (!"string".equalsIgnoreCase(dataType)) {
 						strValue = strValue.trim();
-						if (StrUtil.EmptyStr.equals(strValue)) {// integer,float,date
+						if (StrUtil.EmptyStr.equals(strValue)) {// integer,float,date,bool
 							lackParamNames.add("缺少 " + text);
 							continue;
 						}
@@ -508,7 +689,7 @@ public class ReportProxy {
 				} else {
 					if (strValue != null && !"string".equalsIgnoreCase(dataType)) {
 						strValue = strValue.trim();
-						if (StrUtil.EmptyStr.equals(strValue)) {// integer,float,date
+						if (StrUtil.EmptyStr.equals(strValue)) {// integer,float,date,bool
 							strValue = null;
 						}
 					}
@@ -546,6 +727,8 @@ public class ReportProxy {
 							lackParamNames.add(text + " 不是yyyy-MM-dd日期形式");
 							continue;
 						}
+					} else if ("bool".equalsIgnoreCase(dataType)) {
+						objValue = BoolUtil.isTrue(strValue);
 					} else {// string
 						objValue = strValue;
 					}

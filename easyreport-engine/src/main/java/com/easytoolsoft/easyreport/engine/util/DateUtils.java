@@ -345,8 +345,8 @@ public class DateUtils {
 		}
 		dateExpr = dateExpr.replaceAll("\\s+", "");
 		dateExpr = dateExpr.trim().toLowerCase();
-		System.out.println("-------------------");
-		System.out.println("'" + dateExpr + "'");
+		// System.out.println("-------------------");
+		// System.out.println("'" + dateExpr + "'");
 		//
 		Matcher matcher = DATE_EXPR_REGEX.matcher(dateExpr);
 		if (matcher.find()) {
@@ -356,9 +356,8 @@ public class DateUtils {
 			if (dateExpr.length() > end) {
 				calcExpr = dateExpr.substring(end).trim();
 			}
-
-			System.out.println("'" + coreExpr + "'");
-			System.out.println("'" + (calcExpr == null ? "" : calcExpr) + "'");
+			// System.out.println("'" + coreExpr + "'");
+			// System.out.println("'" + (calcExpr == null ? "" : calcExpr) + "'");
 			Date baseDate = null;
 			if ("month.firstday".equals(coreExpr)) {
 				baseDate = getMonthFirstDay();
