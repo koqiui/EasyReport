@@ -29,7 +29,7 @@ EasyReport是一个简单易用的Web报表工具,它的主要功能是把SQL语
 * 支持把隐藏+非必须（但是必须有默认值)的参数当作基于sql的参数的数据源的变量（注意：这样的参数为参数sql中专用，不会出现在查询界面）
 * 加强参数合理性检查，优化错误提示，更加具体
 * 加强对用于in的（下拉多选“,”分割）列表数据的支持
-* 增加对strng、date类型值特殊字符转义（减少错误）
+* 增加对string、date类型值特殊字符转义（减少错误）
 * 简化checkbox选择，提供就地刷新数据源下拉列表
 * 去掉内建的startTime、endTime等时间参数（以免影响集成api对参数的检查和过滤）
 * sql分析后得到的列名不再转为小写，而是原封不动地返回（保持大小写的习惯）
@@ -53,6 +53,7 @@ EasyReport是一个简单易用的Web报表工具,它的主要功能是把SQL语
 * 根据命名经验性判断新提取的sql参数的类型
 * 所有combobox改为 editable = "false"（防止误改导致结果异常）
 * 在非prod环境下保留admin登陆用户密码
+* 针对date类型参数支持设置默认值表达式(today, month.firstday, month.lastday, year.firstday, year.lastday +- 整数)
 
 ### what's new?(ver2.1)
 * 改进图表报表图表生成并增加图表生成配置
