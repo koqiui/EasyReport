@@ -189,7 +189,7 @@ public class ReportProxy {
 		String cacheKey = CacheUtil.makeKey("report-meta-info", reportInfo.getCode());
 
 		bizComnCache.put(cacheKey, reportInfo);
-		bizComnCache.expire(cacheKey, REPORT_INFO_CACHE_MINUTES, TimeUnit.SECONDS);
+		bizComnCache.expire(cacheKey, REPORT_INFO_CACHE_MINUTES, TimeUnit.MINUTES);
 	}
 
 	private static ReportMeta loadReportInfoCache(String reportCode) {
