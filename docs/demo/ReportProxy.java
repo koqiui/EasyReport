@@ -780,6 +780,7 @@ public class ReportProxy {
 			} else {
 				// 补充必要参数
 				paramMap.put("uid", reportInfo.getUuid());
+				paramMap.put("is_restMode", true);
 				//
 				Ajax ajax = newAjax();
 				ajax.post("/report/table/getData.json");
