@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -175,6 +176,8 @@ public abstract class AbstractQueryer implements Queryer {
 			// 日期时间格式
 			SimpleDateFormat[] colFormats = new SimpleDateFormat[colCount];
 			String colName = null;
+			String colStdSqlTypeName = null;
+			Set<Integer> binaryCols = new HashSet<>();
 			for (int i = 1; i <= colCount; i++) {
 				colName = rsMataData.getColumnLabel(i);
 				colNames[i - 1] = colName;
@@ -182,6 +185,11 @@ public abstract class AbstractQueryer implements Queryer {
 				String className = rsMataData.getColumnClassName(i);
 				if (Boolean.class.getName().equals(className)) {
 					sqlType = Types.BOOLEAN;
+				} else {
+					colStdSqlTypeName = JdbcUtils.toStdSqlTypeName(sqlType);
+					if (colStdSqlTypeName.contains("BINARY")) {
+						binaryCols.add(i);
+					}
 				}
 				// 日期格式化
 				if (Types.DATE == sqlType) {
@@ -203,10 +211,14 @@ public abstract class AbstractQueryer implements Queryer {
 					colName = colNames[i - 1];
 					Object value = rs.getObject(colName);
 					if (value != null) {
-						format = colFormats[i - 1];
-						// 日期格式化
-						if (format != null) {
-							value = format.format(value);
+						if (binaryCols.contains(i)) {
+							value = new String((byte[]) value);
+						} else {
+							format = colFormats[i - 1];
+							// 日期格式化
+							if (format != null) {
+								value = format.format(value);
+							}
 						}
 					}
 					retRow.put(colName, value);

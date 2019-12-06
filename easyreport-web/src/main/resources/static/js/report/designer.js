@@ -509,7 +509,15 @@ var DesignerMVC = {
                 }, {
                     field: 'sqlType',
                     title: 'Sql类型',
-                    width: 75
+                    width: 75,
+                    formatter: function (value, row, index) {
+                    	if(value.indexOf('BINARY') != -1){
+                    		return '<span style="color:rgb(124, 39, 88);">'+value+'</span>'
+                    	}
+                    	else {
+                    		return value;
+                    	}
+                    }
                 }, {
                     field: 'width',
                     title: '字符宽度',
@@ -704,12 +712,12 @@ var DesignerMVC = {
                     }
                 }, {
                     field: 'defaultValue',
-                    title: '默认值',
+                    title: '默认初值',
                     width: 100,
                     formatter: function (value, row, index) {
                         if (row.dataType == "date") {
                            if(row.defaultExpr != null && $.trim(row.defaultExpr) != ''){
-                        	   var hintMsg = '默认值表达式：' + row.defaultExpr;
+                        	   var hintMsg = '默认初值表达式：' + row.defaultExpr;
                         	   return value + ' <span style="color:darkgreen;font-size:16px;float:right;cursor:default;" title="' + hintMsg + '" onclick="$.messager.alert(\'提示\', \''+ hintMsg + '\', \'info\')">❀</span>';
                            }
                         }
@@ -1474,7 +1482,7 @@ var DesignerMVC = {
         				$('#report-query-param-curIndex').val('');
                         EasyUIUtils.clearDatagrid('#report-query-param-grid');
                         $("#report-query-param-grid").datagrid('loadData', paramRows);
-        				$.messager.alert('提示', "参数列表已刷新" + (newCount >0 ? '，新发现并追加了变量参数：<br/></br>'+ varNames.join('、') + '</br></br>注意：补全变量参数类型和默认值信息' : ''), 'info');
+        				$.messager.alert('提示', "参数列表已刷新" + (newCount >0 ? '，新发现并追加了变量参数：<br/></br>'+ varNames.join('、') + '</br></br>注意：补全变量参数类型和默认初值信息' : ''), 'info');
         			}
         			else {
         				$.messager.alert('提取sql变量失败', result.msg, 'error');
