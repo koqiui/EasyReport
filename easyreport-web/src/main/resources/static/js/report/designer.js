@@ -586,12 +586,29 @@ var DesignerMVC = {
                     align : 'center',
                     formatter: function (value, row, index) {
                     	if(DesignerMVC.Util.isNumbericCol(row.sqlType) && (row.type == 3 || row.type == 4)){
-                            var tmpl = '<input type="button" style="cursor: pointer;border:1px solid gray;height:20px;border-radius:2px;" value="..设置.." onclick="DesignerMVC.Controller.showMetaColumnClrLvl(${index})" />';
+                    		var clrLvlEnabled = row.clrLvlEnabled == true;
+                            var tmpl = '<input type="button" style="cursor: pointer;border:1px solid ${borderColor};color:${fontColor};height:20px;border-radius:2px;" value="..设置.." onclick="DesignerMVC.Controller.showMetaColumnClrLvl(${index})" />';
                             return juicer(tmpl, {
-                                index : index
+                                index : index,
+                                borderColor : clrLvlEnabled ? 'darkgreen' : 'gray',
+                                fontColor : clrLvlEnabled ? 'darkgreen' : 'black'
                             });
                     	}
                     	return '';
+                    }
+                }, {
+                	field: 'linkFunc',
+                	title: '链接函数',
+                    width: 70,
+                    align : 'center',
+                    formatter: function (value, row, index) {
+                		var linkFuncExpr = row.linkFuncExpr || '';
+                        var tmpl = '<input type="button" style="cursor: pointer;border:1px solid ${borderColor};color:${fontColor};height:20px;border-radius:2px;" value="..设置.." onclick="DesignerMVC.Controller.showMetaColumnLinkFunc(${index})" />';
+                        return juicer(tmpl, {
+                            index : index,
+                            borderColor : $.trim(linkFuncExpr) == '' ? 'gray' : 'darkgreen',
+                            fontColor : $.trim(linkFuncExpr) == '' ? 'black' : 'darkgreen'
+                        });
                     }
                 }, {
                     field: 'sortType',
@@ -1680,6 +1697,27 @@ var DesignerMVC = {
             $("#report-column-clrLvlStart").trigger('change');
             $("#report-column-clrLvlEnd").trigger('change');
         },
+        showMetaColumnLinkFunc: function (index) {
+            $("#report-meta-column-grid").datagrid('selectRow', index);
+            var row = $("#report-meta-column-grid").datagrid('getSelected');
+            var linkFuncExpr = row.linkFuncExpr || '';
+            if(linkFuncExpr == ''){
+            	linkFuncExpr = 'showReportDetail( [ ' + row.name + ' ] )';
+            }
+            //
+            $.messager.prompt('输入集成链接js函数', '表达式（列名称之间用","分割）<br/>生成的链接点击调用的函数：函数名(json数据, 自定义报表代码)', function(val){
+            	val = $.trim(val);
+            	row.linkFuncExpr = val;
+            	//
+            	$(".messager-window .messager-input").val('');//fix
+            	//
+            	var rows = $("#report-meta-column-grid").datagrid('getRows');
+                $("#report-meta-column-grid").datagrid('loadData', rows);
+                $("#report-meta-column-grid").datagrid('selectRow', index);
+            });
+            //
+            $(".messager-window .messager-input").val(linkFuncExpr);//初始值fix
+        },
         setMetaColumnFormat:function(){
         	var row = $("#report-meta-column-grid").datagrid('getSelected');
         	if(row == null){
@@ -1742,21 +1780,18 @@ var DesignerMVC = {
             row.clrLvlStart = $.trim($("#report-column-clrLvlStart").val());
             row.clrLvlEnd = $.trim($("#report-column-clrLvlEnd").val());
             //TODO 验证数据
-            return $('#report-column-clrLvl-dlg').dialog('close');
+            $('#report-column-clrLvl-dlg').dialog('close');
+            //
+            var index = $("#report-meta-column-grid").datagrid('getRowIndex', row);
+            var rows = $("#report-meta-column-grid").datagrid('getRows');
+            $("#report-meta-column-grid").datagrid('loadData', rows);
+            $("#report-meta-column-grid").datagrid('selectRow', index);
         },
         saveMetaColumnOption: function (name) {
             var row = $("#report-meta-column-grid").datagrid('getSelected');
             if (name == "expression") {
                 row.expression = $("#report-column-expression").val();
                 return $('#report-column-expression-dlg').dialog('close');
-            }
-            if (name == "clrLvl") {
-                row.clrLvlEnabled = $("#report-column-clrLvlEnabled").prop('checked');
-                row.clrLvlValve = parseInt($("#report-column-clrLvlValve").val()) || null;
-                row.clrLvlStart = $.trim($("#report-column-clrLvlStart").val());
-                row.clrLvlEnd = $.trim($("#report-column-clrLvlEnd").val());
-                //TODO 验证数据
-                return $('#report-column-clrLvl-dlg').dialog('close');
             }
             if (name == "comment") {
                 row.comment = $("#report-column-comment").val();

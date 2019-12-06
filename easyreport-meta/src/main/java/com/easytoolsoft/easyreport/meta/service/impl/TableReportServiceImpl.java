@@ -95,11 +95,23 @@ public class TableReportServiceImpl implements TableReportService {
 	}
 
 	private ReportParameter createReportParameter(final Report report, final Map<String, Object> formParams) {
+		Object tmpValue = formParams.remove("is_restMode");// 集成调用模式
+		boolean isRestMode = tmpValue == null ? false : tmpValue.toString().equals("true");
+		tmpValue = formParams.remove("show_dataLinks");// 是否显示连接
+		boolean showDataLinks = tmpValue == null ? false : tmpValue.toString().equals("true");
+		//
 		final String sqlText = new ReportSqlTemplate(report.getSqlText(), formParams).execute();
 		final Set<String> enabledStatColumn = this.getEnabledStatColumns(formParams);
 		final ReportOptions options = this.reportService.parseOptions(report.getOptions());
 		final List<ReportMetaDataColumn> metaColumns = this.reportService.parseMetaColumns(report.getMetaColumns());
-		return new ReportParameter(report.getId().toString(), report.getName(), options.getLayout(), options.getStatColumnLayout(), metaColumns, enabledStatColumn, Boolean.valueOf(formParams.get("isRowSpan").toString()), sqlText);
+		ReportParameter reportParameter = new ReportParameter(report.getId().toString(), report.getName(), options.getLayout(), options.getStatColumnLayout(), metaColumns, enabledStatColumn,
+				Boolean.valueOf(formParams.get("isRowSpan").toString()), sqlText);
+		//
+		reportParameter.setUcode(report.getUcode());// 增加ucode信息
+		reportParameter.setRestMode(isRestMode);// 是否集成调用模式
+		reportParameter.setShowDataLinks(showDataLinks);
+		//
+		return reportParameter;
 	}
 
 	private Set<String> getEnabledStatColumns(final Map<String, Object> formParams) {
@@ -146,6 +158,15 @@ public class TableReportServiceImpl implements TableReportService {
 			formParams.put("isRowSpan", values[0]);
 		} else {
 			formParams.put("isRowSpan", "true");
+		}
+		// 集成调用提示参数
+		if (httpReqParamMap.containsKey("is_restMode")) {
+			final String[] values = (String[]) httpReqParamMap.get("is_restMode");
+			formParams.put("is_restMode", values[0]);
+		}
+		if (httpReqParamMap.containsKey("show_dataLinks")) {
+			final String[] values = (String[]) httpReqParamMap.get("show_dataLinks");
+			formParams.put("show_dataLinks", values[0]);
 		}
 	}
 

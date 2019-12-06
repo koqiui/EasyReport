@@ -35,25 +35,34 @@ public class HorizontalStatColumnReportBuilder extends AbstractReportBuilder imp
 		final ColumnTree leftFixedColumnTree = this.reportDataSet.getBodyLeftFixedColumnTree();
 		final List<ColumnTreeNode> rowNodes = leftFixedColumnTree.getLastLevelNodes();
 		final List<ColumnTreeNode> columnNodes = this.reportDataSet.getBodyRightColumnNodes();
-		final Map<String, ReportDataRow> statRowMap = this.reportDataSet.getRowMap();
+		final Map<String, ReportDataRow> dataRowMap = this.reportDataSet.getRowMap();
 		final List<ReportDataColumn> statColumns = this.reportDataSet.getEnabledStatColumns();
 		final Map<String, ColumnTreeNode> treeNodePathMap = this.getTreeNodePathMap(leftFixedColumnTree);
 
 		int rowIndex = 0;
 		String[] lastNodePaths = null;
+		//
+		LinkFunc linkFunc = null;
+		boolean showDataLinks = this.reportParameter.shouldShowDataLinks();
+		String reportCode = this.reportParameter.getUcode();
+		//
 		this.tableRows.append("<tbody>");
 		for (final ColumnTreeNode rowNode : rowNodes) {
 			this.tableRows.append("<tr").append(rowIndex % 2 == 0 ? " class=\"easyreport-row\"" : "").append(">");
 			lastNodePaths = this.drawLeftFixedColumn(treeNodePathMap, lastNodePaths, rowNode, this.reportParameter.isRowSpan());
 			for (final ColumnTreeNode columnNode : columnNodes) {
 				final String rowKey = this.reportDataSet.getRowKey(rowNode, columnNode);
-				ReportDataRow statRow = statRowMap.get(rowKey);
-				if (statRow == null) {
-					statRow = new ReportDataRow();
+				ReportDataRow dataRow = dataRowMap.get(rowKey);
+				if (dataRow == null) {
+					dataRow = new ReportDataRow();
 				}
 				for (final ReportDataColumn statColumn : statColumns) {
-					final ReportDataCell cell = statRow.getCell(statColumn.getName());
-					final String value = (cell == null) ? "" : cell.toString();
+					final ReportDataCell cell = dataRow.getCell(statColumn.getName());
+					String value = (cell == null) ? "" : cell.toString();
+					linkFunc = statColumn.getLinkFunc();
+					if (showDataLinks && linkFunc != null && value.length() > 0) {
+						value = LinkFunc.toLinkHtml(value, linkFunc, reportCode, dataRow.getDataMap());
+					}
 					String style = cell == null ? "" : statColumn.getStyle(cell.getValue());
 					this.tableRows.append(String.format("<td style=\"%s\">", style)).append(value).append("</td>");
 				}

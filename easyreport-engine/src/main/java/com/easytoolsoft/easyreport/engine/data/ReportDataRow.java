@@ -10,31 +10,37 @@ import java.util.Map;
  * @author tomdeng
  */
 public class ReportDataRow {
-    private final Map<String, ReportDataCell> cells = new HashMap<>();
+	private final Map<String, ReportDataCell> cells = new HashMap<>();
+	private final Map<String, Object> dataMap = new HashMap<>();
 
-    public ReportDataRow() {
-    }
+	public ReportDataRow() {
+	}
 
-    public ReportDataRow add(final ReportDataCell cell) {
-        this.cells.put(cell.getName(), cell);
-        return this;
-    }
+	public ReportDataRow add(final ReportDataCell cell) {
+		this.cells.put(cell.getName(), cell);
+		this.dataMap.put(cell.getName(), cell.getValueX());
+		return this;
+	}
 
-    public ReportDataRow addAll(final List<ReportDataCell> cells) {
-        cells.forEach(this::add);
-        return this;
-    }
+	public ReportDataRow addAll(final List<ReportDataCell> cells) {
+		cells.forEach(this::add);
+		return this;
+	}
 
-    public Map<String, ReportDataCell> getCells() {
-        return this.cells;
-    }
+	public Map<String, ReportDataCell> getCells() {
+		return this.cells;
+	}
 
-    public ReportDataCell getCell(final String name) {
-        return this.cells.get(name);
-    }
+	public ReportDataCell getCell(final String name) {
+		return this.cells.get(name);
+	}
 
-    public Object getCellValue(final String name) {
-        final ReportDataCell cell = this.cells.get(name);
-        return (cell == null) ? "" : cell.getValue();
-    }
+	public Object getCellValue(final String name) {
+		final ReportDataCell cell = this.cells.get(name);
+		return (cell == null) ? "" : cell.getValue();
+	}
+
+	public Map<String, Object> getDataMap() {
+		return this.dataMap;
+	}
 }

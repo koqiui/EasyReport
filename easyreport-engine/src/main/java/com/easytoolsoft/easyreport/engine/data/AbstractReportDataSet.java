@@ -231,6 +231,12 @@ public abstract class AbstractReportDataSet implements ReportDataSet {
 		for (ReportMetaDataRow metaDataRow : metaDataRows) {
 			String key = this.getDataRowMapKey(metaDataRow, nonStatColumns);
 			ReportDataRow dataRow = new ReportDataRow();
+			// + 把非统计列也加进去（支持链接数据）
+			for (ReportDataColumn nonStatColumn : nonStatColumns) {
+				Object value = metaDataRow.getCellValue(nonStatColumn.getName());
+				dataRow.add(new ReportDataCell(nonStatColumn, nonStatColumn.getName(), value));
+			}
+
 			Map<String, Object> exprContext = new HashMap<>();
 			for (ReportDataColumn statColumn : statColumns) {
 				Object value = metaDataRow.getCellValue(statColumn.getName());
@@ -245,6 +251,8 @@ public abstract class AbstractReportDataSet implements ReportDataSet {
 				dataRow.getCell(column.getName()).setValue(value);
 				exprContext.put("c" + column.getMetaData().getOrdinal(), value);
 				exprContext.put(column.getName(), value);
+				// + 把计算列也加进去（支持链接数据）
+				dataRow.add(new ReportDataCell(column, column.getName(), value));
 			}
 			dataRowMap.put(key, dataRow);
 		}

@@ -389,3 +389,9 @@ var TableReportMVC = {
         filterTable: null
     }
 };
+
+//仅供调试链接列使用
+function showReportDetail(dataMap, reportCode) {
+    console.log("-" + reportCode + "-");
+    console.log(dataMap);
+}

@@ -36,6 +36,24 @@ public class ReportDataCell {
 		return this.column.getStyle(null);
 	}
 
+	public Object getValueX() {
+		if (this.value != null) {
+			ReportMetaDataColumn metaData = this.column.getMetaData();
+			String theType = metaData.getTheType();
+			if ("date".equals(theType)) {
+				Format format = metaData.getFormatX();
+				if (format != null) {
+					try {
+						return format.format(this.value);
+					} catch (Exception ex) {
+						//
+					}
+				}
+			}
+		}
+		return this.value;
+	}
+
 	@Override
 	public String toString() {
 		if (this.value == null) {

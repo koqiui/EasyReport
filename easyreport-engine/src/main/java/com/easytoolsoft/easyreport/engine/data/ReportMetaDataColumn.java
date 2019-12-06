@@ -12,6 +12,7 @@ import java.util.TreeSet;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.easytoolsoft.easyreport.engine.LinkFunc;
 import com.easytoolsoft.easyreport.engine.util.ClrLvlUtils;
 import com.easytoolsoft.easyreport.engine.util.JdbcUtils;
 import com.easytoolsoft.easyreport.engine.util.NumberFormatUtils;
@@ -46,12 +47,21 @@ public class ReportMetaDataColumn {
 	private boolean isExtensions;
 	private boolean isFootings;
 	private boolean isPercent;
+	// 自定义链接函数
+	// showReportDetail([colName])
+	// showReportDetail([colName1, colName2,...])
+	// => showReportDetail({"colName1" : value1, "colName2" : value2, ...}, "${reportCode}")
+	// <a href='#' onclick='showReportDetail({"colName1" : value1, "colName2" : value2, ...}, "${reportCode}")'></a>
+	private String linkFuncExpr;
 	private boolean isOptional;
 	private boolean isDisplayInMail;
 	private boolean isHidden;
+
 	// 不同地数值集合
 	private Set<Number> diffValues;
 	private Map<Number, String> clrLvlMap;
+	// 链接信息
+	private LinkFunc linkFunc;
 
 	public ReportMetaDataColumn() {
 		//
@@ -479,6 +489,20 @@ public class ReportMetaDataColumn {
 		this.isPercent = isPercent;
 	}
 
+	public String getLinkFuncExpr() {
+		return linkFuncExpr;
+	}
+
+	public void setLinkFuncExpr(String linkFuncExpr) {
+		this.linkFuncExpr = linkFuncExpr;
+		//
+		this.linkFunc = LinkFunc.fromLinkFuncExpr(linkFuncExpr);
+	}
+
+	public LinkFunc getLinkFunc() {
+		return linkFunc;
+	}
+
 	/**
 	 * 获取配置列是否支持可选择显示
 	 *
@@ -578,4 +602,5 @@ public class ReportMetaDataColumn {
 		//
 		return StringUtils.join(styleItems, "; ");
 	}
+
 }

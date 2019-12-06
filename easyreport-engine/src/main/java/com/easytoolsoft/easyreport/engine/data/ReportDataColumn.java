@@ -1,5 +1,7 @@
 package com.easytoolsoft.easyreport.engine.data;
 
+import com.easytoolsoft.easyreport.engine.LinkFunc;
+
 /**
  * 报表数据列
  *
@@ -69,5 +71,9 @@ public class ReportDataColumn {
 
 	public String getStyle(Object cellValue) {
 		return this.metaDataColumn.getStyle(cellValue);
+	}
+
+	public LinkFunc getLinkFunc() {
+		return this.metaDataColumn.getLinkFunc();
 	}
 }

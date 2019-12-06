@@ -4,13 +4,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.easytoolsoft.easyreport.engine.data.AbstractReportDataSet;
 import com.easytoolsoft.easyreport.engine.data.ColumnTree;
 import com.easytoolsoft.easyreport.engine.data.ColumnTreeNode;
 import com.easytoolsoft.easyreport.engine.data.ReportDataColumn;
 import com.easytoolsoft.easyreport.engine.data.ReportParameter;
 import com.easytoolsoft.easyreport.engine.data.ReportTable;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author tomdeng
@@ -80,10 +81,20 @@ public abstract class AbstractReportBuilder implements ReportBuilder {
 		if (paths == null || paths.length == 0) {
 			return null;
 		}
-
+		//
+		LinkFunc linkFunc = null;
+		boolean showDataLinks = this.reportParameter.shouldShowDataLinks();
+		String reportCode = this.reportParameter.getUcode();
+		ReportDataColumn dataColumn = rowNode.getColumn();
+		linkFunc = dataColumn.getLinkFunc();
+		//
 		final int level = paths.length > 1 ? paths.length - 1 : 1;
 		for (int i = 0; i < level; i++) {
-			this.tableRows.append(String.format("<td class=\"easyreport-fixed-column\" style=\"%s\">%s</td>", rowNode.getStyle(), paths[i]));
+			String value = paths[i];
+			if (showDataLinks && linkFunc != null && value.length() > 0) {
+				value = LinkFunc.toLinkHtml(value, linkFunc, reportCode, dataColumn.getName(), value);
+			}
+			this.tableRows.append(String.format("<td class=\"easyreport-fixed-column\" style=\"%s\">%s</td>", rowNode.getStyle(), value));
 		}
 		return null;
 	}
@@ -121,6 +132,10 @@ public abstract class AbstractReportBuilder implements ReportBuilder {
 		if (paths == null || paths.length == 0) {
 			return null;
 		}
+		LinkFunc linkFunc = null;
+		boolean showDataLinks = this.reportParameter.shouldShowDataLinks();
+		String reportCode = this.reportParameter.getUcode();
+		ReportDataColumn dataColumn = null;
 
 		final int level = paths.length > 1 ? paths.length - 1 : 1;
 		final String[] currNodePaths = new String[level];
@@ -134,8 +149,14 @@ public abstract class AbstractReportBuilder implements ReportBuilder {
 			if (treeNode == null) {
 				this.tableRows.append("<td class=\"easyreport-fixed-column\"></td>");
 			} else {
+				dataColumn = treeNode.getColumn();
+				linkFunc = dataColumn.getLinkFunc();
+				String value = treeNode.getValue();
+				if (showDataLinks && linkFunc != null && value.length() > 0) {
+					value = LinkFunc.toLinkHtml(value, linkFunc, reportCode, dataColumn.getName(), value);
+				}
 				final String rowspan = treeNode.getSpans() > 1 ? String.format(" rowspan=\"%s\"", treeNode.getSpans()) : "";
-				this.tableRows.append(String.format("<td class=\"easyreport-fixed-column\"%s style=\"%s\">%s</td>", rowspan, treeNode.getStyle(), treeNode.getValue()));
+				this.tableRows.append(String.format("<td class=\"easyreport-fixed-column\"%s style=\"%s\">%s</td>", rowspan, treeNode.getStyle(), value));
 			}
 		}
 		lastNodePaths = currNodePaths;
