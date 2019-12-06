@@ -512,7 +512,7 @@ var DesignerMVC = {
                     width: 75,
                     formatter: function (value, row, index) {
                     	if(value.indexOf('BINARY') != -1){
-                    		return '<span style="color:rgb(124, 39, 88);">'+value+'</span>'
+                    		return '<span style="color:rgb(247,119,39);">'+value+'</span>'
                     	}
                     	else {
                     		return value;
