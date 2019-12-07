@@ -745,9 +745,13 @@ var DesignerMVC = {
                     title: '默认文本',
                     width: 100
                 }, {
+                    field: 'cascName',
+                    title: '级联参数',
+                    width: 120
+                }, {
                     field: 'width',
                     title: '数据长度',
-                    width: 100,
+                    width: 80,
                     align: 'right'
                 }, {
                     field: 'required',
@@ -821,7 +825,18 @@ var DesignerMVC = {
                     $("#report-query-param-grid").datagrid('loadData', rows);
                     $("#report-query-param-grid").datagrid('selectRow', index);
                     //
-                    $('.for-query-param-defaultExpr').css('visibility', row.dataType == 'date' ? 'visible' : 'hidden');
+                    $('.for-query-param-defaultExpr').css('display', row.dataType == 'date' ? '' : 'none');
+                    if(row.dataType == 'date'){//不要影响date的defaultExpr
+                    	$('.for-query-param-cascName').css('display', 'none');
+                    }
+                    else {
+                    	if(row.formElement == 'select' || row.formElement == 'selectMul'){
+                    		$('.for-query-param-cascName').css('display', '');
+                    	}
+                    	else {
+                    		$('.for-query-param-cascName').css('display', 'none');
+                    	}
+                    }
                 },
                 rowStyler: function (index, row) {
                 	var curIndex = $.trim($("#report-query-param-curIndex").val());
@@ -1175,7 +1190,10 @@ var DesignerMVC = {
                     		$('#report-query-param-formElement').combobox('setValue', 'text');
                     	}
                     	//
-                        $('.for-query-param-defaultExpr').css('visibility', rec.value == 'date' ? 'visible' : 'hidden');
+                        $('.for-query-param-defaultExpr').css('display', rec.value == 'date' ? '' : 'none');
+                        if(rec.value == 'date'){//不要影响date的defaultExpr
+                        	$('.for-query-param-cascName').css('display', 'none');
+                        }
                     }
                 }
             });
@@ -1184,6 +1202,13 @@ var DesignerMVC = {
                     var value = "text";
                     if (rec.value == "text" || rec.value == "date" || rec.value == "checkbox") {
                         value = 'none';
+                        //
+                        $('.for-query-param-cascName').css('display', 'none');
+                    }
+                    else {
+                    	if($('#report-query-param-dataType').combobox('getValue') != 'date'){
+                    		$('.for-query-param-cascName').css('display', '');
+                    	}
                     }
                     $('#report-query-param-dataSource').combobox('setValue', value);
                 }
@@ -1553,12 +1578,13 @@ var DesignerMVC = {
         },
         save: function () {
             if (!DesignerMVC.Util.checkBasicConfParam()) return;
-
+            
+            //检查列定义
             var rows = $("#report-meta-column-grid").datagrid('getRows');
             if (rows == null || rows.length == 0) {
                 return $.messager.alert('失败', "没有任何报表SQL配置列选项！", 'error');
             }
-
+            
             var metaColumns = DesignerMVC.Util.getMetaColumns(rows);
             var columnTypeMap = DesignerMVC.Util.getColumnTypeMap(metaColumns);
             if (columnTypeMap.layout == 0 || columnTypeMap.stat == 0) {
@@ -1569,13 +1595,50 @@ var DesignerMVC = {
             if (emptyExprColumns && emptyExprColumns.length) {
                 return $.messager.alert('失败', "计算列：[" + emptyExprColumns.join() + "]没有设置表达式！", 'error');
             }
+            
+            //检查参数定义
+            var paramRows = $("#report-query-param-grid").datagrid('getRows');
+            var paramMap = {};
+            var cascNames = [];
+            for(var i=0, c=paramRows.length; i<c; i++){
+            	var row = paramRows[i];
+            	var name = $.trim(row.name);
+            	if(paramMap[name] != null){
+            		return $.messager.alert('失败', "第 " + (i+1) + " 个参数【" + row.text +"】的代码和前面的参数重复", 'error');
+            	}
+            	paramMap[name] = row;
+            	//
+            	if(row.formElement == 'select' || row.formElement == 'selectMul'){
+            		row.cascName = $.trim(row.cascName || '');
+            		if(row.cascName){
+            			if(cascNames.indexOf(row.cascName) == -1){
+            				cascNames.push(row.cascName);
+            			}
+            		}
+            	}
+            	else {
+            		row.cascName = '';
+            	}
+            }
+            //检查cascName的有效性（必须指向下拉控件）
+            for(var i=0, c=cascNames.length; i<c; i++){
+            	var cascName = cascNames[i];
+            	var target = paramMap[cascName];
+            	if(target == null){
+            		return $.messager.alert('失败', "级联参数代码【" + cascName +"】无效：不存在对应代码的参数", 'error');
+            	}
+            	if(target.formElement != 'select' && target.formElement != 'selectMul' || target.dataSource != 'sql'){
+            		return $.messager.alert('失败', "级联参数代码【" + cascName +"】无效：对应的参数只能是基于sql的下拉控件类型的参数", 'error');
+            	}
+            }
+            
 
             $.messager.progress({
                 title: '请稍后...',
                 text: '正在处理中...',
             });
 
-            $('#report-queryParams').val(DesignerMVC.Util.getQueryParams());
+            $('#report-queryParams').val(DesignerMVC.Util.getQueryParams(paramRows));
 
             var action = $('#modal-action').val();
             var actUrl = action === "edit" ? DesignerMVC.URLs.edit.url : DesignerMVC.URLs.add.url;
@@ -1645,7 +1708,14 @@ var DesignerMVC = {
                     $("#report-query-param-content").focus();
                     return $.messager.alert('提示', "内容不能为空", 'error');
                 }
-
+                if(row.formElement == 'select' || row.formElement == 'selectMul'){
+                	if(row.cascName != null){
+                		row.cascName = $.trim(row.cascName);
+                	}
+                }
+                else {//清除非下拉的cascName
+                	row.cascName = '';
+                }
                 row.required = $("#report-query-param-required").prop("checked");
                 row.hidden = $("#report-query-param-hidden").prop("checked");
                 row.autoComplete = $("#report-query-param-autoComplete").prop("checked");
@@ -1832,6 +1902,7 @@ var DesignerMVC = {
 				dataType : 'string',
 				defaultValue : '',
 				defaultExpr : '',
+				cascName : '',
 				formElement : 'text',
 				dataSource : 'none',
 				content : '',
@@ -2228,8 +2299,8 @@ var DesignerMVC = {
             }
             $("#report-query-param-json").val(jsonText);
         },
-        getQueryParams: function () {
-            var rows = $("#report-query-param-grid").datagrid('getRows');
+        getQueryParams: function (curRows) {
+            var rows = curRows == null ? $("#report-query-param-grid").datagrid('getRows') : curRows;
             return rows ? JSON.stringify(rows) : "";
         },
         //刷新/重新加载数据源列表

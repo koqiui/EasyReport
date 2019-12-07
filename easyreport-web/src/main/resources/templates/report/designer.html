@@ -248,9 +248,20 @@
                                 <option value="text">文本定义</option>
                                 <option value="sql">SQL语句</option>
                             </select></td>
-                            <td class="for-query-param-defaultExpr" style="visibility:hidden;" title="优先于 默认初值">默认初值表达式:<span style="color:darkgreen;font-size:16px;float:right;cursor:default;" onclick="$.messager.alert('提示', '支持如下关键字：<br/>===========<br/>当天： today <br/>当月第一天： month.firstday <br/>当月最后一天 ：month.lastday <br/>当年第一天 ：year.firstday <br/>当年最后一天： year.lastday <br/><br/>比如：用 today -7 代表一星期前的一天...', 'info')">❀</span></td>
-                            <td class="for-query-param-defaultExpr" style="visibility:hidden;"><input class="easyui-textbox" type="text" id="report-query-param-defaultExpr"
-                                       name="defaultExpr" style="width:200px;color:darkgreen;"/></td>
+                            <td>
+                            	<span class="for-query-param-defaultExpr" style="display:none;" title="优先于 默认初值">默认初值表达式:<span style="color:darkgreen;font-size:16px;float:right;cursor:default;" onclick="$.messager.alert('提示', '支持如下关键字：<br/>===========<br/>当天： today <br/>当月第一天： month.firstday <br/>当月最后一天 ：month.lastday <br/>当年第一天 ：year.firstday <br/>当年最后一天： year.lastday <br/><br/>比如：用 today -7 代表一星期前的一天...', 'info')">❀</span></span>
+                            	<span class="for-query-param-cascName" style="display:none;" title="级联的下游基于sql的下拉型参数的代码">级联参数代码：</span>
+                            </td>
+                            <td>
+                            	<span class="for-query-param-defaultExpr" style="display:none;">
+                            		<input class="easyui-textbox" type="text" id="report-query-param-defaultExpr"
+                                       name="defaultExpr" style="width:200px;color:darkgreen;"/>
+                                </span>
+                                <span class="for-query-param-cascName" style="display:none;" >
+                                	<input class="easyui-textbox" type="text" id="report-query-param-cascName"
+                                       name="cascName" style="width:200px;color:darkblue;"/>
+                                </span>
+                            </td>
                             <td><label for="report-query-param-autoComplete" style="color:#999">自动提示:</label></td>
                             <td><input class="easyui-checkbox" type="checkbox" id="report-query-param-autoComplete" name="autoComplete"/></td>
                             

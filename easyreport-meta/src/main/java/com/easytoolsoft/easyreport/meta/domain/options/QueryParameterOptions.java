@@ -31,6 +31,7 @@ public class QueryParameterOptions implements Serializable {
 	private int height = 25;
 	private boolean isRequired;
 	private Boolean isHidden;
+	private String cascName;// 级联的下拉参数名称
 	private boolean isAutoComplete;
 
 	private String getDateStrByExpr() {
@@ -297,6 +298,14 @@ public class QueryParameterOptions implements Serializable {
 	 */
 	public void setHidden(Boolean isHidden) {
 		this.isHidden = isHidden == null ? false : isHidden;
+	}
+
+	public String getCascName() {
+		return cascName;
+	}
+
+	public void setCascName(String cascName) {
+		this.cascName = cascName;
 	}
 
 	/**
