@@ -467,9 +467,15 @@ public class ReportProxy {
 				}
 				initParam.put("defValue", defValue);
 				if ("select".equalsIgnoreCase(ctrlType) || "selectMul".equalsIgnoreCase(ctrlType)) {// 单选和多选
+					// 变更要联动的参数名
+					String cascName = (String) queryParam.get("cascName");
+					if (StrUtil.hasText(cascName)) {
+						initParam.put("cascName", cascName.trim());
+					}
+					//
+					String dataSrc = (String) queryParam.get("dataSource");
 					String content = (String) queryParam.get("content");
 					content = content.trim();
-					String dataSrc = (String) queryParam.get("dataSource");
 					List<Map<String, Object>> optionList = null;
 					if ("sql".equals(dataSrc)) {
 						optionList = fetchSqlBasedParamOptionList(reportInfo.getUuid(), content, sqlParamMap);
@@ -559,6 +565,55 @@ public class ReportProxy {
 				resultData.put("isRowSpan", true);
 			}
 		}
+		return result;
+	}
+
+	/**
+	 * 获取指定报表指定名称的基于sql下拉列表选项列表
+	 * 
+	 * @author koqiui
+	 * @date 2019年12月7日 下午5:05:44
+	 * 
+	 * @param reportCode
+	 * @param paramName
+	 * @param sqlParamMap
+	 * @return
+	 */
+	public static Result<List<Map<String, Object>>> fetchReportSqlBasedParamOptions(String reportCode, String paramName, Map<String, Object> sqlParamMap) {
+		Result<List<Map<String, Object>>> result = Result.newOne();
+		//
+		ReportMeta reportInfo = fetchReportInfoByCode(reportCode);
+		if (reportInfo == null) {
+			result.type = Type.error;
+			result.message = "获取不到指定报表的配置信息";
+		} else {
+			String sqlTpl = null;
+			//
+			List<Map<String, Object>> queryParams = reportInfo.getQueryParams();
+			for (Map<String, Object> queryParam : queryParams) {
+				String name = (String) queryParam.get("name");
+				if (name.equals(paramName)) {
+					String ctrlType = (String) queryParam.get("formElement");
+					if ("select".equalsIgnoreCase(ctrlType) || "selectMul".equalsIgnoreCase(ctrlType)) {// 单选和多选
+						String dataSrc = (String) queryParam.get("dataSource");
+						if ("sql".equals(dataSrc)) {
+							sqlTpl = (String) queryParam.get("content");
+							sqlTpl = sqlTpl.trim();
+							break;
+						}
+					}
+
+				}
+			}
+			//
+			if (sqlTpl != null) {
+				result.data = fetchSqlBasedParamOptionList(reportInfo.getUuid(), sqlTpl, sqlParamMap);
+			} else {
+				result.type = Type.error;
+				result.message = "找不到指定的参数信息或参数不是基于sql的下拉控件";
+			}
+		}
+		//
 		return result;
 	}
 
