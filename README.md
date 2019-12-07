@@ -52,6 +52,7 @@ EasyReport是一个简单易用的Web报表工具,它的主要功能是把SQL语
 * 在非prod环境下保留admin登陆用户密码
 * 支持针对date类型参数设置默认值表达式(today, month.firstday, month.lastday, year.firstday, year.lastday +- 整数)
 * 支持自定义链接js函数（参考：[自定义报表单元格链接回调函数][]）
+* 支持对下拉型参数设置级联参数代码（指向另一个基于sql下拉列表参数）用于集成支持
 
 ### what's new?(ver2.1)
 * 改进图表报表图表生成并增加图表生成配置
