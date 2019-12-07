@@ -92,7 +92,7 @@ public abstract class AbstractReportBuilder implements ReportBuilder {
 		for (int i = 0; i < level; i++) {
 			String value = paths[i];
 			if (showDataLinks && linkFunc != null && value.length() > 0) {
-				value = LinkFunc.toLinkHtml(value, linkFunc, reportCode, dataColumn.getName(), value);
+				value = LinkFunc.toLinkHtml(value, linkFunc, reportCode, dataColumn.getName());
 			}
 			this.tableRows.append(String.format("<td class=\"easyreport-fixed-column\" style=\"%s\">%s</td>", rowNode.getStyle(), value));
 		}
@@ -153,7 +153,7 @@ public abstract class AbstractReportBuilder implements ReportBuilder {
 				linkFunc = dataColumn.getLinkFunc();
 				String value = treeNode.getValue();
 				if (showDataLinks && linkFunc != null && value.length() > 0) {
-					value = LinkFunc.toLinkHtml(value, linkFunc, reportCode, dataColumn.getName(), value);
+					value = LinkFunc.toLinkHtml(value, linkFunc, reportCode, dataColumn.getName());
 				}
 				final String rowspan = treeNode.getSpans() > 1 ? String.format(" rowspan=\"%s\"", treeNode.getSpans()) : "";
 				this.tableRows.append(String.format("<td class=\"easyreport-fixed-column\"%s style=\"%s\">%s</td>", rowspan, treeNode.getStyle(), value));

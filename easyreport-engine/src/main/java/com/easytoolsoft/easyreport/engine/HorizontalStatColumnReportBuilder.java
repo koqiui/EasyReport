@@ -57,14 +57,15 @@ public class HorizontalStatColumnReportBuilder extends AbstractReportBuilder imp
 					dataRow = new ReportDataRow();
 				}
 				for (final ReportDataColumn statColumn : statColumns) {
-					final ReportDataCell cell = dataRow.getCell(statColumn.getName());
-					String value = (cell == null) ? "" : cell.toString();
+					String colName = statColumn.getName();
+					final ReportDataCell cell = dataRow.getCell(colName);
+					String valText = (cell == null) ? "" : cell.toString();
 					linkFunc = statColumn.getLinkFunc();
-					if (showDataLinks && linkFunc != null && value.length() > 0) {
-						value = LinkFunc.toLinkHtml(value, linkFunc, reportCode, dataRow.getDataMap());
+					if (showDataLinks && linkFunc != null && valText.length() > 0) {
+						valText = LinkFunc.toLinkHtml(valText, linkFunc, reportCode, colName, dataRow.getDataMap());
 					}
 					String style = cell == null ? "" : statColumn.getStyle(cell.getValue());
-					this.tableRows.append(String.format("<td style=\"%s\">", style)).append(value).append("</td>");
+					this.tableRows.append(String.format("<td style=\"%s\">", style)).append(valText).append("</td>");
 				}
 			}
 			this.tableRows.append("</tr>");

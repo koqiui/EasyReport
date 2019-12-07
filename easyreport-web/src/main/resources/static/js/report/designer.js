@@ -1705,18 +1705,18 @@ var DesignerMVC = {
             	linkFuncExpr = 'showReportDetail( [ ' + row.name + ' ] )';
             }
             //
-            $.messager.prompt('输入集成链接js函数', '表达式（列名称之间用","分割）<br/>生成的链接点击调用的函数：函数名(json数据, 自定义报表代码)', function(val){
+            $.messager.prompt('输入集成链接js函数', '表达式（列名称之间用","分割）<br/>生成的链接点击调用的函数：<br/>自定义函数名(json数据, 自定义报表code, 所在列name)', function(val){
             	val = $.trim(val);
             	row.linkFuncExpr = val;
-            	//
-            	$(".messager-window .messager-input").val('');//fix
+            	//fix
+            	$(".messager-window .messager-input").val('');
             	//
             	var rows = $("#report-meta-column-grid").datagrid('getRows');
                 $("#report-meta-column-grid").datagrid('loadData', rows);
                 $("#report-meta-column-grid").datagrid('selectRow', index);
             });
-            //
-            $(".messager-window .messager-input").val(linkFuncExpr);//初始值fix
+            //初始值fix
+            $(".messager-window .messager-input").val(linkFuncExpr);
         },
         setMetaColumnFormat:function(){
         	var row = $("#report-meta-column-grid").datagrid('getSelected');

@@ -83,7 +83,7 @@ public class LinkFunc {
 				retFunc.colNames = colNames.toArray(new String[0]);
 			}
 		}
-		retFunc.tplStr = retFunc.funcName + "(%s, \"%s\")";
+		retFunc.tplStr = retFunc.funcName + "(%s, \"%s\", \"%s\")";
 		// System.out.println(retFunc.tplStr);
 		return retFunc;
 	}
@@ -103,38 +103,51 @@ public class LinkFunc {
 		return retStr;
 	}
 
-	public static String toLinkHtml(String valueText, LinkFunc linkFunc, String reportCode, String dataName, Object dataValue) {
+	public static String toLinkHtml(String valText, LinkFunc linkFunc, String reportCode, String colName) {
+		if (colName == null) {
+			colName = "";
+		}
+		//
 		Map<String, Object> dataMap = new HashMap<String, Object>();
-		dataMap.put(dataName, dataValue);
-		return toLinkHtml(valueText, linkFunc, reportCode, dataMap);
+		dataMap.put(colName, valText);
+		return toLinkHtml(valText, linkFunc, reportCode, colName, dataMap);
 	}
 
-	public static String toLinkHtml(String valueText, LinkFunc linkFunc, String reportCode, Map<String, Object> dataMap) {
+	public static String toLinkHtml(String valText, LinkFunc linkFunc, String reportCode, String colName, Map<String, Object> dataMap) {
 		if (linkFunc == null) {
-			return valueText;
+			return valText;
 		}
+		//
+		if (colName == null) {
+			colName = "";
+		}
+		//
 		String dataMapJson = null;
 		if (linkFunc.useAllCols) {
+			if (!dataMap.containsKey(colName)) {
+				// 确保含有当前列的值
+				dataMap.put(colName, valText);
+			}
 			dataMapJson = JSON.toJSONString(dataMap);
 		} else {
 			Map<String, Object> tempMap = new HashMap<>();
-			for (String colName : linkFunc.colNames) {
-				if (dataMap.containsKey(colName)) {
-					tempMap.put(colName, dataMap.get(colName));
+			for (String colNameTmp : linkFunc.colNames) {
+				if (dataMap.containsKey(colNameTmp)) {
+					tempMap.put(colNameTmp, dataMap.get(colNameTmp));
 				}
 			}
-			if (tempMap.isEmpty()) {
-				// 没找到key，使用全部数据
-				tempMap = dataMap;
+			if (!tempMap.containsKey(colName)) {
+				// 确保含有当前列的值
+				tempMap.put(colName, dataMap.getOrDefault(colName, valText));
 			}
 			dataMapJson = JSON.toJSONString(tempMap);
 		}
-		String funcStr = String.format(linkFunc.tplStr, dataMapJson, reportCode);
+		String funcStr = String.format(linkFunc.tplStr, dataMapJson, reportCode, colName);
 		// System.out.println(funcStr);
 
 		funcStr = escapeXmlAttrValue(funcStr);
 		// System.out.println(funcStr);
 
-		return String.format(LINK_HTML_TPL, funcStr, valueText);
+		return String.format(LINK_HTML_TPL, funcStr, valText);
 	}
 }

@@ -34,7 +34,7 @@ public class LinkFuncTest {
 	public void testToLinkHtml1() {
 		String linkFuncExpr = " showReportDetail ( ) ";
 		LinkFunc linkFunc = LinkFunc.fromLinkFuncExpr(linkFuncExpr);
-
+		String colName = "name";
 		String valueText = "商维宝";
 		String reportCode = "xyz-report";
 		Map<String, Object> dataMap = new HashMap<>();
@@ -45,7 +45,7 @@ public class LinkFuncTest {
 		dataMap.put("birthDate", "1978-06-22");
 		dataMap.put("marriage", true);
 
-		String linkHtml = LinkFunc.toLinkHtml(valueText, linkFunc, reportCode, dataMap);
+		String linkHtml = LinkFunc.toLinkHtml(valueText, linkFunc, reportCode, colName, dataMap);
 
 		System.out.println(linkHtml);
 	}
@@ -55,6 +55,7 @@ public class LinkFuncTest {
 		String linkFuncExpr = " showReportDetail ( [ gender, birthDate] ) ";
 		LinkFunc linkFunc = LinkFunc.fromLinkFuncExpr(linkFuncExpr);
 
+		String colName = "name";
 		String valueText = "商维宝";
 		String reportCode = "xyz-report";
 		Map<String, Object> dataMap = new HashMap<>();
@@ -65,7 +66,7 @@ public class LinkFuncTest {
 		dataMap.put("birthDate", "1978-06-22");
 		dataMap.put("marriage", true);
 
-		String linkHtml = LinkFunc.toLinkHtml(valueText, linkFunc, reportCode, dataMap);
+		String linkHtml = LinkFunc.toLinkHtml(valueText, linkFunc, reportCode, colName, dataMap);
 
 		System.out.println(linkHtml);
 	}

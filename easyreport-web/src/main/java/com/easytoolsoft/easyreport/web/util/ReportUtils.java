@@ -53,6 +53,9 @@ public class ReportUtils {
 		return StrUtils.extractVarNames(sqlText);
 	}
 
+	// 是否本地funcLink测试模式
+	private static final boolean LOCAL_FUNC_LINK_DEV_MODE = false;
+
 	/**
 	 * 验证sql语句中的变量是否都提供了值
 	 * 
@@ -282,6 +285,16 @@ public class ReportUtils {
 				formParams.put(es.getKey(), es.getValue());
 			}
 		}
+		//
+		if (LOCAL_FUNC_LINK_DEV_MODE) {
+			// 不能影响正常集成调用（所以要加判断）
+			if (!formParams.containsKey("is_restMode")) {
+				formParams.put("is_restMode", true);
+				//
+				formParams.put("show_dataLinks", true);
+			}
+		}
+		//
 		return tableReportService.getReportTable(report, formParams);
 	}
 

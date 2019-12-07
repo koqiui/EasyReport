@@ -51,7 +51,7 @@ public class ReportMetaDataColumn {
 	// showReportDetail([colName])
 	// showReportDetail([colName1, colName2,...])
 	// => showReportDetail({"colName1" : value1, "colName2" : value2, ...}, "${reportCode}")
-	// <a href='#' onclick='showReportDetail({"colName1" : value1, "colName2" : value2, ...}, "${reportCode}")'></a>
+	// <a href='#' onclick='showReportDetail({"colName1" : value1, "colName2" : value2, ...}, "${reportCode}", "${colName}")'></a>
 	private String linkFuncExpr;
 	private boolean isOptional;
 	private boolean isDisplayInMail;

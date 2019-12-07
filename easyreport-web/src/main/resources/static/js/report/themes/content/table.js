@@ -391,7 +391,7 @@ var TableReportMVC = {
 };
 
 //仅供调试链接列使用
-function showReportDetail(dataMap, reportCode) {
-    console.log("-" + reportCode + "-");
+function showReportDetail(dataMap, reportCode, colName) {
+    console.log(">" + reportCode + " : " + colName);
     console.log(dataMap);
 }
