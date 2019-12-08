@@ -905,9 +905,9 @@ public class ReportProxy {
 				paramMap.put("uid", reportInfo.getUuid());
 				//
 				Ajax ajax = newAjax();
-				ajax.get("/report/getResultSetRows.json");
-				ajax.params(paramMap);
+				ajax.post("/report/getResultSetRows.json");
 				ajax.asForm();
+				ajax.dataMap(paramMap);
 				ajax.send();
 				String jsonText = ajax.resultAsText();
 				logger.debug(jsonText);
