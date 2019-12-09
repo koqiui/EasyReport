@@ -5,9 +5,11 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -204,6 +206,17 @@ public class ReportProxy {
 		return (ReportMeta) bizComnCache.get(cacheKey, true);
 	}
 
+	// 内建查询参数名称列表
+	private final static Set<String> builtInQryParamNames;
+	static {
+		builtInQryParamNames = new HashSet<>();
+		builtInQryParamNames.add("uid");
+		builtInQryParamNames.add("isRowSpan");
+		builtInQryParamNames.add("statColumns");
+		builtInQryParamNames.add("is_restMode");
+		builtInQryParamNames.add("show_dataLinks");
+	}
+
 	/**
 	 * 根据自定义代码获取报表配置信息
 	 * 
@@ -256,7 +269,15 @@ public class ReportProxy {
 							metaCol.put("statis", colType != null && (colType.intValue() == 3 || colType.intValue() == 4));
 						}
 						String queryParamsJson = (String) mapData.get("queryParams");
-						targetInfo.setQueryParams(JsonUtil.fromJson(queryParamsJson, TypeUtil.TypeRefs.StringObjectMapListType));
+						List<Map<String, Object>> queryParams = JsonUtil.fromJson(queryParamsJson, TypeUtil.TypeRefs.StringObjectMapListType);
+						targetInfo.setQueryParams(queryParams);
+						//
+						Set<String> queryParamNamesForRequest = new HashSet<>(builtInQryParamNames);
+						targetInfo.setQueryParamNamesForRequest(queryParamNamesForRequest);
+						for (Map<String, Object> queryParam : queryParams) {
+							queryParamNamesForRequest.add((String) queryParam.get("name"));
+						}
+						//
 						Integer status = (Integer) mapData.get("status");
 						targetInfo.setDisabled(status.intValue() == 0);
 						String comment = (String) mapData.get("comment");
@@ -525,7 +546,7 @@ public class ReportProxy {
 	 * 
 	 * @param reportCode
 	 * @param sqlParamMap
-	 * @return data : { initParams : [], initExtra : { statColumns :[], isRowSpan }}
+	 * @return data : { initParams : [], initExtra : { statColumns :[], isRowSpan, show_dataLinks }}
 	 */
 	public static Result<Map<String, Object>> fetchReportInitParamsX(String reportCode, Map<String, Object> sqlParamMap) {
 		Result<Map<String, Object>> result = Result.newOne();
@@ -563,6 +584,8 @@ public class ReportProxy {
 				}
 				// 是否合并左边相同维度行
 				resultData.put("isRowSpan", true);
+				// 是否显示数据链接
+				resultData.put("show_dataLinks", false);
 			}
 		}
 		return result;
@@ -617,6 +640,20 @@ public class ReportProxy {
 		return result;
 	}
 
+	/** 去除多余的报表请求参数 */
+	private static Set<String> removeRedundantReportParams(Set<String> validParamNamesForRequest, Map<String, Object> paramMap) {
+		Set<String> removedParamNames = new HashSet<>();
+		if (validParamNamesForRequest != null) {
+			removedParamNames = new HashSet<>(paramMap.keySet());
+			removedParamNames.removeAll(validParamNamesForRequest);
+			//
+			for (String paramName : removedParamNames) {
+				paramMap.remove(paramName);
+			}
+		}
+		return removedParamNames;
+	}
+
 	/**
 	 * 检查并过滤报表参数（必须的参数是否有有效值），返回缺少的参数名称列表（、分割）
 	 * 
@@ -630,15 +667,25 @@ public class ReportProxy {
 	 */
 	@SuppressWarnings("unchecked")
 	private static String checkAndFilterReportParams(ReportMeta reportInfo, Map<String, Object> paramMap) {
-		// 处理 statColumns, isRowSpan
-		Boolean isRowSpan = !BoolUtil.isFalse((Boolean) paramMap.get("isRowSpan"));
-		paramMap.put("isRowSpan", isRowSpan);
-		Object statColumnsVal = paramMap.get("statColumns");
-		List<String> statColumns = (List<String>) TypeUtil.asList(statColumnsVal, true);
-		if (statColumns != null && !statColumns.isEmpty()) {
-			paramMap.put("statColumns", statColumns);
-		} else {
-			paramMap.remove("statColumns");
+		// 移除多余无用的请求参数
+		Set<String> uselessParamNames = removeRedundantReportParams(reportInfo.getQueryParamNamesForRequest(), paramMap);
+		// 处理内建参数 isRowSpan, statColumns, show_dataLinks
+		if (paramMap.containsKey("isRowSpan")) {
+			Boolean isRowSpan = !BoolUtil.isFalse((Boolean) paramMap.get("isRowSpan"));
+			paramMap.put("isRowSpan", isRowSpan);
+		}
+		if (paramMap.containsKey("statColumns")) {
+			Object statColumnsVal = paramMap.get("statColumns");
+			List<String> statColumns = (List<String>) TypeUtil.asList(statColumnsVal, true);
+			if (statColumns != null && !statColumns.isEmpty()) {
+				paramMap.put("statColumns", statColumns);
+			} else {
+				paramMap.remove("statColumns");
+			}
+		}
+		if (paramMap.containsKey("show_dataLinks")) {
+			Boolean show_dataLinks = BoolUtil.isTrue((Boolean) paramMap.get("show_dataLinks"));
+			paramMap.put("show_dataLinks", show_dataLinks);
 		}
 		//
 		List<String> lackParamNames = new ArrayList<>();
@@ -795,11 +842,17 @@ public class ReportProxy {
 		}
 		//
 		if (lackParamNames.isEmpty()) {
-			logger.info("--------【" + reportInfo.getName() + "】 统计查询参数 --------");
+			logger.info("--------【" + reportInfo.getName() + " : " + reportInfo.getCode() + "】 统计查询参数 --------");
+			if (!uselessParamNames.isEmpty()) {
+				logger.info("删除了多余参数：" + StrUtil.join(uselessParamNames, "、"));
+			}
 			logger.info(JsonUtil.toFormattedJson(paramMap));
 			return null;
 		} else {
-			logger.warn("--------【" + reportInfo.getName() + "】 缺少查询参数 --------");
+			logger.warn("--------【" + reportInfo.getName() + " : " + reportInfo.getCode() + "】 缺少查询参数 --------");
+			if (!uselessParamNames.isEmpty()) {
+				logger.info("删除了多余参数：" + StrUtil.join(uselessParamNames, "、"));
+			}
 			logger.warn(JsonUtil.toFormattedJson(paramMap));
 			return StrUtil.join(lackParamNames, "、");
 		}

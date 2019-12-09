@@ -5,6 +5,7 @@ import java.sql.Types;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -72,6 +73,8 @@ public class ReportMeta implements Serializable {
 	private List<Map<String, Object>> metaColumns;
 	/** { param meta } list */
 	private List<Map<String, Object>> queryParams;
+	/** 请求要用的参数名称（缓存，包含内建参数） */
+	private Set<String> queryParamNamesForRequest;
 	/** { name, text, width ...UI参考信息 } list */
 	private List<Map<String, Object>> metaColList;
 
@@ -193,6 +196,14 @@ public class ReportMeta implements Serializable {
 
 	public void setQueryParams(List<Map<String, Object>> queryParams) {
 		this.queryParams = queryParams;
+	}
+
+	public Set<String> getQueryParamNamesForRequest() {
+		return queryParamNamesForRequest;
+	}
+
+	public void setQueryParamNamesForRequest(Set<String> queryParamNamesForRequest) {
+		this.queryParamNamesForRequest = queryParamNamesForRequest;
 	}
 
 	public List<Map<String, Object>> getMetaColList() {
