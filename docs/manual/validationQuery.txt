@@ -1,0 +1,15 @@
+几种常见数据库的validationQuery
+--------------------------------------------------------------------
+数据库					validationQuery
+--------------------------------------------------------------------
+Oracle					select 1 from dual
+MySQL					select 1 [from dual]
+Microsoft SQL Server	select 1
+DB2						select 1 from sysibm.sysdummy1
+SQLite					select 1
+HSQLDB					select 1 from INFORMATION_SCHEMA.SYSTEM_USERS
+postgresql				select version()
+ingres					select 1
+Apache Derby			select 1
+H2						select 1 [from dual]
+Informix				select count(*) from systables

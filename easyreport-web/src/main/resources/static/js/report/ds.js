@@ -180,8 +180,8 @@ var DsMVC = {
             $('#ds-dlg').dialog({
                 closed: true,
                 modal: false,
-                width: 650,
-                height: 450,
+                width: 800,
+                height: 600,
                 iconCls: 'icon-add',
                 buttons: [{
                     text: '测试连接',
@@ -234,10 +234,11 @@ var DsMVC = {
 
             $('#ds-options-pg').propertygrid({
                 scrollbarSize: 0,
-                height: 200,
+                width : 516,
+                height: 260,
                 columns: [[
                     {field: 'name', title: '配置项', width: 200, sortable: true},
-                    {field: 'value', title: '配置值', width: 100, resizable: false}
+                    {field: 'value', title: '配置值', width: 200, resizable: false}
                 ]]
             });
         },
@@ -270,6 +271,8 @@ var DsMVC = {
         edit: function () {
             var row = $('#ds-datagrid').datagrid('getSelected');
             if (row) {
+            	row = DsMVC.Util.copy(row);//防止数据污染
+            	//
                 var options = DsMVC.Util.getOptions();
                 options.iconCls = 'icon-edit1';
                 options.data = row;
@@ -280,7 +283,12 @@ var DsMVC = {
                 $('#jdbcUrl').textbox('setValue', row.jdbcUrl);
                 $('#options').val(row.options || "{}");
                 EasyReport.utils.debug(row.options);
-                $('#ds-options-pg').propertygrid('loadData', EasyUIUtils.toPropertygridRows($.toJSON(row.options)));
+                var config = {
+                	poolClass : row.poolClass,
+                	options : $.toJSON(row.options)
+                };
+                DsMVC.Util.filterDsOptions(config);
+                $('#ds-options-pg').propertygrid('loadData', EasyUIUtils.toPropertygridRows(config.options));
             } else {
                 $.messager.alert('警告', '请选中一条记录!', 'info');
             }
@@ -362,7 +370,20 @@ var DsMVC = {
         }
     },
     Util: {
-        getOptions: function () {
+    	copy: function(src){
+    		var ret = null;
+    		if(src != null){
+    			if($.isArray(src)){
+        			 ret = [];
+        		}
+    			else {
+    				ret = {};
+    			}
+    			$.extend(true, ret, src);
+    		}
+    		return ret;
+    	},
+    	getOptions: function () {
             return {
                 dlgId: '#ds-dlg',
                 formId: '#ds-form',
@@ -399,12 +420,32 @@ var DsMVC = {
                 $(id).combobox('setValue', idxKey);
             }
         },
+        //补充默认validationQuery
+        filterDsOptions: function(config){
+        	var poolClass = config['poolClass'];
+        	if(poolClass){
+            	if(poolClass.indexOf('.DBCP2DataSourcePool') != -1 || poolClass.indexOf('.DruidDataSourcePool') != -1){
+            		//这两个连接池支持设置validationQuery
+            		var options = config['options'];
+            		if(!options['validationQuery']){
+            			options['validationQuery'] = 'SELECT 1 FROM dual';
+            		}
+            	}
+            }
+        },
         loadConfigItems: function () {
             $.getJSON(DsMVC.URLs.getConfItems.url + "?key=" + DsCommon.keys.dbType, function (result) {
                 DsMVC.Util.toMap(DsMVC.Model.dbTypes, result.data);
             });
             $.getJSON(DsMVC.URLs.getConfItems.url + "?key=" + DsCommon.keys.dbPoolType, function (result) {
+            	//console.log(result);
                 DsMVC.Util.toMap(DsMVC.Model.dbPoolTypes, result.data);
+                //补充默认validationQuery
+                var dbPoolTypes = DsMVC.Model.dbPoolTypes || {};
+                for(var key in dbPoolTypes){
+                	var config = dbPoolTypes[key].value;
+                	DsMVC.Util.filterDsOptions(config);
+                }
             });
         },
         toMap: function (srcMap, data) {
