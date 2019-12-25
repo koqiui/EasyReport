@@ -53,7 +53,7 @@ EasyReport是一个简单易用的Web报表工具,它的主要功能是把SQL语
 * 支持针对date类型参数设置默认值表达式(today, month.firstday, month.lastday, year.firstday, year.lastday +- 整数)
 * 支持自定义链接js函数（参考：[自定义报表单元格链接回调函数][]）
 * 支持对下拉型参数设置级联参数代码（指向另一个基于sql下拉列表参数）用于集成支持
-* 数据源连接池配置支持自定义validationQuery(默认改为select 1 from dual)
+* 数据源连接池配置支持自定义validationQuery(默认改为select 1 from dual ，[常见数据库的validationQuery][])
 
 ### what's new?(ver2.1)
 * 改进图表报表图表生成并增加图表生成配置
@@ -80,6 +80,7 @@ EasyReport是一个简单易用的Web报表工具,它的主要功能是把SQL语
 
 [开发参考]: https://github.com/koqiui/EasyReport/blob/master/docs/EasyReport开发、部署、应用指南.pdf
 [入门手册]: https://github.com/koqiui/EasyReport/blob/master/docs/manual/user-guide.md
+[常见数据库的validationQuery]: https://github.com/koqiui/EasyReport/blob/master/docs/manual/validationQuery.txt
 [用户参考]: https://github.com/koqiui/EasyReport/blob/master/docs/manual/version2_0.md
 [自定义报表单元格链接回调函数]: https://github.com/koqiui/EasyReport/blob/master/docs/manual/自定义集成用链接说明.png
 [支付宝]: https://raw.githubusercontent.com/koqiui/EasyReport/master/docs/assets/imgs/alipay-code.png
