@@ -54,6 +54,8 @@ EasyReport是一个简单易用的Web报表工具,它的主要功能是把SQL语
 * 支持自定义链接js函数（参考：[自定义报表单元格链接回调函数][]）
 * 支持对下拉型参数设置级联参数代码（指向另一个基于sql下拉列表参数）用于集成支持
 * 数据源连接池配置支持自定义validationQuery(默认改为select 1 from dual ，[常见数据库的validationQuery][])
+* 增加/report/getResultSetMap.json 集成api获取 带排序 和 分页 结果集
+(可以传参：page_no, page_size, sort_items: [colName1: asc, colName2: desc, ...])
 
 ### what's new?(ver2.1)
 * 改进图表报表图表生成并增加图表生成配置
