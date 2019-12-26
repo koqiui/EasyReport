@@ -41,7 +41,7 @@ public class JdbcUtils {
 						int value = typeField.getInt(null);
 						String name = typeField.getName();
 						STD_SQL_TYPE_NAME_MAP.put(value, name);
-						System.out.println("sqlType: " + value + " => " + name);
+						// System.out.println("sqlType: " + value + " => " + name);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}

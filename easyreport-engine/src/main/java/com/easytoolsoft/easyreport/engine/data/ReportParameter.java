@@ -1,8 +1,11 @@
 package com.easytoolsoft.easyreport.engine.data;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import com.easytoolsoft.easyreport.engine.SortItem;
 
 /**
  * 报表参数类
@@ -18,6 +21,13 @@ public class ReportParameter {
 	private List<ReportMetaDataColumn> metaColumns;
 	private Set<String> enabledStatColumns;
 	private boolean isRowSpan = true;
+
+	// 排序项目
+	private List<SortItem> sortItems;
+	// 分页信息
+	private boolean pageUsed = false;
+	private Integer pageNo = 1;
+	private Integer pageSize = 1000;
 
 	private String ucode;
 	// 是否集成ajax调用模式
@@ -205,6 +215,50 @@ public class ReportParameter {
 	 */
 	public void setRowSpan(final boolean isRowSpan) {
 		this.isRowSpan = isRowSpan;
+	}
+
+	public List<SortItem> getSortItems() {
+		return sortItems;
+	}
+
+	public void setSortItems(List<SortItem> sortItems) {
+		this.sortItems = sortItems;
+	}
+
+	public void setSortItems(String[] sortItems) {
+		if (sortItems != null) {// colName : asc|desc
+			this.sortItems = new ArrayList<>();
+			for (String sortPair : sortItems) {
+				String[] sortInfo = sortPair.split(":", -1);
+				String name = sortInfo[0].trim();
+				String order = sortInfo.length > 1 ? sortInfo[1].trim() : null;
+				this.sortItems.add(new SortItem(name, order));
+			}
+		}
+	}
+
+	public boolean isPageUsed() {
+		return pageUsed;
+	}
+
+	public void setPageUsed(boolean pageUsed) {
+		this.pageUsed = pageUsed;
+	}
+
+	public Integer getPageNo() {
+		return pageNo;
+	}
+
+	public void setPageNo(Integer pageNo) {
+		this.pageNo = pageNo;
+	}
+
+	public Integer getPageSize() {
+		return pageSize;
+	}
+
+	public void setPageSize(Integer pageSize) {
+		this.pageSize = pageSize;
 	}
 
 	public String getUcode() {

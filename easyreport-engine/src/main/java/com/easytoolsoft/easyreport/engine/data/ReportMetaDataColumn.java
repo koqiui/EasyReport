@@ -53,6 +53,7 @@ public class ReportMetaDataColumn {
 	// => showReportDetail({"colName1" : value1, "colName2" : value2, ...}, "${reportCode}")
 	// <a href='#' onclick='showReportDetail({"colName1" : value1, "colName2" : value2, ...}, "${reportCode}", "${colName}")'></a>
 	private String linkFuncExpr;
+	private String linkFuncName;// 冗余
 	private boolean isOptional;
 	private boolean isDisplayInMail;
 	private boolean isHidden;
@@ -497,6 +498,11 @@ public class ReportMetaDataColumn {
 		this.linkFuncExpr = linkFuncExpr;
 		//
 		this.linkFunc = LinkFunc.fromLinkFuncExpr(linkFuncExpr);
+		this.linkFuncName = this.linkFunc == null ? null : this.linkFunc.funcName;
+	}
+
+	public String getLinkFuncName() {
+		return linkFuncName;
 	}
 
 	public LinkFunc getLinkFunc() {

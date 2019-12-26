@@ -181,6 +181,7 @@ public class ReportUtils {
 	 * 
 	 * @param uid
 	 * @param parameters
+	 *            (可以传参：page_no, page_size, sort_items: [colName1: asc, colName2: desc, ...])
 	 * @return
 	 */
 	public static List<Map<String, Object>> getReportResultSetRows(final String uid, final Map<?, ?> parameters) {
@@ -189,6 +190,25 @@ public class ReportUtils {
 		ReportParameter parameter = tableReportService.getReportParameter(report, parameters);
 		Queryer queryer = QueryerFactory.create(dataSource, parameter);
 		return queryer.getResultSetRows();
+	}
+
+	/**
+	 * 返回查询统计主体的原生结果（total, rows）
+	 * 
+	 * @author koqiui
+	 * @date 2019年11月10日 下午10:36:12
+	 * 
+	 * @param uid
+	 * @param parameters
+	 *            (可以传参：page_no, page_size, sort_items: [colName1: asc, colName2: desc, ...])
+	 * @return
+	 */
+	public static Map<String, Object> getReportResultSetMap(final String uid, final Map<?, ?> parameters) {
+		Report report = reportService.getByUid(uid);
+		ReportDataSource dataSource = reportService.getReportDataSource(report.getDsId());
+		ReportParameter parameter = tableReportService.getReportParameter(report, parameters);
+		Queryer queryer = QueryerFactory.create(dataSource, parameter);
+		return queryer.getResultSetMap();
 	}
 
 	/**
@@ -213,7 +233,7 @@ public class ReportUtils {
 		Report report = reportService.getByUid(uid);
 		ReportDataSource dataSource = reportService.getReportDataSource(report.getDsId());
 		Queryer queryer = QueryerFactory.create(dataSource, null);
-		return queryer.getResultSetRows(sqlText);
+		return queryer.getResultMapRows(sqlText);
 	}
 
 	public static void renderByFormMap(final String uid, final ModelAndView modelAndView, final HttpServletRequest request) {

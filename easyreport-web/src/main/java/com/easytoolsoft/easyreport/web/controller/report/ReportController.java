@@ -24,7 +24,6 @@ import com.easytoolsoft.easyreport.engine.exception.QueryParamsException;
 import com.easytoolsoft.easyreport.engine.exception.SQLQueryException;
 import com.easytoolsoft.easyreport.engine.exception.TemplatePraseException;
 import com.easytoolsoft.easyreport.meta.domain.Report;
-import com.easytoolsoft.easyreport.meta.domain.options.ReportOptions;
 import com.easytoolsoft.easyreport.meta.form.BootstrapQueryFormView;
 import com.easytoolsoft.easyreport.meta.form.EasyUIQueryFormView;
 import com.easytoolsoft.easyreport.meta.form.QueryParamFormView;
@@ -108,7 +107,7 @@ public class ReportController {
 
 	@ResponseBody // add by koqiui
 	@RequestMapping(value = "/getResultSetRows.json")
-	public ResponseResult<?> getResultSet(final String uid, final HttpServletRequest request) {
+	public ResponseResult<?> getResultSetRows(final String uid, final HttpServletRequest request) {
 		ResponseResult<?> result;
 		try {
 			result = ResponseResult.success(ReportUtils.getReportResultSetRows(uid, request.getParameterMap()));
@@ -116,8 +115,24 @@ public class ReportController {
 			log.error("报表结果出错", ex);
 			result = ResponseResult.failure(10007, "报表结果出错", ex.getMessage());
 		} catch (final Exception ex) {
-			log.error("报表系统出错", ex);
+			log.error("报表结果出错", ex);
 			result = ResponseResult.failure(10008, "报表结果出错", ex.getMessage());
+		}
+		return result;
+	}
+
+	@ResponseBody // add by koqiui
+	@RequestMapping(value = "/getResultSetMap.json")
+	public ResponseResult<?> getResultSetMap(final String uid, final HttpServletRequest request) {
+		ResponseResult<?> result;
+		try {
+			result = ResponseResult.success(ReportUtils.getReportResultSetMap(uid, request.getParameterMap()));
+		} catch (QueryParamsException | NotFoundLayoutColumnException | SQLQueryException | TemplatePraseException ex) {
+			log.error("报表分页结果出错", ex);
+			result = ResponseResult.failure(10007, "报表分页结果出错", ex.getMessage());
+		} catch (final Exception ex) {
+			log.error("报表分页结果出错", ex);
+			result = ResponseResult.failure(10008, "报表分页结果出错", ex.getMessage());
 		}
 		return result;
 	}

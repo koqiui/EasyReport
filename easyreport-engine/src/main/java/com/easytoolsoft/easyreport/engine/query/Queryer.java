@@ -13,6 +13,8 @@ import com.easytoolsoft.easyreport.engine.data.ReportQueryParamItem;
  * @author tomdeng
  */
 public interface Queryer {
+	public static final String ROWNUM_ALIAS = "ROW_NUM";
+
 	/**
 	 * 从sql语句中解析出报表元数据列集合
 	 *
@@ -56,7 +58,17 @@ public interface Queryer {
 	public List<Map<String, Object>> getResultSetRows();
 
 	/**
-	 * 返回指定的sql语句的原生结果行集
+	 * 返回查询统计主体的原生结果（total, rows）
+	 * 
+	 * @author koqiui
+	 * @date 2019年11月10日 下午6:48:51
+	 * 
+	 * @return
+	 */
+	public Map<String, Object> getResultSetMap();
+
+	/**
+	 * 返回同源指定的sql语句的原生结果行集
 	 * 
 	 * @author koqiui
 	 * @date 2019年11月10日 下午10:18:48
@@ -65,5 +77,5 @@ public interface Queryer {
 	 *            指定的sql语句
 	 * @return
 	 */
-	public List<Map<String, Object>> getResultSetRows(String sqlText);
+	public List<Map<String, Object>> getResultMapRows(String sqlText);
 }

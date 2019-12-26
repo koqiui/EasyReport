@@ -95,7 +95,22 @@ public class TableReportServiceImpl implements TableReportService {
 	}
 
 	private ReportParameter createReportParameter(final Report report, final Map<String, Object> formParams) {
-		Object tmpValue = formParams.remove("is_restMode");// 集成调用模式
+		Object tmpValue = null;
+		// 排序
+		String[] sortItems = (String[]) formParams.remove("sort_items");
+		// 分页
+		Integer pageNo = null;
+		tmpValue = formParams.remove("page_no");
+		if (tmpValue != null) {
+			pageNo = NumUtils.parseInt(tmpValue.toString());
+		}
+		Integer pageSize = null;
+		tmpValue = formParams.remove("page_size");
+		if (tmpValue != null) {
+			pageSize = NumUtils.parseInt(tmpValue.toString());
+		}
+		//
+		tmpValue = formParams.remove("is_restMode");// 集成调用模式
 		boolean isRestMode = tmpValue == null ? false : tmpValue.toString().equals("true");
 		tmpValue = formParams.remove("show_dataLinks");// 是否显示连接
 		boolean showDataLinks = tmpValue == null ? false : tmpValue.toString().equals("true");
@@ -106,6 +121,16 @@ public class TableReportServiceImpl implements TableReportService {
 		final List<ReportMetaDataColumn> metaColumns = this.reportService.parseMetaColumns(report.getMetaColumns());
 		ReportParameter reportParameter = new ReportParameter(report.getId().toString(), report.getName(), options.getLayout(), options.getStatColumnLayout(), metaColumns, enabledStatColumn,
 				Boolean.valueOf(formParams.get("isRowSpan").toString()), sqlText);
+		//
+		reportParameter.setSortItems(sortItems);
+		if (pageNo != null) {
+			reportParameter.setPageNo(pageNo);
+			reportParameter.setPageUsed(true);
+		}
+		if (pageSize != null) {
+			reportParameter.setPageSize(pageSize);
+			reportParameter.setPageUsed(true);
+		}
 		//
 		reportParameter.setUcode(report.getUcode());// 增加ucode信息
 		reportParameter.setRestMode(isRestMode);// 是否集成调用模式
@@ -158,6 +183,20 @@ public class TableReportServiceImpl implements TableReportService {
 			formParams.put("isRowSpan", values[0]);
 		} else {
 			formParams.put("isRowSpan", "true");
+		}
+		// 排序信息
+		if (httpReqParamMap.containsKey("sort_items")) {
+			final String[] values = (String[]) httpReqParamMap.get("sort_items");
+			formParams.put("sort_items", values);
+		}
+		// 分页信息
+		if (httpReqParamMap.containsKey("page_no")) {
+			final String[] values = (String[]) httpReqParamMap.get("page_no");
+			formParams.put("page_no", values[0]);
+		}
+		if (httpReqParamMap.containsKey("page_size")) {
+			final String[] values = (String[]) httpReqParamMap.get("page_size");
+			formParams.put("page_size", values[0]);
 		}
 		// 集成调用提示参数
 		if (httpReqParamMap.containsKey("is_restMode")) {

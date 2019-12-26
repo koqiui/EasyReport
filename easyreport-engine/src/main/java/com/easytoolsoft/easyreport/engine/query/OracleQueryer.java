@@ -12,4 +12,38 @@ public class OracleQueryer extends AbstractQueryer {
 	public OracleQueryer(final ReportDataSource dataSource, final ReportParameter parameter) {
 		super(dataSource, parameter);
 	}
+
+	@Override
+	protected String asPagedSqlText(String sqlText, boolean forMetaOnly) {
+		if (forMetaOnly) {
+			return "SELECT TMP_TBL.* FROM (\r" + sqlText + "\r) TMP_TBL WHERE ROWNUM = 1";
+		}
+
+		String retSql = sqlText;
+		if (this.endsWithOrderBy(retSql)) {
+			retSql = "SELECT TMP.* FROM (\r" + retSql + "\r) TMP";
+		}
+
+		long startRow = 0;
+		long endRow = 0;
+		//
+		int pageNo = this.parameter.getPageNo();
+		int pageSize = this.parameter.getPageSize();
+		if (this.parameter.isPageUsed()) {
+			startRow = (pageNo - 1) * pageSize + 1;
+			endRow = pageNo * pageSize;
+		} else {
+			startRow = 1;
+			endRow = pageSize;
+		}
+		retSql = "SELECT TMP_TBX.* FROM (SELECT TMP_TBL.*, ROWNUM " + Queryer.ROWNUM_ALIAS + " FROM (\r" + retSql + "\r) TMP_TBL WHERE ROWNUM <= " + endRow + ") TMP_TBX WHERE " + Queryer.ROWNUM_ALIAS + " >= " + startRow;
+
+		String orderByStr = this.getOrderByStr();
+		if (orderByStr != null) {
+			retSql += "\r" + orderByStr;
+		}
+
+		return retSql;
+	}
+
 }

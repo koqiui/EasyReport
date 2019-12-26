@@ -13,11 +13,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.easytoolsoft.easyreport.engine.SortItem;
 import com.easytoolsoft.easyreport.engine.data.ColumnType;
 import com.easytoolsoft.easyreport.engine.data.ReportDataSource;
 import com.easytoolsoft.easyreport.engine.data.ReportMetaDataCell;
@@ -49,16 +53,28 @@ public abstract class AbstractQueryer implements Queryer {
 		ResultSet rs = null;
 		List<ReportMetaDataColumn> columns = null;
 		try {
-			this.logger.debug("Parse Report MetaDataColumns SQL:{},", sqlText);
+			this.logger.debug("parseMetaDataColumns SQL:");
+			this.logger.debug(sqlText);
 			conn = this.getJdbcConnection();
 			stmt = conn.createStatement();
-			rs = stmt.executeQuery(this.preprocessSqlText(sqlText));
+			//
+			String sqlStr = this.filterSqlText(sqlText);
+			sqlStr = this.asSingleRowSqlText(sqlStr);
+			this.logger.debug(sqlStr);
+			//
+			rs = stmt.executeQuery(sqlStr);
 			final ResultSetMetaData rsMataData = rs.getMetaData();
 			final int count = rsMataData.getColumnCount();
 			columns = new ArrayList<>(count);
+			String colName = null;
 			for (int i = 1; i <= count; i++) {
+				colName = rsMataData.getColumnLabel(i);
+				if (Queryer.ROWNUM_ALIAS.equals(colName)) {
+					// 分页行号
+					continue;
+				}
 				final ReportMetaDataColumn column = new ReportMetaDataColumn();
-				column.setName(rsMataData.getColumnLabel(i));
+				column.setName(colName);
 				String className = rsMataData.getColumnClassName(i);
 				column.setClassName(className);
 				int sqlType = rsMataData.getColumnType(i);
@@ -84,8 +100,8 @@ public abstract class AbstractQueryer implements Queryer {
 		ResultSet rs = null;
 		final HashSet<String> set = new HashSet<>();
 		final List<ReportQueryParamItem> rows = new ArrayList<>();
-
 		try {
+			this.logger.debug("parseQueryParamItems SQL:");
 			this.logger.debug(sqlText);
 			conn = this.getJdbcConnection();
 			stmt = conn.createStatement();
@@ -119,10 +135,17 @@ public abstract class AbstractQueryer implements Queryer {
 		ResultSet rs = null;
 
 		try {
-			this.logger.debug(this.parameter.getSqlText());
 			conn = this.getJdbcConnection();
 			stmt = conn.createStatement();
-			rs = stmt.executeQuery(this.parameter.getSqlText());
+			//
+			this.logger.debug("getMetaDataRows SQL:");
+			String sqlText = this.parameter.getSqlText();
+			this.logger.debug(sqlText);
+			String sqlStr = this.filterSqlText(sqlText);
+			sqlStr = this.asPagedSqlText(sqlStr);
+			this.logger.debug(sqlStr);
+			//
+			rs = stmt.executeQuery(sqlStr);
 			return this.getMetaDataRows(rs, this.getSqlColumns(this.parameter.getMetaColumns()));
 		} catch (final Exception ex) {
 			this.logger.error(String.format("SqlText:%s，Msg:%s", this.parameter.getSqlText(), ex));
@@ -154,21 +177,21 @@ public abstract class AbstractQueryer implements Queryer {
 	}
 
 	public List<Map<String, Object>> getResultSetRows() {
-		return this.getResultSetRows(null);
-	}
-
-	public List<Map<String, Object>> getResultSetRows(String sqlText) {
 		Connection conn = null;
 		Statement stmt = null;
 		ResultSet rs = null;
+		//
+		this.logger.debug("getResultSetRows SQL:");
+		String sqlText = this.parameter.getSqlText();
+		this.logger.debug(sqlText);
 		try {
-			if (sqlText == null) {
-				sqlText = this.parameter.getSqlText();
-			}
-			this.logger.debug(sqlText);
 			conn = this.getJdbcConnection();
 			stmt = conn.createStatement();
-			rs = stmt.executeQuery(sqlText);
+			//
+			String sqlStr = this.filterSqlText(sqlText);
+			sqlStr = this.asPagedSqlText(sqlStr);
+			this.logger.debug(sqlStr);
+			rs = stmt.executeQuery(sqlStr);
 			// 获取列名称
 			final ResultSetMetaData rsMataData = rs.getMetaData();
 			final int colCount = rsMataData.getColumnCount();
@@ -180,7 +203,12 @@ public abstract class AbstractQueryer implements Queryer {
 			Set<Integer> binaryCols = new HashSet<>();
 			for (int i = 1; i <= colCount; i++) {
 				colName = rsMataData.getColumnLabel(i);
-				colNames[i - 1] = colName;
+				if (Queryer.ROWNUM_ALIAS.equals(colName)) {
+					colNames[i - 1] = null;// 分页行号
+					continue;
+				} else {
+					colNames[i - 1] = colName;
+				}
 				int sqlType = rsMataData.getColumnType(i);
 				String className = rsMataData.getColumnClassName(i);
 				if (Boolean.class.getName().equals(className)) {
@@ -209,6 +237,193 @@ public abstract class AbstractQueryer implements Queryer {
 				final Map<String, Object> retRow = new HashMap<>();
 				for (int i = 1; i <= colCount; i++) {
 					colName = colNames[i - 1];
+					if (colName == null) {
+						continue;
+					}
+					Object value = rs.getObject(colName);
+					if (value != null) {
+						if (binaryCols.contains(i)) {
+							value = new String((byte[]) value);
+						} else {
+							format = colFormats[i - 1];
+							// 日期格式化
+							if (format != null) {
+								value = format.format(value);
+							}
+						}
+					}
+					retRow.put(colName, value);
+				}
+				retRows.add(retRow);
+			}
+			return retRows;
+		} catch (final Exception ex) {
+			this.logger.error(String.format("SqlText:%s，Msg:%s", sqlText, ex));
+			throw new SQLQueryException(ex);
+		} finally {
+			JdbcUtils.releaseJdbcResource(conn, stmt, rs);
+		}
+	}
+
+	public Map<String, Object> getResultSetMap() {
+		Connection conn = null;
+		Statement stmt = null;
+		ResultSet rs = null;
+		//
+		this.logger.debug("getResultSetMap SQL:");
+		String sqlText = this.parameter.getSqlText();
+		this.logger.debug(sqlText);
+		try {
+			Map<String, Object> retMap = new HashMap<>();
+			//
+			conn = this.getJdbcConnection();
+			stmt = conn.createStatement();
+			//
+			sqlText = this.filterSqlText(sqlText);
+			// total
+			String countSql = this.asCountSqlText(sqlText);
+			rs = stmt.executeQuery(countSql);
+			rs.next();//
+			long totalCount = rs.getLong(1);
+			rs.close();//
+			retMap.put("total", totalCount);//
+			// rows
+			String sqlStr = this.asPagedSqlText(sqlText);
+			this.logger.debug(sqlStr);
+			rs = stmt.executeQuery(sqlStr);
+			// 获取列名称
+			final ResultSetMetaData rsMataData = rs.getMetaData();
+			final int colCount = rsMataData.getColumnCount();
+			String[] colNames = new String[colCount];
+			// 日期时间格式
+			SimpleDateFormat[] colFormats = new SimpleDateFormat[colCount];
+			String colName = null;
+			String colStdSqlTypeName = null;
+			Set<Integer> binaryCols = new HashSet<>();
+			for (int i = 1; i <= colCount; i++) {
+				colName = rsMataData.getColumnLabel(i);
+				if (Queryer.ROWNUM_ALIAS.equals(colName)) {
+					colNames[i - 1] = null;// 分页行号
+					continue;
+				} else {
+					colNames[i - 1] = colName;
+				}
+				int sqlType = rsMataData.getColumnType(i);
+				String className = rsMataData.getColumnClassName(i);
+				if (Boolean.class.getName().equals(className)) {
+					sqlType = Types.BOOLEAN;
+				} else {
+					colStdSqlTypeName = JdbcUtils.toStdSqlTypeName(sqlType);
+					if (colStdSqlTypeName.contains("BINARY")) {
+						binaryCols.add(i);
+					}
+				}
+				// 日期格式化
+				if (Types.DATE == sqlType) {
+					colFormats[i - 1] = new SimpleDateFormat("yyyy-MM-dd");
+				} else if (Types.TIME == sqlType) {
+					colFormats[i - 1] = new SimpleDateFormat("HH:mm:ss");
+				} else if (Types.TIMESTAMP == sqlType) {
+					colFormats[i - 1] = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+				} else {
+					colFormats[i - 1] = null;
+				}
+			}
+			// 获取结果集
+			List<Map<String, Object>> resultRows = new ArrayList<>();
+			retMap.put("rows", resultRows);//
+			SimpleDateFormat format = null;
+			while (rs.next()) {
+				final Map<String, Object> retRow = new HashMap<>();
+				for (int i = 1; i <= colCount; i++) {
+					colName = colNames[i - 1];
+					if (colName == null) {
+						continue;
+					}
+					Object value = rs.getObject(colName);
+					if (value != null) {
+						if (binaryCols.contains(i)) {
+							value = new String((byte[]) value);
+						} else {
+							format = colFormats[i - 1];
+							// 日期格式化
+							if (format != null) {
+								value = format.format(value);
+							}
+						}
+					}
+					retRow.put(colName, value);
+				}
+				resultRows.add(retRow);
+			}
+			return retMap;
+		} catch (final Exception ex) {
+			this.logger.error(String.format("SqlText:%s，Msg:%s", sqlText, ex));
+			throw new SQLQueryException(ex);
+		} finally {
+			JdbcUtils.releaseJdbcResource(conn, stmt, rs);
+		}
+	}
+
+	public List<Map<String, Object>> getResultMapRows(String sqlText) {
+		Connection conn = null;
+		Statement stmt = null;
+		ResultSet rs = null;
+		try {
+			this.logger.debug("getResultMapRows SQL:");
+			this.logger.debug(sqlText);
+			//
+			conn = this.getJdbcConnection();
+			stmt = conn.createStatement();
+			rs = stmt.executeQuery(sqlText);
+			// 获取列名称
+			final ResultSetMetaData rsMataData = rs.getMetaData();
+			final int colCount = rsMataData.getColumnCount();
+			String[] colNames = new String[colCount];
+			// 日期时间格式
+			SimpleDateFormat[] colFormats = new SimpleDateFormat[colCount];
+			String colName = null;
+			String colStdSqlTypeName = null;
+			Set<Integer> binaryCols = new HashSet<>();
+			for (int i = 1; i <= colCount; i++) {
+				colName = rsMataData.getColumnLabel(i);
+				if (Queryer.ROWNUM_ALIAS.equals(colName)) {
+					colNames[i - 1] = null;// 分页行号
+					continue;
+				} else {
+					colNames[i - 1] = colName;
+				}
+				int sqlType = rsMataData.getColumnType(i);
+				String className = rsMataData.getColumnClassName(i);
+				if (Boolean.class.getName().equals(className)) {
+					sqlType = Types.BOOLEAN;
+				} else {
+					colStdSqlTypeName = JdbcUtils.toStdSqlTypeName(sqlType);
+					if (colStdSqlTypeName.contains("BINARY")) {
+						binaryCols.add(i);
+					}
+				}
+				// 日期格式化
+				if (Types.DATE == sqlType) {
+					colFormats[i - 1] = new SimpleDateFormat("yyyy-MM-dd");
+				} else if (Types.TIME == sqlType) {
+					colFormats[i - 1] = new SimpleDateFormat("HH:mm:ss");
+				} else if (Types.TIMESTAMP == sqlType) {
+					colFormats[i - 1] = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+				} else {
+					colFormats[i - 1] = null;
+				}
+			}
+			// 获取结果集
+			List<Map<String, Object>> retRows = new ArrayList<>();
+			SimpleDateFormat format = null;
+			while (rs.next()) {
+				final Map<String, Object> retRow = new HashMap<>();
+				for (int i = 1; i <= colCount; i++) {
+					colName = colNames[i - 1];
+					if (colName == null) {
+						continue;
+					}
 					Object value = rs.getObject(colName);
 					if (value != null) {
 						if (binaryCols.contains(i)) {
@@ -238,15 +453,64 @@ public abstract class AbstractQueryer implements Queryer {
 		return metaDataColumns.stream().filter(x -> x.getType() != ColumnType.COMPUTED).collect(Collectors.toList());
 	}
 
-	/**
-	 * 预处理获取报表列集合的sql语句， 在这里可以拦截全表查询等sql， 因为如果表的数据量很大，将会产生过多的内存消耗，甚至性能问题
-	 *
-	 * @param sqlText
-	 *            原sql语句
-	 * @return 预处理后的sql语句
-	 */
-	protected String preprocessSqlText(final String sqlText) {
-		return sqlText;
+	/** 返回order by 语句 */
+	protected String getOrderByStr() {
+		return this.getOrderByStr(null);
+	}
+
+	/** 返回order by 语句（列名加表别名） */
+	protected String getOrderByStr(String tblAlias) {
+		List<SortItem> sortItems = this.parameter.getSortItems();
+		if (sortItems != null && sortItems.size() > 0) {
+			List<String> orderStrs = new ArrayList<>();
+			if (tblAlias == null) {
+				for (SortItem sortItem : sortItems) {
+					orderStrs.add(sortItem.toString());
+				}
+			} else {
+				for (SortItem sortItem : sortItems) {
+					orderStrs.add(sortItem.toString(tblAlias));
+				}
+			}
+			return "ORDER BY " + StringUtils.join(orderStrs, ", ");
+		}
+		//
+		return null;
+	}
+
+	protected boolean endsWithOrderBy(final String sqlText) {
+		final Pattern pattern = Pattern.compile("order\\s+by\\s+.*?$", Pattern.CASE_INSENSITIVE);
+		final Matcher matcher = pattern.matcher(sqlText);
+		if (matcher.find()) {
+			String matched = matcher.group();
+			if (matched.indexOf(")") == -1) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** 过滤sql文本（比如转义、去掉结尾的; 及 分页信息等） */
+	protected String filterSqlText(final String sqlText) {
+		return StringUtils.stripEnd(sqlText.trim(), ";");
+	}
+
+	/** 转换为仅获取1行结果的sql */
+	protected String asSingleRowSqlText(final String sqlText) {
+		return this.asPagedSqlText(sqlText, true);
+	}
+
+	/** 转换为 计算总数量的sql */
+	protected String asCountSqlText(final String sqlText) {
+		return "SELECT count(1) count FROM (" + sqlText + ") TMP_TBL";
+	}
+
+	/** 为sql 增加分页 */
+	protected abstract String asPagedSqlText(final String sqlText, boolean forMetaOnly);
+
+	/** 为sql 增加分页 */
+	protected String asPagedSqlText(final String sqlText) {
+		return this.asPagedSqlText(sqlText, false);
 	}
 
 	/**

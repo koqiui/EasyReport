@@ -11,6 +11,26 @@ public class NumUtils {
 	 * @param numStr
 	 * @return
 	 */
+	public static Integer parseInt(String numStr) {
+		if (StringUtils.isBlank(numStr)) {
+			return null;
+		}
+		//
+		try {
+			return Integer.parseInt(numStr);
+		} catch (NumberFormatException nfe) {
+			return null;
+		}
+	}
+
+	/**
+	 * 解析错误返回 null
+	 * 
+	 * @author koqiui
+	 * 
+	 * @param numStr
+	 * @return
+	 */
 	public static Long parseLong(String numStr) {
 		if (StringUtils.isBlank(numStr)) {
 			return null;
