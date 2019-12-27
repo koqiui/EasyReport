@@ -12,6 +12,7 @@ import com.easytoolsoft.easyreport.engine.data.ColumnTreeNode;
 import com.easytoolsoft.easyreport.engine.data.ReportDataColumn;
 import com.easytoolsoft.easyreport.engine.data.ReportParameter;
 import com.easytoolsoft.easyreport.engine.data.ReportTable;
+import com.easytoolsoft.easyreport.engine.util.NumberUtils;
 
 /**
  * @author tomdeng
@@ -87,12 +88,16 @@ public abstract class AbstractReportBuilder implements ReportBuilder {
 		String reportCode = this.reportParameter.getUcode();
 		ReportDataColumn dataColumn = rowNode.getColumn();
 		linkFunc = dataColumn.getLinkFunc();
+		boolean ignore0LinkFunc = dataColumn.ignore0LinkFunc();
+		String colName = dataColumn.getName();
 		//
 		final int level = paths.length > 1 ? paths.length - 1 : 1;
 		for (int i = 0; i < level; i++) {
 			String value = paths[i];
 			if (showDataLinks && linkFunc != null && value.length() > 0) {
-				value = LinkFunc.toLinkHtml(value, linkFunc, reportCode, dataColumn.getName());
+				if (!ignore0LinkFunc || !NumberUtils.isNumVal0(value)) {
+					value = LinkFunc.toLinkHtml(value, linkFunc, reportCode, colName);
+				}
 			}
 			this.tableRows.append(String.format("<td class=\"easyreport-fixed-column\" style=\"%s\">%s</td>", rowNode.getStyle(), value));
 		}
@@ -136,6 +141,7 @@ public abstract class AbstractReportBuilder implements ReportBuilder {
 		boolean showDataLinks = this.reportParameter.shouldShowDataLinks();
 		String reportCode = this.reportParameter.getUcode();
 		ReportDataColumn dataColumn = null;
+		boolean ignore0LinkFunc = false;
 
 		final int level = paths.length > 1 ? paths.length - 1 : 1;
 		final String[] currNodePaths = new String[level];
@@ -151,9 +157,12 @@ public abstract class AbstractReportBuilder implements ReportBuilder {
 			} else {
 				dataColumn = treeNode.getColumn();
 				linkFunc = dataColumn.getLinkFunc();
+				ignore0LinkFunc = dataColumn.ignore0LinkFunc();
 				String value = treeNode.getValue();
 				if (showDataLinks && linkFunc != null && value.length() > 0) {
-					value = LinkFunc.toLinkHtml(value, linkFunc, reportCode, dataColumn.getName());
+					if (!ignore0LinkFunc || !NumberUtils.isNumVal0(value)) {
+						value = LinkFunc.toLinkHtml(value, linkFunc, reportCode, dataColumn.getName());
+					}
 				}
 				final String rowspan = treeNode.getSpans() > 1 ? String.format(" rowspan=\"%s\"", treeNode.getSpans()) : "";
 				this.tableRows.append(String.format("<td class=\"easyreport-fixed-column\"%s style=\"%s\">%s</td>", rowspan, treeNode.getStyle(), value));

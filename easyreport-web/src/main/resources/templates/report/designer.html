@@ -403,21 +403,47 @@
         <tr>
         	<td style="text-align:right;">最少异值数量：</td>
             <td>
-            	<input id="report-column-clrLvlValve" name="clrLvlValve" type="number" value="3" style="line-height:23px;height:23px;border:1px dotted #AAAAA;text-align:center;" title="如果该列不同数值的数量少于指定的数量则不会出现色阶样式（最小 3 ，建议 > 5）" />
+            	<input id="report-column-clrLvlValve" name="clrLvlValve" type="number" style="line-height:23px;height:23px;border:1px dotted #AAAAA;text-align:center;" title="如果该列不同数值的数量少于指定的数量则不会出现色阶样式（最小 3 ，建议 > 5）" />
             </td>
         </tr>
         <tr>
         	<td style="text-align:right;">色阶起始颜色：</td>
             <td>
             	<input id="report-column-clrLvlStart" name="clrLvlStart" type="text" style="line-height:23px;height:23px;border:1px dotted #AAAAA;text-align:center;" title="十六进制颜色，形如：#RRGGBB" />
-            	<div id="report-column-clrLvlStart-feedback" style="display:inline-block;width:40px;line-height:23px;height:23px;border:1px dotted #AAAAA;text-align:center;">文字</div>
+            	<div id="report-column-clrLvlStart-feedback" style="display:inline-block;width:60px;line-height:23px;height:23px;border:1px dotted #AAAAA;text-align:center;">文字</div>
             </td>
         </tr>
         <tr>
         	<td style="text-align:right;">色阶终止颜色：</td>
             <td>
             	<input id="report-column-clrLvlEnd" name="clrLvlEnd" type="text" style="line-height:23px;height:23px;border:1px dotted #AAAAA;text-align:center;" title="十六进制颜色，形如：#RRGGBB" />
-            	<div id="report-column-clrLvlEnd-feedback" style="display:inline-block;width:40px;line-height:23px;height:23px;border:1px dotted #AAAAA;text-align:center;">文字</div>
+            	<div id="report-column-clrLvlEnd-feedback" style="display:inline-block;width:60px;line-height:23px;height:23px;border:1px dotted #AAAAA;text-align:center;">文字</div>
+            </td>
+        </tr>
+        <tr>
+        	<td style="text-align:right;">排除点：</td>
+            <td>
+            	<label><input id="report-column-clrLvlIgnore0" name="clrLvlIgnore0" class="easyui-checkbox" type="checkbox"/>忽略 0 值</label>
+            </td>
+        </tr>
+    </table>
+</div>
+<!-- 设置链接函数弹框  -->
+<div id="report-column-linkFunc-dlg" title="链接函数信息">
+    <table class="designer-table" style="height: 90%">
+        <tr>
+        	<td colspan="2" style="padding-left:54px;">集成链接js函数 - 表达式（列名称之间用","分割）<br/>生成的链接点击调用的函数：<br/>自定义函数名(json数据, 自定义报表code, 所在列name)</td>
+        </tr>
+        <tr>
+        	<td style="text-align:right;width:100px;">表达式：</td>
+            <td>
+            	<input id="report-column-linkFuncExpr" name="linkFuncExpr" type="text" style="width:440px;line-height:23px;height:23px;border:1px dotted #AAAAA;" />
+            </td>
+        </tr>
+        <tr>
+        	<td style="text-align:right;width:100px;">排除点：</td>
+            <td>
+            	<label><input id="report-column-linkFuncIgnore0" name="linkFuncIgnore0" class="easyui-checkbox" type="checkbox"/>忽略 0 值</label>
             </td>
         </tr>
     </table>

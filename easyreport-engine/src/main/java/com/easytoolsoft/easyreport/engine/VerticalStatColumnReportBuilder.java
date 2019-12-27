@@ -7,8 +7,10 @@ import com.easytoolsoft.easyreport.engine.data.AbstractReportDataSet;
 import com.easytoolsoft.easyreport.engine.data.ColumnTree;
 import com.easytoolsoft.easyreport.engine.data.ColumnTreeNode;
 import com.easytoolsoft.easyreport.engine.data.ReportDataCell;
+import com.easytoolsoft.easyreport.engine.data.ReportDataColumn;
 import com.easytoolsoft.easyreport.engine.data.ReportDataRow;
 import com.easytoolsoft.easyreport.engine.data.ReportParameter;
+import com.easytoolsoft.easyreport.engine.util.NumberUtils;
 
 /**
  * 纵向展示统计列的报表生成类
@@ -45,6 +47,7 @@ public class VerticalStatColumnReportBuilder extends AbstractReportBuilder imple
 		LinkFunc linkFunc = null;
 		boolean showDataLinks = this.reportParameter.shouldShowDataLinks();
 		String reportCode = this.reportParameter.getUcode();
+		boolean ignore0LinkFunc = false;
 		//
 		this.tableRows.append("<tbody>");
 		for (final ColumnTreeNode rowNode : rowNodes) {
@@ -59,9 +62,13 @@ public class VerticalStatColumnReportBuilder extends AbstractReportBuilder imple
 				}
 				final ReportDataCell cell = dataRow.getCell(colName);
 				String valText = (cell == null) ? "" : cell.toString();
-				linkFunc = columnNode.getColumn().getLinkFunc();
+				ReportDataColumn dataColumn = columnNode.getColumn();
+				linkFunc = dataColumn.getLinkFunc();
+				ignore0LinkFunc = dataColumn.ignore0LinkFunc();
 				if (showDataLinks && linkFunc != null && valText.length() > 0) {
-					valText = LinkFunc.toLinkHtml(valText, linkFunc, reportCode, colName, dataRow.getDataMap());
+					if (!ignore0LinkFunc || !NumberUtils.isNumVal0(valText)) {
+						valText = LinkFunc.toLinkHtml(valText, linkFunc, reportCode, colName, dataRow.getDataMap());
+					}
 				}
 				String style = cell == null ? "" : cell.getStyle();
 				this.tableRows.append(String.format("<td style=\"%s\">", style)).append(valText).append("</td>");

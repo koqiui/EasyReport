@@ -212,6 +212,9 @@ public class ReportProxy {
 		builtInQryParamNames = new HashSet<>();
 		builtInQryParamNames.add("uid");
 		builtInQryParamNames.add("isRowSpan");
+		builtInQryParamNames.add("sort_items");// 排序
+		builtInQryParamNames.add("page_no");// 分页
+		builtInQryParamNames.add("page_size");// 分页
 		builtInQryParamNames.add("statColumns");
 		builtInQryParamNames.add("is_restMode");
 		builtInQryParamNames.add("show_dataLinks");
@@ -262,8 +265,11 @@ public class ReportProxy {
 							metaCol.put("dataType", metaColumn.get("theType"));
 							metaCol.put("format", metaColumn.get("format"));
 							metaCol.put("align", metaColumn.get("align"));
-							metaCol.put("percent", metaColumn.get("percent"));
+							metaCol.put("percent", metaColumn.getOrDefault("percent", false));
 							metaCol.put("width", metaColumn.get("width"));
+							metaCol.put("hidden", metaColumn.getOrDefault("hidden", false));
+							metaCol.put("optional", metaColumn.getOrDefault("optional", false));
+							metaCol.put("linkFuncExpr", metaColumn.get("linkFuncExpr"));
 							colType = NumUtil.parseInteger(String.valueOf(metaColumn.get("type")));
 							// 是否统计/计算列
 							metaCol.put("statis", colType != null && (colType.intValue() == 3 || colType.intValue() == 4));
@@ -577,9 +583,10 @@ public class ReportProxy {
 						statColumn = new HashMap<>();
 						statColumns.add(statColumn);
 						//
+						Boolean optional = (Boolean) metaCol.getOrDefault("optional", false);
 						statColumn.put("name", metaCol.get("name"));
 						statColumn.put("text", metaCol.get("text"));
-						statColumn.put("selected", true);
+						statColumn.put("selected", !optional);
 					}
 				}
 				// 是否合并左边相同维度行
@@ -686,6 +693,16 @@ public class ReportProxy {
 		if (paramMap.containsKey("show_dataLinks")) {
 			Boolean show_dataLinks = BoolUtil.isTrue((Boolean) paramMap.get("show_dataLinks"));
 			paramMap.put("show_dataLinks", show_dataLinks);
+		}
+		// 分页
+		if (paramMap.containsKey("sort_items")) {
+			Object sortItemsVal = paramMap.get("sort_items");
+			List<String> sortItems = (List<String>) TypeUtil.asList(sortItemsVal, true);
+			if (sortItems != null && !sortItems.isEmpty()) {
+				paramMap.put("sort_items", sortItems);
+			} else {
+				paramMap.remove("sort_items");
+			}
 		}
 		//
 		List<String> lackParamNames = new ArrayList<>();
@@ -992,7 +1009,7 @@ public class ReportProxy {
 	}
 
 	/**
-	 * 获取指定报表的数据（行信息 + 结果集行）（json）
+	 * 获取指定报表的数据（行信息 + 结果集行）（json: {cols, rows}）
 	 * 
 	 * @author koqiui
 	 * @date 2019年11月11日 下午12:38:51
@@ -1001,7 +1018,7 @@ public class ReportProxy {
 	 * @param paramMap
 	 * @return
 	 */
-	public static Result<Map<String, Object>> fetchReportResultData(String reportCode, Map<String, Object> paramMap) {
+	public static Result<Map<String, Object>> fetchReportResultSetInfo(String reportCode, Map<String, Object> paramMap) {
 		Result<Map<String, Object>> result = Result.newOne();
 		//
 		ReportMeta reportInfo = fetchReportInfoByCode(reportCode);
@@ -1018,6 +1035,110 @@ public class ReportProxy {
 			result.type = resultSetInfo.type;
 			result.message = resultSetInfo.message;
 			resultData.put("rows", resultSetInfo.data);
+		}
+		//
+		return result;
+	}
+
+	/**
+	 * 返回查询统计主体的原生结果（total, rows）
+	 * 
+	 * @author koqiui
+	 * @date 2019年11月11日 下午12:38:01
+	 * 
+	 * @param reportCode
+	 * @param paramMap
+	 *            注意：日期要用yyyy-MM-dd格式的字符串(可以传参：page_no, page_size, sort_items: [colName1: asc, colName2: desc, ...])
+	 * @return
+	 */
+	public static Result<Map<String, Object>> fetchReportResultMap(String reportCode, Map<String, Object> paramMap) {
+		ReportMeta reportInfo = fetchReportInfoByCode(reportCode);
+		return fetchReportResultMapInner(reportInfo, paramMap);
+	}
+
+	@SuppressWarnings("unchecked")
+	private static Result<Map<String, Object>> fetchReportResultMapInner(ReportMeta reportInfo, Map<String, Object> paramMap) {
+		Result<Map<String, Object>> result = Result.newOne();
+		if (reportInfo == null) {
+			result.type = Type.error;
+			result.message = "获取不到指定报表的配置信息";
+		} else {
+			if (paramMap == null) {
+				paramMap = new HashMap<String, Object>();
+			}
+			String errParamsMesage = checkAndFilterReportParams(reportInfo, paramMap);
+			if (errParamsMesage != null) {
+				result.type = Type.error;
+				result.message = errParamsMesage;
+			} else {
+				// 补充必要参数
+				paramMap.put("uid", reportInfo.getUuid());
+				//
+				Ajax ajax = newAjax();
+				ajax.post("/report/getResultSetMap.json");
+				ajax.asForm();
+				ajax.dataMap(paramMap);
+				ajax.send();
+				String jsonText = ajax.resultAsText();
+				logger.debug(jsonText);
+				Map<String, Object> mapResult = JsonUtil.fromJson(jsonText, TypeUtil.TypeRefs.StringObjectMapType);
+				if (mapResult != null) {
+					Integer errCode = (Integer) mapResult.get("code");
+					if (errCode.intValue() == 0) {
+						result.data = (Map<String, Object>) mapResult.get("data");
+					} else {
+						String errMsg = (String) mapResult.get("detailMsg");
+						if (StrUtil.isNullOrBlank(errMsg)) {
+							errMsg = (String) mapResult.getOrDefault("message", "未知原因");
+						}
+						//
+						result.type = Type.error;
+						result.message = errMsg;
+						logger.warn("获取报表结果数据失败：" + errMsg);
+					}
+				} else {
+					String errMsg = ajax.getLastErrorText();
+					result.type = Type.error;
+					result.message = errMsg;
+					logger.error("获取报表结果数据失败：" + errMsg);
+				}
+			}
+		}
+		//
+		return result;
+	}
+
+	/**
+	 * 获取指定报表的数据（行信息 + 结果集行）（json: {cols, rows, total}）
+	 * 
+	 * @author koqiui
+	 * @date 2019年11月11日 下午12:38:51
+	 * 
+	 * @param reportCode
+	 * @param paramMap
+	 *            (可以传参：page_no, page_size, sort_items: [colName1: asc, colName2: desc, ...])
+	 * @return
+	 */
+	public static Result<Map<String, Object>> fetchReportResultMapInfo(String reportCode, Map<String, Object> paramMap) {
+		Result<Map<String, Object>> result = Result.newOne();
+		//
+		ReportMeta reportInfo = fetchReportInfoByCode(reportCode);
+		if (reportInfo == null) {
+			result.type = Type.error;
+			result.message = "获取不到指定报表结果信息";
+		} else {
+			Map<String, Object> resultData = new LinkedHashMap<>();
+			result.data = resultData;
+			//
+			resultData.put("cols", reportInfo.getMetaColList());
+			//
+			Result<Map<String, Object>> resultMapInfo = fetchReportResultMapInner(reportInfo, paramMap);
+			result.type = resultMapInfo.type;
+			result.message = resultMapInfo.message;
+			Map<String, Object> dataMap = resultMapInfo.data;
+			if (dataMap != null) {
+				resultData.putAll(dataMap);
+			}
 		}
 		//
 		return result;

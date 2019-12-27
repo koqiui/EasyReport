@@ -15,7 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.easytoolsoft.easyreport.engine.LinkFunc;
 import com.easytoolsoft.easyreport.engine.util.ClrLvlUtils;
 import com.easytoolsoft.easyreport.engine.util.JdbcUtils;
-import com.easytoolsoft.easyreport.engine.util.NumberFormatUtils;
+import com.easytoolsoft.easyreport.engine.util.NumberUtils;
 
 /**
  * 报表元数据列类
@@ -32,10 +32,11 @@ public class ReportMetaDataColumn {
 	// 对齐方式
 	private String align;
 	// 色阶
-	private Boolean clrLvlEnabled = false;// 是否启用色阶
+	private boolean clrLvlEnabled;// 是否启用色阶
 	private Integer clrLvlValve;// 最少异值数量
 	private String clrLvlStart;// 色阶起始色
 	private String clrLvlEnd;// 色阶终止色
+	private boolean clrLvlIgnore0;// 是否忽略0值
 	//
 	private String expression;
 	private String format;// 日期、数值格式化字符串
@@ -53,10 +54,11 @@ public class ReportMetaDataColumn {
 	// => showReportDetail({"colName1" : value1, "colName2" : value2, ...}, "${reportCode}")
 	// <a href='#' onclick='showReportDetail({"colName1" : value1, "colName2" : value2, ...}, "${reportCode}", "${colName}")'></a>
 	private String linkFuncExpr;
-	private String linkFuncName;// 冗余
+	private boolean linkFuncIgnore0;// 是否忽略0值
+
 	private boolean isOptional;
-	private boolean isDisplayInMail;
 	private boolean isHidden;
+	private boolean isDisplayInMail;
 
 	// 不同地数值集合
 	private Set<Number> diffValues;
@@ -79,11 +81,14 @@ public class ReportMetaDataColumn {
 		if (valueStr == null) {
 			return null;
 		}
-		if (NumberFormatUtils.isNumber(valueStr)) {
+		if (NumberUtils.isNumber(valueStr)) {
 			return valueStr;
 		}
 		return null;
 	}
+
+	private static final Long ZERO_LNG = 0L;
+	private static final Double ZERO_DBL = 0.0;
 
 	/** 收集单元格的值（异值） */
 	public void clctCellValue(Object cellValue) {
@@ -97,9 +102,15 @@ public class ReportMetaDataColumn {
 					String valStr = this.asNumStr(cellValue);
 					if (valStr != null) {// 有可能是tinyint之类的bool值
 						if ("integer".equals(theType)) {
-							diffValues.add(Long.valueOf(valStr));
+							Long value = Long.valueOf(valStr);
+							if (!this.clrLvlIgnore0 || !ZERO_LNG.equals(value)) {
+								diffValues.add(value);
+							}
 						} else if ("float".equals(theType)) {
-							diffValues.add(Double.valueOf(valStr));
+							Double value = Double.valueOf(valStr);
+							if (!this.clrLvlIgnore0 || !ZERO_DBL.equals(value)) {
+								diffValues.add(value);
+							}
 						}
 					}
 				}
@@ -281,6 +292,10 @@ public class ReportMetaDataColumn {
 		return theType;
 	}
 
+	public boolean ignore0LinkFunc() {
+		return ("integer".equals(this.theType) || "float".equals(this.theType)) && this.linkFuncIgnore0;
+	}
+
 	public String getAlign() {
 		if (StringUtils.isBlank(align)) {
 			String theType = this.theType;
@@ -299,12 +314,12 @@ public class ReportMetaDataColumn {
 		this.align = align;
 	}
 
-	public Boolean getClrLvlEnabled() {
-		return clrLvlEnabled == null ? false : clrLvlEnabled;
+	public boolean getClrLvlEnabled() {
+		return clrLvlEnabled;
 	}
 
 	public void setClrLvlEnabled(Boolean clrLvlEnabled) {
-		this.clrLvlEnabled = clrLvlEnabled == null ? false : clrLvlEnabled;
+		this.clrLvlEnabled = clrLvlEnabled == null ? Boolean.FALSE : clrLvlEnabled;
 	}
 
 	public Integer getClrLvlValve() {
@@ -329,6 +344,14 @@ public class ReportMetaDataColumn {
 
 	public void setClrLvlEnd(String clrLvlEnd) {
 		this.clrLvlEnd = clrLvlEnd;
+	}
+
+	public boolean getClrLvlIgnore0() {
+		return clrLvlIgnore0;
+	}
+
+	public void setClrLvlIgnore0(Boolean clrLvlIgnore0) {
+		this.clrLvlIgnore0 = clrLvlIgnore0 == null ? Boolean.FALSE : clrLvlIgnore0;
 	}
 
 	/**
@@ -486,8 +509,8 @@ public class ReportMetaDataColumn {
 	 *
 	 * @param isPercent
 	 */
-	public void setPercent(final boolean isPercent) {
-		this.isPercent = isPercent;
+	public void setPercent(Boolean isPercent) {
+		this.isPercent = isPercent == null ? Boolean.FALSE : isPercent;
 	}
 
 	public String getLinkFuncExpr() {
@@ -498,15 +521,18 @@ public class ReportMetaDataColumn {
 		this.linkFuncExpr = linkFuncExpr;
 		//
 		this.linkFunc = LinkFunc.fromLinkFuncExpr(linkFuncExpr);
-		this.linkFuncName = this.linkFunc == null ? null : this.linkFunc.funcName;
-	}
-
-	public String getLinkFuncName() {
-		return linkFuncName;
 	}
 
 	public LinkFunc getLinkFunc() {
 		return linkFunc;
+	}
+
+	public boolean getLinkFuncIgnore0() {
+		return linkFuncIgnore0;
+	}
+
+	public void setLinkFuncIgnore0(Boolean linkFuncIgnore0) {
+		this.linkFuncIgnore0 = linkFuncIgnore0 == null ? Boolean.FALSE : linkFuncIgnore0;
 	}
 
 	/**
@@ -523,8 +549,8 @@ public class ReportMetaDataColumn {
 	 *
 	 * @param isOptional
 	 */
-	public void setOptional(final boolean isOptional) {
-		this.isOptional = isOptional;
+	public void setOptional(Boolean isOptional) {
+		this.isOptional = isOptional == null ? Boolean.FALSE : isOptional;
 	}
 
 	/**
@@ -559,8 +585,8 @@ public class ReportMetaDataColumn {
 	 *
 	 * @param isHidden
 	 */
-	public void setHidden(final boolean isHidden) {
-		this.isHidden = isHidden;
+	public void setHidden(Boolean isHidden) {
+		this.isHidden = isHidden == null ? Boolean.FALSE : isHidden;
 	}
 
 	/**

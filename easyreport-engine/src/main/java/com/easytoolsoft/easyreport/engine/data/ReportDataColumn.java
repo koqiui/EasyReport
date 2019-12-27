@@ -73,6 +73,10 @@ public class ReportDataColumn {
 		return this.metaDataColumn.getStyle(cellValue);
 	}
 
+	public boolean ignore0LinkFunc() {
+		return this.metaDataColumn.ignore0LinkFunc();
+	}
+
 	public LinkFunc getLinkFunc() {
 		return this.metaDataColumn.getLinkFunc();
 	}

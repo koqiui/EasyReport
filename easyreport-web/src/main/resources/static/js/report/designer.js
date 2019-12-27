@@ -90,6 +90,10 @@ var DesignerMVC = {
     },
     Model: {
         MetaColumnOptions: [{
+            name: "hidden",
+            text: "隐藏列",
+            type: 1
+        }, {
             name: "optional",
             text: "可选的",
             type: 1
@@ -415,10 +419,6 @@ var DesignerMVC = {
                                 row.align = '';
                                 row.format = '';
                                 row.percent = false;
-                                row.clrLvlEnabled = false;
-                                row.clrLvlValve = 0;
-                                row.clrLvlStart = '';
-                                row.clrLvlEnd = '';
                                 row.sortType = 0;
                                 //
                                 $('#report-meta-column-grid').datagrid('appendRow', row);
@@ -1088,8 +1088,8 @@ var DesignerMVC = {
                 closed: true,
                 modal: true,
                 iconCls: 'icon-formula',
-                top: (window.screen.height - 500) / 2,
-                left: (window.screen.width - 300) / 2,
+                left: (window.screen.width - 500) / 2,
+                top: (window.screen.height - 310) / 2,
                 width: 500,
                 height: 310,
                 buttons: [{
@@ -1111,8 +1111,8 @@ var DesignerMVC = {
                 closed: true,
                 modal: true,
                 iconCls: 'icon-comment',
-                top: (window.screen.height - 500) / 2,
-                left: (window.screen.width - 300) / 2,
+                left: (window.screen.width - 500) / 2,
+                top: (window.screen.height - 310) / 2,
                 width: 500,
                 height: 310,
                 buttons: [{
@@ -1134,10 +1134,10 @@ var DesignerMVC = {
                 closed: true,
                 modal: true,
                 iconCls: 'icon-comment',
-                top: (window.screen.height - 400) / 2,
-                left: (window.screen.width - 300) / 2,
+                left: (window.screen.width - 400) / 2,
+                top: (window.screen.height - 360) / 2,
                 width: 400,
-                height: 300,
+                height: 360,
                 buttons: [{
                     text: '关闭',
                     iconCls: 'icon-no',
@@ -1149,6 +1149,28 @@ var DesignerMVC = {
                     iconCls: 'icon-save',
                     handler: function () {
                         DesignerMVC.Controller.saveMetaColumnClrLvl();
+                    }
+                }]
+            });
+            $('#report-column-linkFunc-dlg').dialog({
+                closed: true,
+                modal: true,
+                iconCls: 'icon-comment',
+                left: (window.screen.width - 600) / 2,
+                top: (window.screen.height - 300) / 2,
+                width: 600,
+                height: 300,
+                buttons: [{
+                    text: '关闭',
+                    iconCls: 'icon-no',
+                    handler: function () {
+                        $("#report-column-linkFunc-dlg").dialog('close');
+                    }
+                }, {
+                    text: '应用',
+                    iconCls: 'icon-save',
+                    handler: function () {
+                        DesignerMVC.Controller.saveMetaColumnLinkFunc();
                     }
                 }]
             });
@@ -1759,34 +1781,21 @@ var DesignerMVC = {
             $("#report-meta-column-grid").datagrid('selectRow', index);
             var row = $("#report-meta-column-grid").datagrid('getSelected');
             $('#report-column-clrLvl-dlg').dialog('open');
-            $("#report-column-clrLvlEnabled").prop('checked', row.clrLvlEnabled);
-            $("#report-column-clrLvlValve").val(row.clrLvlValve);
+            $("#report-column-clrLvlEnabled").prop('checked', row.clrLvlEnabled || false);
+            $("#report-column-clrLvlValve").val(row.clrLvlValve || 3);
             $("#report-column-clrLvlStart").val(row.clrLvlStart);
             $("#report-column-clrLvlEnd").val(row.clrLvlEnd);
+            $("#report-column-clrLvlIgnore0").prop('checked', row.clrLvlIgnore0 || false);
             //
             $("#report-column-clrLvlStart").trigger('change');
             $("#report-column-clrLvlEnd").trigger('change');
         },
         showMetaColumnLinkFunc: function (index) {
-            $("#report-meta-column-grid").datagrid('selectRow', index);
+        	$("#report-meta-column-grid").datagrid('selectRow', index);
             var row = $("#report-meta-column-grid").datagrid('getSelected');
-            var linkFuncExpr = row.linkFuncExpr || '';
-            if(linkFuncExpr == ''){
-            	linkFuncExpr = 'showReportDetail( [ ' + row.name + ' ] )';
-            }
-            //
-            $.messager.prompt('输入集成链接js函数', '表达式（列名称之间用","分割）<br/>生成的链接点击调用的函数：<br/>自定义函数名(json数据, 自定义报表code, 所在列name)', function(val){
-            	val = $.trim(val);
-            	row.linkFuncExpr = val;
-            	//fix
-            	$(".messager-window .messager-input").val('');
-            	//
-            	var rows = $("#report-meta-column-grid").datagrid('getRows');
-                $("#report-meta-column-grid").datagrid('loadData', rows);
-                $("#report-meta-column-grid").datagrid('selectRow', index);
-            });
-            //初始值fix
-            $(".messager-window .messager-input").val(linkFuncExpr);
+            $('#report-column-linkFunc-dlg').dialog('open');
+            $("#report-column-linkFuncExpr").val(row.linkFuncExpr);
+            $("#report-column-linkFuncIgnore0").prop('checked', row.linkFuncIgnore0 || false);
         },
         setMetaColumnFormat:function(){
         	var row = $("#report-meta-column-grid").datagrid('getSelected');
@@ -1846,11 +1855,24 @@ var DesignerMVC = {
         saveMetaColumnClrLvl: function(){
             var row = $("#report-meta-column-grid").datagrid('getSelected');
             row.clrLvlEnabled = $("#report-column-clrLvlEnabled").prop('checked');
-            row.clrLvlValve = parseInt($("#report-column-clrLvlValve").val()) || null;
+            row.clrLvlValve = parseInt($("#report-column-clrLvlValve").val()) || 3;
             row.clrLvlStart = $.trim($("#report-column-clrLvlStart").val());
             row.clrLvlEnd = $.trim($("#report-column-clrLvlEnd").val());
+            row.clrLvlIgnore0 = $("#report-column-clrLvlIgnore0").prop('checked');
             //TODO 验证数据
             $('#report-column-clrLvl-dlg').dialog('close');
+            //
+            var index = $("#report-meta-column-grid").datagrid('getRowIndex', row);
+            var rows = $("#report-meta-column-grid").datagrid('getRows');
+            $("#report-meta-column-grid").datagrid('loadData', rows);
+            $("#report-meta-column-grid").datagrid('selectRow', index);
+        },
+        saveMetaColumnLinkFunc: function(){
+            var row = $("#report-meta-column-grid").datagrid('getSelected');
+            row.linkFuncExpr = $.trim($("#report-column-linkFuncExpr").val()) || null;
+            row.linkFuncIgnore0 = $("#report-column-linkFuncIgnore0").prop('checked');
+            //TODO 验证数据
+            $('#report-column-linkFunc-dlg').dialog('close');
             //
             var index = $("#report-meta-column-grid").datagrid('getRowIndex', row);
             var rows = $("#report-meta-column-grid").datagrid('getRows');

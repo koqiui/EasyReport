@@ -10,6 +10,7 @@ import com.easytoolsoft.easyreport.engine.data.ReportDataCell;
 import com.easytoolsoft.easyreport.engine.data.ReportDataColumn;
 import com.easytoolsoft.easyreport.engine.data.ReportDataRow;
 import com.easytoolsoft.easyreport.engine.data.ReportParameter;
+import com.easytoolsoft.easyreport.engine.util.NumberUtils;
 
 /**
  * 横向展示统计列的报表生成类
@@ -58,11 +59,14 @@ public class HorizontalStatColumnReportBuilder extends AbstractReportBuilder imp
 				}
 				for (final ReportDataColumn statColumn : statColumns) {
 					String colName = statColumn.getName();
+					linkFunc = statColumn.getLinkFunc();
+					boolean ignore0LinkFunc = statColumn.ignore0LinkFunc();
 					final ReportDataCell cell = dataRow.getCell(colName);
 					String valText = (cell == null) ? "" : cell.toString();
-					linkFunc = statColumn.getLinkFunc();
 					if (showDataLinks && linkFunc != null && valText.length() > 0) {
-						valText = LinkFunc.toLinkHtml(valText, linkFunc, reportCode, colName, dataRow.getDataMap());
+						if (!ignore0LinkFunc || !NumberUtils.isNumVal0(valText)) {
+							valText = LinkFunc.toLinkHtml(valText, linkFunc, reportCode, colName, dataRow.getDataMap());
+						}
 					}
 					String style = cell == null ? "" : statColumn.getStyle(cell.getValue());
 					this.tableRows.append(String.format("<td style=\"%s\">", style)).append(valText).append("</td>");

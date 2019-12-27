@@ -12,8 +12,8 @@ import org.slf4j.LoggerFactory;
 /**
  * @author tomdeng
  */
-public class NumberFormatUtils {
-	private static final Logger logger = LoggerFactory.getLogger(NumberFormatUtils.class);
+public class NumberUtils {
+	private static final Logger logger = LoggerFactory.getLogger(NumberUtils.class);
 
 	public static String format(final Object value) {
 		return (value == null) ? "" : format(value.toString());
@@ -75,5 +75,12 @@ public class NumberFormatUtils {
 
 	public static boolean isNumber(final String value) {
 		return Pattern.matches("^-?(?:\\d+|\\d{1,3}(?:,\\d{3})+)?(?:\\.\\d+)?$", value);
+	}
+
+	public static boolean isNumVal0(final String value) {
+		if (value == null || value.trim().length() == 0) {
+			return false;
+		}
+		return Pattern.matches("^-?(?:0+|0{1,3}(?:,0{3})+)?(?:\\.0+)?$", value);
 	}
 }
