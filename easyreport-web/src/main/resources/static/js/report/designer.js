@@ -1794,7 +1794,11 @@ var DesignerMVC = {
         	$("#report-meta-column-grid").datagrid('selectRow', index);
             var row = $("#report-meta-column-grid").datagrid('getSelected');
             $('#report-column-linkFunc-dlg').dialog('open');
-            $("#report-column-linkFuncExpr").val(row.linkFuncExpr);
+            var linkFuncExpr = row.linkFuncExpr || '';
+            if(linkFuncExpr == ''){
+            	linkFuncExpr = 'showReportDetail( [ ' + row.name + ' ] )';
+            }
+            $("#report-column-linkFuncExpr").val(linkFuncExpr);
             $("#report-column-linkFuncIgnore0").prop('checked', row.linkFuncIgnore0 || false);
         },
         setMetaColumnFormat:function(){
