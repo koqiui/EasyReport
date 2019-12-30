@@ -33,7 +33,7 @@ public abstract class AbstractReportBuilder implements ReportBuilder {
 		table.append("<table id=\"easyreport\" class=\"easyreport\">");
 		table.append(this.tableRows.toString());
 		table.append("</table>");
-		return new ReportTable(table.toString(), this.reportParameter.getSqlText(), this.reportDataSet.getMetaData().getRows().size(), this.reportDataSet.getMetaData().getColumns().size());
+		return new ReportTable(this.reportDataSet.getTotal(), table.toString(), this.reportParameter.getSqlText(), this.reportDataSet.getMetaData().getRows().size(), this.reportDataSet.getMetaData().getColumns().size());
 	}
 
 	@Override

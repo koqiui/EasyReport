@@ -250,7 +250,7 @@ public class ReportParameter {
 	}
 
 	public void setPageNo(Integer pageNo) {
-		this.pageNo = pageNo;
+		this.pageNo = pageNo < 1 ? 1 : pageNo;
 	}
 
 	public Integer getPageSize() {
@@ -258,7 +258,7 @@ public class ReportParameter {
 	}
 
 	public void setPageSize(Integer pageSize) {
-		this.pageSize = pageSize;
+		this.pageSize = pageSize < 1 ? 1000 : pageSize;
 	}
 
 	public String getUcode() {

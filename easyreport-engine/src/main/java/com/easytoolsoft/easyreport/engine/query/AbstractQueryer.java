@@ -29,6 +29,7 @@ import com.easytoolsoft.easyreport.engine.data.ReportMetaDataColumn;
 import com.easytoolsoft.easyreport.engine.data.ReportMetaDataRow;
 import com.easytoolsoft.easyreport.engine.data.ReportParameter;
 import com.easytoolsoft.easyreport.engine.data.ReportQueryParamItem;
+import com.easytoolsoft.easyreport.engine.data.ReportResult;
 import com.easytoolsoft.easyreport.engine.exception.SQLQueryException;
 import com.easytoolsoft.easyreport.engine.util.JdbcUtils;
 
@@ -129,24 +130,40 @@ public abstract class AbstractQueryer implements Queryer {
 		return this.metaDataColumns;
 	}
 
-	public List<ReportMetaDataRow> getMetaDataRows() {
+	public ReportResult getMetaDataResult() {
 		Connection conn = null;
 		Statement stmt = null;
 		ResultSet rs = null;
 
 		try {
+			ReportResult result = new ReportResult();
+
 			conn = this.getJdbcConnection();
 			stmt = conn.createStatement();
 			//
-			this.logger.debug("getMetaDataRows SQL:");
+			this.logger.debug("getMetaDataResult SQL:");
 			String sqlText = this.parameter.getSqlText();
 			this.logger.debug(sqlText);
-			String sqlStr = this.filterSqlText(sqlText);
-			sqlStr = this.asPagedSqlText(sqlStr);
+			sqlText = this.filterSqlText(sqlText);
+			// count
+			if (this.parameter.isPageUsed()) {
+				String countSql = this.asCountSqlText(sqlText);
+				this.logger.debug(countSql);
+				rs = stmt.executeQuery(countSql);
+				rs.next();
+				result.total = rs.getLong(1);
+				rs.close();
+			} else {
+				result.total = -1; // 未知
+			}
+			// rows
+			String sqlStr = this.asPagedSqlText(sqlText);
 			this.logger.debug(sqlStr);
 			//
 			rs = stmt.executeQuery(sqlStr);
-			return this.getMetaDataRows(rs, this.getSqlColumns(this.parameter.getMetaColumns()));
+			result.rows = this.getMetaDataRows(rs, this.getSqlColumns(this.parameter.getMetaColumns()));
+			//
+			return result;
 		} catch (final Exception ex) {
 			this.logger.error(String.format("SqlText:%s，Msg:%s", this.parameter.getSqlText(), ex));
 			throw new SQLQueryException(ex);

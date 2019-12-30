@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.easytoolsoft.easyreport.engine.data.ReportMetaDataColumn;
-import com.easytoolsoft.easyreport.engine.data.ReportMetaDataRow;
 import com.easytoolsoft.easyreport.engine.data.ReportQueryParamItem;
+import com.easytoolsoft.easyreport.engine.data.ReportResult;
 
 /**
  * 报表查询器接口
@@ -38,7 +38,7 @@ public interface Queryer {
 	 *
 	 * @return List[ReportMetaDataRow]
 	 */
-	List<ReportMetaDataRow> getMetaDataRows();
+	ReportResult getMetaDataResult();
 
 	/**
 	 * 获取报表原始数据列集合

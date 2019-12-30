@@ -10,6 +10,7 @@ import java.util.Set;
  * @author tomdeng
  */
 public class ReportMetaDataSet {
+	private final long total;
 	private final List<ReportMetaDataRow> rows;
 	private final List<ReportMetaDataColumn> columns;
 	private List<ReportMetaDataColumn> nonComputeColumns;
@@ -27,10 +28,15 @@ public class ReportMetaDataSet {
 	 * @param enabledStatColumns
 	 *            报表中启用的统计列
 	 */
-	public ReportMetaDataSet(final List<ReportMetaDataRow> rows, final List<ReportMetaDataColumn> columns, final Set<String> enabledStatColumns) {
+	public ReportMetaDataSet(final long total, final List<ReportMetaDataRow> rows, final List<ReportMetaDataColumn> columns, final Set<String> enabledStatColumns) {
+		this.total = total;
 		this.rows = rows;
 		this.columns = columns;
 		this.initilizeColumn(enabledStatColumns);
+	}
+
+	public long getTotal() {
+		return total;
 	}
 
 	/**

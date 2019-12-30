@@ -5,22 +5,32 @@
                 <td id="table-report-title" colspan="2" style="font-size: 24px;" th:text="${name}"></td>
             </tr>
             <tr>
-                <td style="text-align: left;padding-right:4px;"><span th:utext="${formHtmlText}"></span>
-                    <label style="float:right;clear:right;margin-top:4px;">
-                    <input id="table-report-isMergeRow" type="checkbox" name="isMergeRow" checked="checked"/>合并左边相同维度行</label>
+                <td colspan="2" style="text-align: left;padding-right:4px;">
+                <span th:utext="${formHtmlText}"></span>
                 </td>
-                <td style="text-align: right;width:140px;padding-left:4px;">
-                	<a id="btn-generate" href="#" style="float:left" class="easyui-linkbutton" data-options="iconCls:'icon-ok'">生成</a>
+            </tr>
+            <tr id="table-report-columns" th:if="${not #strings.isEmpty(statColumHtmlText)}">
+                <td colspan="2" style="text-align: left;" th:utext="${statColumHtmlText}"></td>
+            </tr>
+            <tr>
+            	<td>
+            		<input id="table-report-page_size" type="hidden" name="page_size" />
+            		<input id="table-report-page_no" type="hidden" name="page_no" />
+            		<span style="display:inline-block;float:left;margin-top:8px;">对原始结果 <label><input id="table-report-usePager" type="checkbox"/>分页</label>：</span>
+            		<div id="thePager" style="background:#efefef;visibility:hidden;"></div>
+            	</td>
+            	<td style="text-align: right;width:320px;padding-left:4px;">
+            		<label style="float:left;clear:left;margin-top:4px;">
+                    <input id="table-report-isMergeRow" type="checkbox" name="isMergeRow" checked="checked"/>合并左边相同维度行</label>
+                    <a id="btn-generate" href="#" style="float:left;margin-left:50px;" class="easyui-linkbutton" data-options="iconCls:'icon-ok'">生成</a>
                     <img id="btn-export-excel" title="导出到Excel" style="cursor: pointer;padding-right: 5px;"
                          src="../../static/custom/easyui/themes/icons/excel_24.png"
                          th:src="@{/custom/easyui/themes/icons/excel_24.png}"/>
                     <input id="table-report-id" type="hidden" name="id" th:value="${id}"/>
                     <input id="table-report-name" type="hidden" name="name" th:value="${name}"/>
                     <input id="table-report-uid" type="hidden" name="uid" th:value="${uid}"/>
-                    <input id="table-report-isRowSpan" type="hidden" name="isRowSpan" th:value="true"/></td>
-            </tr>
-            <tr id="table-report-columns" th:if="${not #strings.isEmpty(statColumHtmlText)}">
-                <td colspan="2" style="text-align: left;" th:utext="${statColumHtmlText}"></td>
+                    <input id="table-report-isRowSpan" type="hidden" name="isRowSpan" th:value="true"/>
+            	</td>
             </tr>
         </table>
     </form>

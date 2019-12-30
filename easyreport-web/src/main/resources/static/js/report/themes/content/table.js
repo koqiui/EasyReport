@@ -25,8 +25,40 @@ var TableReportMVC = {
     View: {
         initControl: function () {
             $.parser.parse('#table-report-div');
+            //
+            
         },
         bindEvent: function () {
+        	$('#table-report-usePager').on('change', function(){
+        		$('#thePager').css('visibility', $(this).prop('checked') ? 'visible' : 'hidden');
+        	});
+        	//分页
+        	var initPageSize = 1000;
+        	$('#table-report-page_size').val(initPageSize);
+        	$('#table-report-page_no').val(1);
+            $('#thePager').pagination({
+                total: 1,//假的
+                pageSize: initPageSize,
+                pageNumber : 1,
+                pageList : [10, 50, 100, 200, 500, 1000],
+                layout : ['list', 'first', 'prev', 'next', 'last', 'manual'],
+                beforePageText : '第',
+                afterPageText : '页，共 {pages} 页 ',
+                displayMsg : '{total} 条',
+                onSelectPage : function(pageNumber, pageSize){
+                	$('#table-report-page_no').val(pageNumber);
+                	$('#table-report-page_size').val(pageSize);
+                	//
+                	//console.log('onSelectPage : pageNumber ' + pageNumber +', pageSize ' + pageSize);
+                },
+                onChangePageSize : function(pageSize){
+                	$('#table-report-page_size').val(pageSize);
+                	//
+                	//console.log('onChangePageSize : ' + pageSize);
+                	//console.log($(this).pagination('options'));
+                }
+            });
+            
             $('#btn-generate').click(TableReportMVC.Controller.generate);
             $('#btn-export-excel').click(TableReportMVC.Controller.exportToExcel);
             $("#table-report-columns input[name='checkAllStatColumn']").click(function (e) {
@@ -49,10 +81,16 @@ var TableReportMVC = {
     Controller: {
         generate: function (mode, callback) {
             $('#table-report-isRowSpan').val($('#table-report-isMergeRow').prop('checked'));
+            var postData = $("#table-report-form").serializeObject();
+            if(!$('#table-report-usePager').prop('checked')){//不用分页信息
+            	delete postData['page_no'];
+            	delete postData['page_size'];
+            }
+            postData = $.param(postData, true);
             $.ajax({
                 type: "POST",
                 url: TableReportMVC.URLs.getData.url,
-                data: $("#table-report-form").serialize(),
+                data: postData,
                 dataType: "json",
                 beforeSend: function () {
                     $.messager.progress({
@@ -62,9 +100,14 @@ var TableReportMVC = {
                 },
                 success: function (result) {
                     if (!result.code) {
-                        $('#table-report-htmltext-div').html(result.data.htmlTable);
+                    	var resultData = result.data;
+                    	$('#thePager').pagination('refresh',{// 改变选项，并刷新分页栏信息
+                    		total: resultData.total > 0 ? resultData.total : 1
+                    	});
+                    	//
+                        $('#table-report-htmltext-div').html(resultData.htmlTable);
                         TableReportMVC.Util.render(mode || TableReportMVC.Model.Mode.classic);
-                        TableReportMVC.Util.filterTable = TableReportMVC.Util.renderFilterTable(result.data);
+                        TableReportMVC.Util.filterTable = TableReportMVC.Util.renderFilterTable(resultData);
                         if (callback instanceof Function) {
                             callback();
                         }
@@ -100,9 +143,11 @@ var TableReportMVC = {
             //从页面直接下载
             //console.log(htmlTable);
             var htmlContent = htmlFilter + htmlTable;
-            var dateName = TableReportMVC.Util.getCurrentTime();
+            var pageNo = parseInt($('#table-report-page_no').val());
+            var pageName = pageNo > 1 ? '[第'+pageNo+'页]' : '';
+            var dateName = TableReportMVC.Util.getCurrentDate();
             dateName = dateName.replace(/\s/g, '_').replace(/\-/g, '').replace(/\:/g, '');
-            var fileName = $('#table-report-name').val() + '_' + dateName + '.xls';
+            var fileName = $('#table-report-name').val() + '_' + dateName + pageName + '.xls';
             //
             TableReportMVC.Util.downloadHtmlAsXls(htmlContent, fileName);
             
@@ -349,6 +394,24 @@ var TableReportMVC = {
                 document.body.removeChild(tmpLink);
                 tmpLink.remove();
             }
+        },
+        getCurrentDate: function() {
+            var d = new Date();
+            var str = '', tmp = '';
+            str += d.getFullYear() + '-';
+            //
+            tmp = d.getMonth() + 1 +'';
+            if(tmp.length <2){
+            	tmp = '0'+tmp;
+            }
+            str += tmp + '-';
+            //
+            tmp = d.getDate() + '';
+            if(tmp.length <2){
+            	tmp = '0'+tmp;
+            }
+            str += tmp;
+            return str;
         },
         getCurrentTime: function() {
             var d = new Date();

@@ -9,10 +9,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.easytoolsoft.easyreport.engine.exception.NotFoundLayoutColumnException;
 import com.easytoolsoft.easyreport.engine.util.AviatorExprUtils;
 import com.easytoolsoft.easyreport.engine.util.ComparatorUtils;
-import org.apache.commons.lang.StringUtils;
 
 /**
  * 抽象报表数据集类,包含生成报表所需的数据集，配置及元数据。
@@ -451,5 +452,9 @@ public abstract class AbstractReportDataSet implements ReportDataSet {
 		treeNode.setColumn(column);
 		treeNode.setPath(text + PATH_SEPARATOR);
 		return treeNode;
+	}
+
+	public long getTotal() {
+		return this.metaDataSet.getTotal();
 	}
 }

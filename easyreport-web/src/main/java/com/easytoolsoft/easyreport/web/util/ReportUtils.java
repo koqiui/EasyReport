@@ -276,6 +276,7 @@ public class ReportUtils {
 			return;
 		}
 		final ReportTable reportTable = generate(uid, attachParams, parameters);
+		data.put("total", reportTable.getTotal());
 		data.put("htmlTable", reportTable.getHtmlText());
 		data.put("metaDataRowCount", reportTable.getMetaDataRowCount());
 		data.put("metaDataColumnCount", reportTable.getMetaDataColumnCount());
