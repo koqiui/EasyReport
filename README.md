@@ -57,6 +57,7 @@ EasyReport是一个简单易用的Web报表工具,它的主要功能是把SQL语
 * 增加/report/getResultSetMap.json 集成api获取 带排序 和 分页 结果集
 (可以传参：page_no, page_size, sort_items: [colName1: asc, colName2: desc, ...])
 * 色阶样式 和 链接函数 可以 忽略 0 值
+* 增加（对原始结果集）分页功能
 
 ### what's new?(ver2.1)
 * 改进图表报表图表生成并增加图表生成配置
