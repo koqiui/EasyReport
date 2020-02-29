@@ -538,7 +538,7 @@ var DesignerMVC = {
                         var tmpl = '<input style="width:95%;text-align:right;" type="text" id="${id}" name="width" value="${value}" />';
                         return juicer(tmpl, {
                             id: id,
-                            value: row.width
+                            value: (row.width || '')
                         });
                     }
                 }, {

@@ -239,7 +239,7 @@ public class ReportProxy {
 			ajax.asForm();
 			ajax.send();
 			String jsonText = ajax.resultAsText();
-			logger.debug(jsonText);
+			//logger.debug(jsonText);
 			Map<String, Object> mapResult = JsonUtil.fromJson(jsonText, TypeUtil.TypeRefs.StringObjectMapType);
 			if (mapResult != null) {
 				Integer errCode = (Integer) mapResult.get("code");
@@ -256,6 +256,7 @@ public class ReportProxy {
 						List<Map<String, Object>> metaColList = new ArrayList<>(metaColumns.size());
 						targetInfo.setMetaColList(metaColList);
 						Integer colType = null;
+						Integer colWidth = null;
 						for (Map<String, Object> metaColumn : metaColumns) {
 							Map<String, Object> metaCol = new LinkedHashMap<>();
 							metaColList.add(metaCol);
@@ -266,7 +267,16 @@ public class ReportProxy {
 							metaCol.put("format", metaColumn.get("format"));
 							metaCol.put("align", metaColumn.get("align"));
 							metaCol.put("percent", metaColumn.getOrDefault("percent", false));
-							metaCol.put("width", metaColumn.get("width"));
+							colWidth = (Integer) metaColumn.get("widthInChars");
+							if (colWidth == null) {
+								colWidth = (Integer) metaColumn.get("width");
+								metaCol.put("widthInChars", colWidth);
+								colWidth = colWidth * 10;
+							} else {
+								metaCol.put("widthInChars", colWidth);
+								colWidth = (Integer) metaColumn.get("width");
+							}
+							metaCol.put("width", colWidth);
 							metaCol.put("hidden", metaColumn.getOrDefault("hidden", false));
 							metaCol.put("optional", metaColumn.getOrDefault("optional", false));
 							metaCol.put("linkFuncExpr", metaColumn.get("linkFuncExpr"));
@@ -1109,7 +1119,7 @@ public class ReportProxy {
 	}
 
 	/**
-	 * 获取指定报表的数据（行信息 + 结果集行）（json: {cols, rows, total}）
+	 * 获取指定报表的数据（列信息 + 结果行）（json: {cols, rows, total}）
 	 * 
 	 * @author koqiui
 	 * @date 2019年11月11日 下午12:38:51
@@ -1117,9 +1127,11 @@ public class ReportProxy {
 	 * @param reportCode
 	 * @param paramMap
 	 *            (可以传参：page_no, page_size, sort_items: [colName1: asc, colName2: desc, ...])
+	 * @param includeMetaCols
+	 *            是否包含列配置元数据
 	 * @return
 	 */
-	public static Result<Map<String, Object>> fetchReportResultMapInfo(String reportCode, Map<String, Object> paramMap) {
+	public static Result<Map<String, Object>> fetchReportResultMapInfo(String reportCode, Map<String, Object> paramMap, boolean includeMetaCols) {
 		Result<Map<String, Object>> result = Result.newOne();
 		//
 		ReportMeta reportInfo = fetchReportInfoByCode(reportCode);
@@ -1130,7 +1142,9 @@ public class ReportProxy {
 			Map<String, Object> resultData = new LinkedHashMap<>();
 			result.data = resultData;
 			//
-			resultData.put("cols", reportInfo.getMetaColList());
+			if (includeMetaCols) {
+				resultData.put("cols", reportInfo.getMetaColList());
+			}
 			//
 			Result<Map<String, Object>> resultMapInfo = fetchReportResultMapInner(reportInfo, paramMap);
 			result.type = resultMapInfo.type;
@@ -1142,6 +1156,42 @@ public class ReportProxy {
 		}
 		//
 		return result;
+	}
+
+	/**
+	 * 获取报表列元数据配置
+	 * 
+	 * @author koqiui
+	 * @date 2020年2月7日 下午5:38:03
+	 * 
+	 * @param reportCode
+	 * @return
+	 */
+	public static Result<List<Map<String, Object>>> getReportMetaColInfo(String reportCode) {
+		Result<List<Map<String, Object>>> result = Result.newOne();
+		//
+		ReportMeta reportInfo = fetchReportInfoByCode(reportCode);
+		if (reportInfo == null) {
+			result.type = Type.error;
+			result.message = "获取不到指定报表结果信息";
+		} else {
+			result.data = reportInfo.getMetaColList();
+		}
+		return result;
+	}
+
+	/**
+	 * 获取指定报表的数据（结果行）（json: {rows, total}）
+	 * 
+	 * @author koqiui
+	 * @date 2020年2月7日 下午5:03:35
+	 * 
+	 * @param reportCode
+	 * @param paramMap
+	 * @return
+	 */
+	public static Result<Map<String, Object>> fetchReportResultMapInfo(String reportCode, Map<String, Object> paramMap) {
+		return fetchReportResultMapInfo(reportCode, paramMap, false);
 	}
 
 }
