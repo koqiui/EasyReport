@@ -58,6 +58,7 @@ EasyReport是一个简单易用的Web报表工具,它的主要功能是把SQL语
 (可以传参：page_no, page_size, sort_items: [colName1: asc, colName2: desc, ...])
 * 色阶样式 和 链接函数 可以 忽略 0 值
 * 增加（对原始结果集）分页功能
+* 支持width宽度调整，老的width当成widthInChars（字符宽度）,会自动计算width = 老的width/widthInChars * 10
 
 ### what's new?(ver2.1)
 * 改进图表报表图表生成并增加图表生成配置
