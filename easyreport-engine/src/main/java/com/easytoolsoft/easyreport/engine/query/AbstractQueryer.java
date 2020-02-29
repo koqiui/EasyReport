@@ -68,6 +68,7 @@ public abstract class AbstractQueryer implements Queryer {
 			final int count = rsMataData.getColumnCount();
 			columns = new ArrayList<>(count);
 			String colName = null;
+			int colWidthInChars = 0;
 			for (int i = 1; i <= count; i++) {
 				colName = rsMataData.getColumnLabel(i);
 				if (Queryer.ROWNUM_ALIAS.equals(colName)) {
@@ -84,7 +85,9 @@ public abstract class AbstractQueryer implements Queryer {
 				}
 				// 使用标准sql类型名称（而不是 getColumnTypeName）
 				column.setSqlType(JdbcUtils.toStdSqlTypeName(sqlType));
-				column.setWidth(rsMataData.getColumnDisplaySize(i));
+				colWidthInChars = rsMataData.getColumnDisplaySize(i);
+				column.setWidthInChars(colWidthInChars);
+				column.setWidth(ReportMetaDataColumn.getAvgPixWidthByChars(colWidthInChars));
 				columns.add(column);
 			}
 		} catch (final SQLException ex) {

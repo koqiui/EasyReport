@@ -111,7 +111,7 @@ public class DesignerController extends BaseController<ReportService, Report, Re
 	public ResponseResult add(@CurrentUser final User loginUser, final Report po) {
 		po.setCreateUser(loginUser.getAccount());
 		po.setUid(UUID.randomUUID().toString());
-		if(po.getComment() == null){
+		if (po.getComment() == null) {
 			po.setComment("");
 		}
 		po.setGmtCreated(new Date());
@@ -177,7 +177,8 @@ public class DesignerController extends BaseController<ReportService, Report, Re
 		// column.setText("计算列");
 		column.setType(4);
 		column.setSqlType("DECIMAL");
-		column.setWidth(42);
+		column.setWidthInChars(18);
+		column.setWidth(ReportMetaDataColumn.getAvgPixWidthByChars(18));
 		return column;
 	}
 

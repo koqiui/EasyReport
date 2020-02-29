@@ -460,6 +460,10 @@ var DesignerMVC = {
                 			row.sqlType = row.dataType;
                 			delete row["dataType"]
                 		}
+                		if(row.widthInChars == null){//兼容旧的无widthInChars
+                			row.widthInChars = row.width || 10;
+                			row.width = row.widthInChars * 10;
+                		}
                 	}
                     return data;
                 },
@@ -519,10 +523,24 @@ var DesignerMVC = {
                     	}
                     }
                 }, {
-                    field: 'width',
+                    field: 'widthInChars',
                     title: '字符宽度',
                     width: 60,
-                    align : 'right'
+                    align : 'right',
+                }, {
+                    field: 'width',
+                    title: '像素宽度',
+                    width: 70,
+                    align : 'right',
+                    formatter: function (value, row, index) {
+                    	var id = "width" + index;
+                        
+                        var tmpl = '<input style="width:95%;text-align:right;" type="text" id="${id}" name="width" value="${value}" />';
+                        return juicer(tmpl, {
+                            id: id,
+                            value: row.width
+                        });
+                    }
                 }, {
                     field: 'align',
                     title: '对齐方式',
@@ -531,7 +549,7 @@ var DesignerMVC = {
                     formatter: function (value, row, index) {
                 		var id = "align" + index;
                         var tmpl =
-                            '<select id="${id}" name=\"align\">' +
+                            '<select id="${id}" name=\"align\" style="width:95%;">' +
                             '{@each list as item}' +
                             '<option value="${item.value}" {@if item.value == currValue} selected {@/if}>${item.text}</option>' +
                             '{@/each}' +
@@ -552,7 +570,7 @@ var DesignerMVC = {
                             if (!row.format) {
                                 row.format = '';
                             }
-                            var tmpl = '<input style="width:98%;text-align:left;" type="text" id="${id}" name="format" value="${value}" />';
+                            var tmpl = '<input style="width:95%;text-align:left;" type="text" id="${id}" name="format" value="${value}" />';
                             return juicer(tmpl, {
                                 id: id,
                                 value: row.format
@@ -617,7 +635,7 @@ var DesignerMVC = {
                     formatter: function (value, row, index) {
                 		var id = "sortType" + index;
                         var tmpl =
-                            '<select id="${id}" name=\"sortType\">' +
+                            '<select id="${id}" name=\"sortType\" style="width:95%;">' +
                             '{@each list as item}' +
                             '<option value="${item.value}" {@if item.value == currValue} selected {@/if}>${item.text}</option>' +
                             '{@/each}' +
@@ -2220,7 +2238,7 @@ var DesignerMVC = {
                 	oldCol.sqlType = newCol.sqlType;
                 	oldCol.theType = newCol.theType;
                 	oldCol.className = newCol.className;
-                	oldCol.width = newCol.width;
+                	oldCol.widthInChars = newCol.widthInChars;
                 	oldCol.align = oldCol.align || newCol.align;
                 	if(DesignerMVC.Util.isJustVarName(oldCol.text)){
                 		oldCol.text = newCol.text;
@@ -2240,6 +2258,7 @@ var DesignerMVC = {
             return $("#report-meta-column-grid").datagrid('loadData', newColumns);
         },
         getMetaColumns: function (columns) {
+        	var tmpVal = null;
             for (var rowIndex = 0; rowIndex < columns.length; rowIndex++) {
                 var column = columns[rowIndex];
                 var subOptions = DesignerMVC.Util.getCheckboxOptions(column.type);
@@ -2251,6 +2270,8 @@ var DesignerMVC = {
                 column["name"] = $.trim($("#name" + rowIndex).val());
                 column["text"] = $.trim($("#text" + rowIndex).val());
                 column["type"] = $("#type" + rowIndex).val();
+                tmpVal = parseInt($.trim($("#width" + rowIndex).val()));
+                column["width"] = isNaN(tmpVal) ? null : tmpVal;
                 column["align"] = $("#align" + rowIndex).val();
                 column["format"] = $("#format" + rowIndex).val() || '';
                 column["sortType"] = $("#sortType" + rowIndex).val();

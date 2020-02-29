@@ -23,6 +23,14 @@ import com.easytoolsoft.easyreport.engine.util.NumberUtils;
  * @author tomdeng
  */
 public class ReportMetaDataColumn {
+	// 每个字符换算的像素数
+	private static final int PIX_AVG_COUNT_PER_CHAR = 10;
+
+	public static int getAvgPixWidthByChars(int widthInChars) {
+		return widthInChars * PIX_AVG_COUNT_PER_CHAR;
+	}
+
+	//
 	private int ordinal;
 	private String name;
 	private String text;
@@ -42,7 +50,8 @@ public class ReportMetaDataColumn {
 	private String format;// 日期、数值格式化字符串
 	private Format formatX;
 	private String comment;
-	private int width;
+	private Integer widthInChars;
+	private Integer width;
 	private ColumnType type = ColumnType.DIMENSION;
 	private ColumnSortType sortType = ColumnSortType.DEFAULT;
 	private boolean isExtensions;
@@ -396,21 +405,29 @@ public class ReportMetaDataColumn {
 		return this.formatX;
 	}
 
+	public Integer getWidthInChars() {
+		return this.widthInChars;
+	}
+
+	public void setWidthInChars(Integer widthInChars) {
+		this.widthInChars = widthInChars;
+	}
+
 	/**
 	 * 获取报表元数据列宽(单位:像素)
 	 *
 	 * @return 列宽(单位:像素)
 	 */
-	public int getWidth() {
-		return this.width;
+	public Integer getWidth() {
+		return width;
 	}
 
 	/**
 	 * 设置报表元数据列宽(单位:像素)
 	 *
-	 * @param width
+	 * @param widthInChars
 	 */
-	public void setWidth(final int width) {
+	public void setWidth(Integer width) {
 		this.width = width;
 	}
 
