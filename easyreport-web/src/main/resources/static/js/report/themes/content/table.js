@@ -40,7 +40,7 @@ var TableReportMVC = {
                 total: 1,//假的
                 pageSize: initPageSize,
                 pageNumber : 1,
-                pageList : [10, 50, 100, 200, 500, 1000],
+                pageList : [500, 1000, 2000, 5000, 10000],
                 layout : ['list', 'first', 'prev', 'next', 'last', 'manual'],
                 beforePageText : '第',
                 afterPageText : '页，共 {pages} 页 ',
