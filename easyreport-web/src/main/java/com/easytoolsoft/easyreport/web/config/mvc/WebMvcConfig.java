@@ -7,7 +7,12 @@ import java.util.Locale;
 import com.easytoolsoft.easyreport.support.resolver.CurrentUserMethodArgumentResolver;
 import com.easytoolsoft.easyreport.support.resolver.ResponseBodyWrapFactoryBean;
 import com.easytoolsoft.easyreport.web.spring.converter.CustomMappingJackson2HttpMessageConverter;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+
 import nz.net.ultraq.thymeleaf.LayoutDialect;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -47,11 +52,25 @@ public class WebMvcConfig implements WebMvcConfigurer {
         configurer.enable();
     }
 
-    @Bean
+    @SuppressWarnings("deprecation")
+	@Bean
     public CustomMappingJackson2HttpMessageConverter messageConverter() {
         final CustomMappingJackson2HttpMessageConverter converter = new CustomMappingJackson2HttpMessageConverter();
         final ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+
+        objectMapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
+        objectMapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
+        objectMapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
+
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        objectMapper.configure(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES, false);
+        objectMapper.configure(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true);
+        objectMapper.configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true);
         objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
+        objectMapper.setSerializationInclusion(Include.NON_NULL);
+        objectMapper.configure(SerializationFeature.WRITE_NULL_MAP_VALUES, false);
+		
         converter.setObjectMapper(objectMapper);
         return converter;
     }
