@@ -191,6 +191,7 @@ public class DesignerController extends BaseController<ReportService, Report, Re
 		}
 		List<String> lackSqlValueVarNames = ReportUtils.validateSqlParamValues(sqlText, queryParameters, formParameters);
 		if (lackSqlValueVarNames.size() > 0) {
+			//TODO 需要支持 动态sql（不能强制 检查所有参数的存在）
 			throw new ValidationException("sql中如下参数的值缺少或无效：\r\n" + lackSqlValueVarNames.toString());
 		}
 		return VelocityUtils.parse(sqlText, formParameters);
